@@ -3,7 +3,7 @@ project(OpenGL)
 
 set(CMAKE_CXX_STANDARD 20)
 
-add_executable(OpenGL text.cpp main.cpp)
+add_executable(OpenGL test.cpp main.cpp)
 
 target_include_directories(OpenGL PRIVATE dependencies/include)
 

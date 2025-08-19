@@ -1,9 +1,24 @@
 #include <cstdio>
+#include <fstream>
 #include <iostream>
+#include <sstream>
 #include <string>
 
 #include "glad/gl.h"
 #include "GLFW/glfw3.h"
+
+static std::string GetShaderString(const std::string& filePath) {
+    std::fstream fileStream(filePath);
+
+    std::string line;
+    std::stringstream ss;
+
+    while (getline(fileStream, line)) {
+        ss << line << '\n';
+    }
+
+    return ss.str();
+}
 
 void error_callback(int error, const char* description) {
     std::printf("Error with code'%d': %s\n", error, description);
@@ -69,15 +84,9 @@ struct Vertex {
     Color color;
 };
 
-void drawTriangle(unsigned int buffer) {
-    // // buffer id
-    // unsigned int buffer;
-    // // generate 1 buffer and assign the id into uint buffer ^
-    // glGenBuffers(1, &buffer);
+void drawPrimative(unsigned int buffer, const int vertexCount, unsigned int mode) {
     // // I am going to work with this buffer. select it
     glBindBuffer(GL_ARRAY_BUFFER, buffer);
-    // // define all the data to use. Use STATIC for objects that are defined once and reused, use DYNAMIC for objects that are redefined multiple times and reused
-    // glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(Vertex), vertices.data(), GL_STATIC_DRAW);
     /* define the position attribute, index is the index for the attrib, size is number of components per generic vertex attribute (1, 2, 3, 4)
      * type is the data type, normalized turned ranges from 0 to 255 into 0-1, stride is byte offset between consecutive generic vertex attributes
      * pointer is a const void* to the first component of the first generic vertex attribute */
@@ -89,10 +98,10 @@ void drawTriangle(unsigned int buffer) {
     // enable the color vertexAttribute
     glEnableVertexAttribArray(1);
 
-    glDrawArrays(GL_TRIANGLES, 0, 3);
+    glDrawArrays(mode, 0, vertexCount);
 }
 
-unsigned int defineTriangle(const std::array<Vertex, 3>& vertices) {
+unsigned int definePrimative(Vertex vertices[], const int vertexCount) {
     // buffer id
     unsigned int buffer;
     // generate 1 buffer and assign the id into uint buffer ^
@@ -100,7 +109,8 @@ unsigned int defineTriangle(const std::array<Vertex, 3>& vertices) {
     // I am going to work with this buffer. select it
     glBindBuffer(GL_ARRAY_BUFFER, buffer);
     // define all the data to use. Use STATIC for objects that are defined once and reused, use DYNAMIC for objects that are redefined multiple times and reused
-    glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(Vertex), vertices.data(), GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, vertexCount * sizeof(Vertex), vertices, GL_STATIC_DRAW);
+
     return buffer;
 }
 
@@ -162,43 +172,29 @@ int main() {
     // // enable the vertextAttribute
     // glEnableVertexAttribArray(0);
 
-    // vertex shader ran on every vertex
-    std::string vertexShader =
-        "#version 330 core\n"
-        "layout(location = 0) in vec2 position;\n"
-        "layout(location = 1) in vec4 color;\n"
-        "out vec4 v_Color;\n"
-        "void main() {\n"
-        "    gl_Position = vec4(position, 0.0, 1.0);\n"
-        "    v_Color = color;\n"
-        "}\n";
-
-    // fragment shader ran on every pixel
-    std::string fragmentShader =
-        "#version 330 core\n"
-        "in vec4 v_Color;\n"
-        "out vec4 color;\n"
-        "void main() {\n"
-        "    color = v_Color;\n"
-        "}\n";
+    auto const vertexShader = GetShaderString("/Users/ricardito/CLionProjects/OpenGL/res/shaders/vertex.shader");
+    auto const fragmentShader = GetShaderString("/Users/ricardito/CLionProjects/OpenGL/res/shaders/fragment.shader");
 
     unsigned int shader = CreateShader(vertexShader, fragmentShader);
     glUseProgram(shader);
 
-    std::array<Vertex, 3> vertices = {};
+    std::vector<Vertex> vertices = {
+        {{-0.5, 0}, {0, 0, 1, 1}},
+        {{-0.5f, -0.5f}, {0, 0, 1, 1}},
+        {{0, -0.5f}, {0, 0, 1, 1}},
 
-    vertices.at(0) = {{-0.5f, -0.5f}, {1, 0, 0, 1}};
-    vertices.at(1) = {{0, 0.5f}, {0, 1, 0, 1}};
-    vertices.at(2) = {{0.5f, -0.5f}, {0, 0, 1, 1}};
+        {{0, -0.5f}, {0, 0, 1, 1}},
+        {{0, 0}, {0, 0, 1, 1}},
+        {{-0.5, 0}, {0, 0, 1, 1}}
+    };
 
-    const unsigned int triangleBuffer = defineTriangle(vertices);
+   auto triangleBuffer = definePrimative(vertices.data(), vertices.size());
 
     // main update loop
     while (!glfwWindowShouldClose(window)) {
         glClear(GL_COLOR_BUFFER_BIT);
         // draw the currently selected array
-        // glDrawArrays(GL_TRIANGLES, 0, 3);
-        drawTriangle(triangleBuffer);
+        drawPrimative(triangleBuffer, vertices.size(), GL_TRIANGLES);
         glfwSwapBuffers(window);
         glfwPollEvents();
     }
