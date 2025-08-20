@@ -1,3 +1,4 @@
+#include <complex>
 #include <cstdio>
 #include <fstream>
 #include <iostream>
@@ -7,18 +8,23 @@
 #include "glad/gl.h"
 #include "GLFW/glfw3.h"
 
-static std::string GetShaderString(const std::string& filePath) {
-    std::fstream fileStream(filePath);
+struct Vector2 {
+    float x, y;
+};
 
-    std::string line;
-    std::stringstream ss;
+struct Color {
+    float r, g, b, a;
+};
 
-    while (getline(fileStream, line)) {
-        ss << line << '\n';
-    }
+struct Vertex {
+    Vector2 position;
+    Color color;
+};
 
-    return ss.str();
-}
+struct Buffers {
+    unsigned int vertexBuffer;
+    unsigned int indexBuffer;
+};
 
 void error_callback(int error, const char* description) {
     std::printf("Error with code'%d': %s\n", error, description);
@@ -31,6 +37,19 @@ void close_callback(GLFWwindow* window) {
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods) {
     if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
         glfwSetWindowShouldClose(window, GLFW_TRUE);
+}
+
+static std::string GetShaderString(const std::string& filePath) {
+    std::fstream fileStream(filePath);
+
+    std::string line;
+    std::stringstream ss;
+
+    while (getline(fileStream, line)) {
+        ss << line << '\n';
+    }
+
+    return ss.str();
 }
 
 static unsigned int CompileShader(unsigned int type, const std::string& source) {
@@ -65,28 +84,35 @@ static unsigned int CreateShader(const std::string& vertexShader, const std::str
     glLinkProgram(program);
     glValidateProgram(program);
 
+    // we can delete the shaders because they are already attached to our program
     glDeleteShader(vertexShaderId);
     glDeleteShader(fragmentShaderId);
 
     return program;
 }
 
-struct Vector2 {
-    float x, y;
-};
+Buffers definePrimative(Vertex vertices[], const int vertexCount, unsigned int indices[], const int indexCount, unsigned int usage) {
+    // buffer id
+    unsigned int vertexBuffer;
+    // generate 1 buffer and assign the id into uint buffer ^
+    glGenBuffers(1, &vertexBuffer);
+    // I am going to work with this buffer. select it
+    glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
+    // define all the data to use. Use STATIC for objects that are defined once and reused, use DYNAMIC for objects that are redefined multiple times and reused
+    glBufferData(GL_ARRAY_BUFFER, vertexCount * sizeof(Vertex), vertices, usage);
 
-struct Color {
-    float r, g, b, a;
-};
+    unsigned int indexBuffer;
+    glGenBuffers(1, &indexBuffer);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, indexCount * sizeof(unsigned int), indices, usage);
+    return {vertexBuffer, indexBuffer};
+}
 
-struct Vertex {
-    Vector2 position;
-    Color color;
-};
-
-void drawPrimative(unsigned int buffer, const int vertexCount, unsigned int mode) {
+void drawPrimative(Buffers buffers, const int indicesCount, unsigned int mode) {
+    auto vertexBuffer = buffers.vertexBuffer;
+    auto indexBuffer = buffers.indexBuffer;
     // // I am going to work with this buffer. select it
-    glBindBuffer(GL_ARRAY_BUFFER, buffer);
+    glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
     /* define the position attribute, index is the index for the attrib, size is number of components per generic vertex attribute (1, 2, 3, 4)
      * type is the data type, normalized turned ranges from 0 to 255 into 0-1, stride is byte offset between consecutive generic vertex attributes
      * pointer is a const void* to the first component of the first generic vertex attribute */
@@ -98,20 +124,10 @@ void drawPrimative(unsigned int buffer, const int vertexCount, unsigned int mode
     // enable the color vertexAttribute
     glEnableVertexAttribArray(1);
 
-    glDrawArrays(mode, 0, vertexCount);
-}
-
-unsigned int definePrimative(Vertex vertices[], const int vertexCount) {
-    // buffer id
-    unsigned int buffer;
-    // generate 1 buffer and assign the id into uint buffer ^
-    glGenBuffers(1, &buffer);
-    // I am going to work with this buffer. select it
-    glBindBuffer(GL_ARRAY_BUFFER, buffer);
-    // define all the data to use. Use STATIC for objects that are defined once and reused, use DYNAMIC for objects that are redefined multiple times and reused
-    glBufferData(GL_ARRAY_BUFFER, vertexCount * sizeof(Vertex), vertices, GL_STATIC_DRAW);
-
-    return buffer;
+    // make sure were using the index buffer
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer);
+    // draw call
+    glDrawElements(mode, indicesCount, GL_UNSIGNED_INT, 0);
 }
 
 int main() {
@@ -151,27 +167,6 @@ int main() {
     glGenVertexArrays(1, &vao);
     glBindVertexArray(vao);
 
-    // float positions[6] = {
-    //     -0.5f, -0.5f,
-    //     0.0f, 0.5f,
-    //     0.5f, -0.5f
-    // };
-
-    // // buffer id
-    // unsigned int buffer;
-    // // generate 1 buffer and assign the id into uint buffer ^
-    // glGenBuffers(1, &buffer);
-    // // I am going to work with this buffer. select it
-    // glBindBuffer(GL_ARRAY_BUFFER, buffer);
-    // // define all the data to use. Use STATIC for objects that are defined once and reused, use DYNAMIC for objects that are redefined multiple times and reused
-    // glBufferData(GL_ARRAY_BUFFER, sizeof(positions), positions, GL_STATIC_DRAW);
-    // /* define the position attribute, index is the index for the attrib, size is number of components per generic vertex attribute (1, 2, 3, 4)
-    //  * type is the data type, normalized turned ranges from 0 to 255 into 0-1, stride is byte offset between consecutive generic vertex attributes
-    //  * pointer is a const void* to the first component of the first generic vertex attribute */
-    // glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 2, 0);
-    // // enable the vertextAttribute
-    // glEnableVertexAttribArray(0);
-
     auto const vertexShader = GetShaderString("/Users/ricardito/CLionProjects/OpenGL/res/shaders/vertex.shader");
     auto const fragmentShader = GetShaderString("/Users/ricardito/CLionProjects/OpenGL/res/shaders/fragment.shader");
 
@@ -179,22 +174,24 @@ int main() {
     glUseProgram(shader);
 
     std::vector<Vertex> vertices = {
-        {{-0.5, 0}, {0, 0, 1, 1}},
-        {{-0.5f, -0.5f}, {0, 0, 1, 1}},
-        {{0, -0.5f}, {0, 0, 1, 1}},
-
-        {{0, -0.5f}, {0, 0, 1, 1}},
-        {{0, 0}, {0, 0, 1, 1}},
-        {{-0.5, 0}, {0, 0, 1, 1}}
+        {{0.5, 0.5}, {1, 0, 0, 1}},
+        {{0.5, -0.5}, {1, 0, 0, 1}},
+        {{-0.5, -0.5}, {1, 0, 0, 1}},
+        {{-0.5, 0.5}, {1, 0, 0, 1}}
     };
 
-   auto triangleBuffer = definePrimative(vertices.data(), vertices.size());
+    std::vector<unsigned int> indices = {
+        0, 1, 2,
+        2, 3, 0
+    };
+
+   auto squareBuffers = definePrimative(vertices.data(), vertices.size(), indices.data(), indices.size(), GL_STATIC_DRAW);
 
     // main update loop
     while (!glfwWindowShouldClose(window)) {
         glClear(GL_COLOR_BUFFER_BIT);
         // draw the currently selected array
-        drawPrimative(triangleBuffer, vertices.size(), GL_TRIANGLES);
+        drawPrimative(squareBuffers, indices.size(), GL_TRIANGLES);
         glfwSwapBuffers(window);
         glfwPollEvents();
     }
