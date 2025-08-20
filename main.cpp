@@ -1,5 +1,4 @@
 #include <complex>
-#include <cstdio>
 #include <fstream>
 #include <iostream>
 #include <sstream>
@@ -26,9 +25,16 @@ struct Buffers {
     unsigned int indexBuffer;
 };
 
+class Drawable;
+
 void error_callback(int error, const char* description) {
     std::printf("Error with code'%d': %s\n", error, description);
 }
+
+void debugErrorCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar *message, const void *userParam) {
+    std::string messageString(message, length);
+    std::cout << severity << ": OpenGL error: %s\n" << messageString.c_str() << std::endl;
+};
 
 void close_callback(GLFWwindow* window) {
     std::printf("user closing window");
@@ -101,21 +107,6 @@ Buffers definePrimative(Vertex vertices[], const int vertexCount, unsigned int i
     // define all the data to use. Use STATIC for objects that are defined once and reused, use DYNAMIC for objects that are redefined multiple times and reused
     glBufferData(GL_ARRAY_BUFFER, vertexCount * sizeof(Vertex), vertices, usage);
 
-    unsigned int indexBuffer;
-    glGenBuffers(1, &indexBuffer);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, indexCount * sizeof(unsigned int), indices, usage);
-    return {vertexBuffer, indexBuffer};
-}
-
-void drawPrimative(Buffers buffers, const int indicesCount, unsigned int mode) {
-    auto vertexBuffer = buffers.vertexBuffer;
-    auto indexBuffer = buffers.indexBuffer;
-    // // I am going to work with this buffer. select it
-    glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
-    /* define the position attribute, index is the index for the attrib, size is number of components per generic vertex attribute (1, 2, 3, 4)
-     * type is the data type, normalized turned ranges from 0 to 255 into 0-1, stride is byte offset between consecutive generic vertex attributes
-     * pointer is a const void* to the first component of the first generic vertex attribute */
     glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (const void*) offsetof(Vertex, position));
     // enable the position vertexAttribute
     glEnableVertexAttribArray(0);
@@ -124,11 +115,65 @@ void drawPrimative(Buffers buffers, const int indicesCount, unsigned int mode) {
     // enable the color vertexAttribute
     glEnableVertexAttribArray(1);
 
+    unsigned int indexBuffer;
+    glGenBuffers(1, &indexBuffer);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, indexCount * sizeof(unsigned int), indices, usage);
+
+    return {vertexBuffer, indexBuffer};
+}
+
+void drawPrimative(unsigned int indexBuffer, const int indicesCount, unsigned int mode, unsigned int vao) {
+    // bind the vertexArray
+    glBindVertexArray(vao);
     // make sure were using the index buffer
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer);
     // draw call
     glDrawElements(mode, indicesCount, GL_UNSIGNED_INT, 0);
 }
+
+class Drawable {
+public:
+    unsigned int shader;
+    unsigned int vertexArrayObject {};
+    std::vector<Vertex> vertices;
+    std::vector<unsigned int> indices;
+    int indicesCount;
+    int verticesCount;
+
+    Drawable(Vertex vertices[], unsigned int indices[], const int verticesCount, const int indicesCount, unsigned int shader) {
+        this -> vertices.reserve(this -> vertices.size() + verticesCount);
+        std::copy(&vertices[0], &vertices[verticesCount], std::back_inserter(this -> vertices)); // copies raw array into vec
+        this -> indices.reserve(this -> indices.size() + indicesCount);
+        std::copy(&indices[0], &indices[indicesCount], std::back_inserter(this -> indices));
+        this -> shader = shader;
+        this -> indicesCount = indicesCount;
+        this -> verticesCount = verticesCount;
+
+        glGenVertexArrays(1, &vertexArrayObject);
+    }
+
+    void Define(unsigned int usage) {
+        glBindVertexArray(vertexArrayObject);
+        buffers = definePrimative(vertices.data(), verticesCount, indices.data(), indicesCount, usage);
+    }
+
+    /// Make ABSOLUTE SURE that you defined the object previously
+    void Draw(const unsigned int mode) const {
+        glUseProgram(shader);
+        drawPrimative(buffers.indexBuffer, indicesCount, mode, vertexArrayObject);
+    }
+
+    void redefineObject(Vertex newVertices[], const int newVerticesCount, unsigned int newIndices[], const int newIndicesCount, unsigned int usage) {
+        this -> verticesCount = newVerticesCount;
+        this -> indicesCount = newIndicesCount;
+
+        buffers = definePrimative(newVertices, newVerticesCount, newIndices, newIndicesCount, usage);
+    }
+
+private:
+    Buffers buffers = {};
+};
 
 int main() {
     glfwSetErrorCallback(error_callback);
@@ -144,7 +189,7 @@ int main() {
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-    GLFWwindow* window = glfwCreateWindow(640, 480, "My Title", NULL, NULL);
+    GLFWwindow* window = glfwCreateWindow(640, 480, "My Title", nullptr, nullptr);
     if (!window)
     {
         std::printf("window creation failed");
@@ -162,10 +207,6 @@ int main() {
     }
 
     glViewport(0, 0, 640, 480);
-
-    unsigned int vao;
-    glGenVertexArrays(1, &vao);
-    glBindVertexArray(vao);
 
     auto const vertexShader = GetShaderString("/Users/ricardito/CLionProjects/OpenGL/res/shaders/vertex.shader");
     auto const fragmentShader = GetShaderString("/Users/ricardito/CLionProjects/OpenGL/res/shaders/fragment.shader");
@@ -185,14 +226,21 @@ int main() {
         2, 3, 0
     };
 
-   auto squareBuffers = definePrimative(vertices.data(), vertices.size(), indices.data(), indices.size(), GL_STATIC_DRAW);
+    Drawable square(vertices.data(), indices.data(), vertices.size(), indices.size(), shader);
+    square.Define(GL_STATIC_DRAW);
+
+    // empty the buffers to make sure its drawing properly
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindVertexArray(0);
 
     // main update loop
     while (!glfwWindowShouldClose(window)) {
         glClear(GL_COLOR_BUFFER_BIT);
-        // draw the currently selected array
-        drawPrimative(squareBuffers, indices.size(), GL_TRIANGLES);
+
+        square.Draw(GL_TRIANGLES);
         glfwSwapBuffers(window);
+
         glfwPollEvents();
     }
 
@@ -200,4 +248,6 @@ int main() {
     glDeleteProgram(shader);
     glfwDestroyWindow(window);
     glfwTerminate();
+
+    exit(EXIT_SUCCESS);
 }

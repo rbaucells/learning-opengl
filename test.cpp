@@ -76,7 +76,7 @@
 //
 //     glfwMakeContextCurrent(window);
 //     gladLoadGL(glfwGetProcAddress);
-//     glfwSwapInterval(1); // when you call swap buffers, basically do it after "n" frames
+//     glfwSwapInterval(1);
 //
 //     // NOTE: OpenGL error checks have been omitted for brevity
 //
