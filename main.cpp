@@ -4,28 +4,9 @@
 #include <sstream>
 #include <string>
 
+#include "Common.h"
 #include "glad/gl.h"
 #include "GLFW/glfw3.h"
-
-struct Vector2 {
-    float x, y;
-};
-
-struct Color {
-    float r, g, b, a;
-};
-
-struct Vertex {
-    Vector2 position;
-    Color color;
-};
-
-struct Buffers {
-    unsigned int vertexBuffer;
-    unsigned int indexBuffer;
-};
-
-class Drawable;
 
 void error_callback(int error, const char* description) {
     std::printf("Error with code'%d': %s\n", error, description);
@@ -97,7 +78,7 @@ static unsigned int CreateShader(const std::string& vertexShader, const std::str
     return program;
 }
 
-Buffers definePrimative(Vertex vertices[], const int vertexCount, unsigned int indices[], const int indexCount, unsigned int usage) {
+Buffers definePrimative(Vertex vertices[], const int vertexCount, unsigned int indices[], const int indexCount, unsigned int usage, unsigned int texture) {
     // buffer id
     unsigned int vertexBuffer;
     // generate 1 buffer and assign the id into uint buffer ^
@@ -114,6 +95,10 @@ Buffers definePrimative(Vertex vertices[], const int vertexCount, unsigned int i
     glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), (const void*) offsetof(Vertex, color));
     // enable the color vertexAttribute
     glEnableVertexAttribArray(1);
+    // define the texture attribute
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (const void*) offsetof(Vertex, uv));
+    // enable the texture attribute
+    glEnableVertexAttribArray(2);
 
     unsigned int indexBuffer;
     glGenBuffers(1, &indexBuffer);
@@ -123,7 +108,8 @@ Buffers definePrimative(Vertex vertices[], const int vertexCount, unsigned int i
     return {vertexBuffer, indexBuffer};
 }
 
-void drawPrimative(unsigned int indexBuffer, const int indicesCount, unsigned int mode, unsigned int vao) {
+void drawPrimative(unsigned int indexBuffer, const int indicesCount, unsigned int mode, unsigned int vao, unsigned int texture) {
+    glBindTexture(GL_TEXTURE_2D, texture);
     // bind the vertexArray
     glBindVertexArray(vao);
     // make sure were using the index buffer
@@ -131,49 +117,6 @@ void drawPrimative(unsigned int indexBuffer, const int indicesCount, unsigned in
     // draw call
     glDrawElements(mode, indicesCount, GL_UNSIGNED_INT, 0);
 }
-
-class Drawable {
-public:
-    unsigned int shader;
-    unsigned int vertexArrayObject {};
-    std::vector<Vertex> vertices;
-    std::vector<unsigned int> indices;
-    int indicesCount;
-    int verticesCount;
-
-    Drawable(Vertex vertices[], unsigned int indices[], const int verticesCount, const int indicesCount, unsigned int shader) {
-        this -> vertices.reserve(this -> vertices.size() + verticesCount);
-        std::copy(&vertices[0], &vertices[verticesCount], std::back_inserter(this -> vertices)); // copies raw array into vec
-        this -> indices.reserve(this -> indices.size() + indicesCount);
-        std::copy(&indices[0], &indices[indicesCount], std::back_inserter(this -> indices));
-        this -> shader = shader;
-        this -> indicesCount = indicesCount;
-        this -> verticesCount = verticesCount;
-
-        glGenVertexArrays(1, &vertexArrayObject);
-    }
-
-    void Define(unsigned int usage) {
-        glBindVertexArray(vertexArrayObject);
-        buffers = definePrimative(vertices.data(), verticesCount, indices.data(), indicesCount, usage);
-    }
-
-    /// Make ABSOLUTE SURE that you defined the object previously
-    void Draw(const unsigned int mode) const {
-        glUseProgram(shader);
-        drawPrimative(buffers.indexBuffer, indicesCount, mode, vertexArrayObject);
-    }
-
-    void redefineObject(Vertex newVertices[], const int newVerticesCount, unsigned int newIndices[], const int newIndicesCount, unsigned int usage) {
-        this -> verticesCount = newVerticesCount;
-        this -> indicesCount = newIndicesCount;
-
-        buffers = definePrimative(newVertices, newVerticesCount, newIndices, newIndicesCount, usage);
-    }
-
-private:
-    Buffers buffers = {};
-};
 
 int main() {
     glfwSetErrorCallback(error_callback);
@@ -215,10 +158,10 @@ int main() {
     glUseProgram(shader);
 
     std::vector<Vertex> vertices = {
-        {{0.5, 0.5}, {1, 0, 0, 1}},
-        {{0.5, -0.5}, {1, 0, 0, 1}},
-        {{-0.5, -0.5}, {1, 0, 0, 1}},
-        {{-0.5, 0.5}, {1, 0, 0, 1}}
+        {{0.5, 0.5}, {1, 0, 0, 1}, {1, 1}},
+        {{0.5, -0.5}, {0, 1, 0, 1}, {1, 0}},
+        {{-0.5, -0.5}, {0, 0, 1, 1}, {0, 0}},
+        {{-0.5, 0.5}, {1, 1, 0, 1}, {0, 1}}
     };
 
     std::vector<unsigned int> indices = {
@@ -227,11 +170,24 @@ int main() {
     };
 
     Drawable square(vertices.data(), indices.data(), vertices.size(), indices.size(), shader);
-    square.Define(GL_STATIC_DRAW);
+    square.Define(GL_STATIC_DRAW, "/Users/ricardito/CLionProjects/OpenGL/res/textures/texture.jpg");
+
+    std::vector<Vertex> otherVertices = {
+        {{0.25, 0.25}, {0, 0, 0, 1}},
+        {{0.25, -0.25}, {0, 0, 0, 1}},
+        {{-0.25, -0.25}, {0, 0, 0, 1}},
+        {{-0.25, 0.25}, {0, 0, 0, 1}}
+    };
+
+    std::vector<unsigned int> otherIndices = {
+        0, 1, 2,
+        2, 3, 0
+    };
 
     // empty the buffers to make sure its drawing properly
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindTexture(GL_TEXTURE0, 0);
     glBindVertexArray(0);
 
     // main update loop
@@ -239,6 +195,7 @@ int main() {
         glClear(GL_COLOR_BUFFER_BIT);
 
         square.Draw(GL_TRIANGLES);
+
         glfwSwapBuffers(window);
 
         glfwPollEvents();
