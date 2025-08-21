@@ -8,25 +8,31 @@
 #include "glad/gl.h"
 #include "GLFW/glfw3.h"
 
+mat4x4 projection;
+
+// callbacks
 void error_callback(int error, const char* description) {
     std::printf("Error with code'%d': %s\n", error, description);
 }
-
 void debugErrorCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar *message, const void *userParam) {
     std::string messageString(message, length);
     std::cout << severity << ": OpenGL error: %s\n" << messageString.c_str() << std::endl;
 };
-
 void close_callback(GLFWwindow* window) {
     std::printf("user closing window");
 }
-
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods) {
     if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
         glfwSetWindowShouldClose(window, GLFW_TRUE);
 }
-
-static std::string GetShaderString(const std::string& filePath) {
+void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
+    SCREEN_WIDTH = width;
+    SCREEN_HEIGHT = height;
+    glViewport(0, 0, width, height);
+    mat4x4_ortho(projection, -width / 2.0f, width / 2.0f, -height / 2.0f, height / 2.0f, 1, -1000);
+}
+// shading
+std::string GetShaderString(const std::string& filePath) {
     std::fstream fileStream(filePath);
 
     std::string line;
@@ -38,8 +44,7 @@ static std::string GetShaderString(const std::string& filePath) {
 
     return ss.str();
 }
-
-static unsigned int CompileShader(unsigned int type, const std::string& source) {
+unsigned int CompileShader(unsigned int type, const std::string& source) {
     const unsigned int id = glCreateShader(type);
     const char* src = source.c_str();
     glShaderSource(id, 1, &src, nullptr);
@@ -60,8 +65,7 @@ static unsigned int CompileShader(unsigned int type, const std::string& source) 
 
     return id;
 }
-
-static unsigned int CreateShader(const std::string& vertexShader, const std::string& fragmentShader) {
+unsigned int CreateShader(const std::string& vertexShader, const std::string& fragmentShader) {
     unsigned int program = glCreateProgram();
     unsigned int vertexShaderId = CompileShader(GL_VERTEX_SHADER, vertexShader);
     unsigned int fragmentShaderId = CompileShader(GL_FRAGMENT_SHADER, fragmentShader);
@@ -78,6 +82,7 @@ static unsigned int CreateShader(const std::string& vertexShader, const std::str
     return program;
 }
 
+// primative
 Buffers definePrimative(Vertex vertices[], const int vertexCount, unsigned int indices[], const int indexCount, unsigned int usage, unsigned int texture) {
     // buffer id
     unsigned int vertexBuffer;
@@ -107,7 +112,6 @@ Buffers definePrimative(Vertex vertices[], const int vertexCount, unsigned int i
 
     return {vertexBuffer, indexBuffer};
 }
-
 void drawPrimative(unsigned int indexBuffer, const int indicesCount, unsigned int mode, unsigned int vao, unsigned int texture) {
     glBindTexture(GL_TEXTURE_2D, texture);
     // bind the vertexArray
@@ -119,10 +123,10 @@ void drawPrimative(unsigned int indexBuffer, const int indicesCount, unsigned in
 }
 
 int main() {
+    // when we get an error, lmk
     glfwSetErrorCallback(error_callback);
 
-    if (!glfwInit())
-    {
+    if (!glfwInit()) {
         std::printf("glfw initialization failed");
         exit(0);
     }
@@ -132,16 +136,19 @@ int main() {
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-    GLFWwindow* window = glfwCreateWindow(640, 480, "My Title", nullptr, nullptr);
+    GLFWwindow* window = glfwCreateWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "learn-opengl", nullptr, nullptr);
     if (!window)
     {
         std::printf("window creation failed");
         exit(0);
     }
 
+    // lmk when something changes
     glfwSetWindowCloseCallback(window, close_callback);
     glfwSetKeyCallback(window, key_callback);
+    glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 
+    // were gonna use this window rn
     glfwMakeContextCurrent(window);
 
     if (gladLoadGL(glfwGetProcAddress) == 0) {
@@ -149,19 +156,21 @@ int main() {
         exit(0);
     }
 
-    glViewport(0, 0, 640, 480);
+    glViewport(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
 
+    // get the strings from the shader files
     auto const vertexShader = GetShaderString("/Users/ricardito/CLionProjects/OpenGL/res/shaders/vertex.shader");
     auto const fragmentShader = GetShaderString("/Users/ricardito/CLionProjects/OpenGL/res/shaders/fragment.shader");
-
+    // compile the shaders
     unsigned int shader = CreateShader(vertexShader, fragmentShader);
+    // yes im gonna use them
     glUseProgram(shader);
 
     std::vector<Vertex> vertices = {
-        {{0.5, 0.5}, {1, 0, 0, 1}, {1, 1}},
-        {{0.5, -0.5}, {0, 1, 0, 1}, {1, 0}},
-        {{-0.5, -0.5}, {0, 0, 1, 1}, {0, 0}},
-        {{-0.5, 0.5}, {1, 1, 0, 1}, {0, 1}}
+        {{128, 128}, {1, 0, 0, 1}, {1, 1}},
+        {{128, -128}, {0, 1, 0, 1}, {1, 0}},
+        {{-128, -128}, {0, 0, 1, 1}, {0, 0}},
+        {{-128, 128}, {1, 1, 0, 1}, {0, 1}}
     };
 
     std::vector<unsigned int> indices = {
@@ -169,20 +178,8 @@ int main() {
         2, 3, 0
     };
 
-    Drawable square(vertices.data(), indices.data(), vertices.size(), indices.size(), shader);
+    Drawable square(vertices, indices, shader, {{0, 0}, 0, {1, 1}});
     square.Define(GL_STATIC_DRAW, "/Users/ricardito/CLionProjects/OpenGL/res/textures/texture.jpg");
-
-    std::vector<Vertex> otherVertices = {
-        {{0.25, 0.25}, {0, 0, 0, 1}},
-        {{0.25, -0.25}, {0, 0, 0, 1}},
-        {{-0.25, -0.25}, {0, 0, 0, 1}},
-        {{-0.25, 0.25}, {0, 0, 0, 1}}
-    };
-
-    std::vector<unsigned int> otherIndices = {
-        0, 1, 2,
-        2, 3, 0
-    };
 
     // empty the buffers to make sure its drawing properly
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
@@ -190,14 +187,16 @@ int main() {
     glBindTexture(GL_TEXTURE0, 0);
     glBindVertexArray(0);
 
+    Camera camera({0, 0}, 0);
+
+    framebuffer_size_callback(window, SCREEN_WIDTH, SCREEN_HEIGHT);
+
     // main update loop
     while (!glfwWindowShouldClose(window)) {
         glClear(GL_COLOR_BUFFER_BIT);
 
-        square.Draw(GL_TRIANGLES);
-
+        square.Draw(GL_TRIANGLES, camera.viewMatrix, projection);
         glfwSwapBuffers(window);
-
         glfwPollEvents();
     }
 
@@ -205,6 +204,6 @@ int main() {
     glDeleteProgram(shader);
     glfwDestroyWindow(window);
     glfwTerminate();
-
+    // and exit
     exit(EXIT_SUCCESS);
 }

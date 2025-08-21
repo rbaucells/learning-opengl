@@ -1,18 +1,21 @@
+#include <iostream>
+
 #include "Common.h"
 #include "stb_image.h"
 #include "glad/gl.h"
 #include "GLFW/glfw3.h"
 
-Drawable::Drawable(Vertex vertices[], unsigned int indices[], const int verticesCount, const int indicesCount, unsigned int shaders) {
-    this -> vertices.reserve(this -> vertices.size() + verticesCount);
-    std::copy(&vertices[0], &vertices[verticesCount], std::back_inserter(this -> vertices)); // copies raw array into vec
-    this -> indices.reserve(this -> indices.size() + indicesCount);
-    std::copy(&indices[0], &indices[indicesCount], std::back_inserter(this -> indices));
+Drawable::Drawable(std::vector<Vertex> vertices, std::vector<unsigned int> indices, unsigned int shaders, Transform transform) {
     this -> shaders = shaders;
-    this -> indicesCount = indicesCount;
-    this -> verticesCount = verticesCount;
+    this -> indicesCount = indices.size();
+    this -> verticesCount = vertices.size();
+
+    this -> vertices = vertices;
+    this -> indices = indices;
+    this -> transform = transform;
 
     glGenVertexArrays(1, &vertexArrayObject);
+    glUseProgram(shaders); // activate shaders and get uniform locations
 }
 
 void Drawable::Define(const unsigned int usage, std::string textureFilePath) {
@@ -37,9 +40,25 @@ void Drawable::Define(const unsigned int usage, std::string textureFilePath) {
     buffers = definePrimative(vertices.data(), verticesCount, indices.data(), indicesCount, usage, texture);
 }
 
-void Drawable::Draw(const unsigned int mode) const {
+void Drawable::Draw(const unsigned int mode, mat4x4 view, mat4x4 projection) const {
+
+    // create the model matrix from the transform
+    mat4x4 model;
+    mat4x4_identity(model);
+    mat4x4_translate(model, transform.position.x, transform.position.y, 0.0f);
+    mat4x4_rotate_Z(model, model, transform.rotation);
+    mat4x4_scale_aniso(model, model, transform.scale.x, transform.scale.y, 1.0f);
+
+    // combine the matrices into a single MVP matrix
+    mat4x4 mvp;
+    mat4x4_mul(mvp, view, model);
+    mat4x4_mul(mvp, projection, mvp);
+
+    GLint mvpLocation = glGetUniformLocation(shaders, "mvp");
+    glUniformMatrix4fv(mvpLocation, 1, GL_FALSE, (const GLfloat*)mvp);
+
     glUseProgram(shaders);
-    drawPrimative(buffers.indexBuffer, indicesCount, mode, vertexArrayObject, texture);
+    drawPrimative(buffers. indexBuffer, indicesCount, mode, vertexArrayObject, texture);
 }
 
 void Drawable::redefineObject(Vertex newVertices[], const int newVerticesCount, unsigned int newIndices[], const int newIndicesCount, unsigned int usage, std::string filePath) {

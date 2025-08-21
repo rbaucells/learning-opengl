@@ -8,7 +8,8 @@ add_executable(OpenGL test.cpp main.cpp
         stb_image.cpp
         Drawable.cpp
         Math.cpp
-        Math.h)
+        Math.h
+        Camera.cpp)
 
 target_include_directories(OpenGL PRIVATE dependencies/include)
 
