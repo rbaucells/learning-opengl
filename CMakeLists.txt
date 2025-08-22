@@ -3,13 +3,18 @@ project(OpenGL)
 
 set(CMAKE_CXX_STANDARD 20)
 
-add_executable(OpenGL test.cpp main.cpp
-        Common.h
-        stb_image.cpp
-        Drawable.cpp
-        Math.cpp
-        Math.h
-        Camera.cpp)
+add_executable(OpenGL main.cpp
+        main.h
+        dependencies/stb_image.cpp
+        Object.cpp
+        math/MATH.h
+        Camera.cpp
+        components/Component.h
+        components/collider.cpp
+        components/collider.h
+        math/Vector2.cpp
+        math/Vector3.cpp
+        math/matrix4x4.cpp)
 
 target_include_directories(OpenGL PRIVATE dependencies/include)
 

@@ -4,9 +4,11 @@
 #include <sstream>
 #include <string>
 
-#include "Common.h"
+#include "main.h"
+#include "components/collider.h"
 #include "glad/gl.h"
 #include "GLFW/glfw3.h"
+#include "linmath/linmath.h"
 
 mat4x4 projection;
 
@@ -82,8 +84,8 @@ unsigned int CreateShader(const std::string& vertexShader, const std::string& fr
     return program;
 }
 
-// primative
-Buffers definePrimative(Vertex vertices[], const int vertexCount, unsigned int indices[], const int indexCount, unsigned int usage, unsigned int texture) {
+// primitive
+Buffers definePrimitive(std::vector<Vertex> vertices, std::vector<unsigned int> indices, unsigned int usage) {
     // buffer id
     unsigned int vertexBuffer;
     // generate 1 buffer and assign the id into uint buffer ^
@@ -91,7 +93,7 @@ Buffers definePrimative(Vertex vertices[], const int vertexCount, unsigned int i
     // I am going to work with this buffer. select it
     glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
     // define all the data to use. Use STATIC for objects that are defined once and reused, use DYNAMIC for objects that are redefined multiple times and reused
-    glBufferData(GL_ARRAY_BUFFER, vertexCount * sizeof(Vertex), vertices, usage);
+    glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(Vertex), vertices.data(), usage);
 
     glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (const void*) offsetof(Vertex, position));
     // enable the position vertexAttribute
@@ -108,11 +110,11 @@ Buffers definePrimative(Vertex vertices[], const int vertexCount, unsigned int i
     unsigned int indexBuffer;
     glGenBuffers(1, &indexBuffer);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, indexCount * sizeof(unsigned int), indices, usage);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned int), indices.data(), usage);
 
     return {vertexBuffer, indexBuffer};
 }
-void drawPrimative(unsigned int indexBuffer, const int indicesCount, unsigned int mode, unsigned int vao, unsigned int texture) {
+void drawPrimitive(unsigned int indexBuffer, const int indicesCount, unsigned int mode, unsigned int vao, unsigned int texture) {
     glBindTexture(GL_TEXTURE_2D, texture);
     // bind the vertexArray
     glBindVertexArray(vao);
@@ -178,9 +180,9 @@ int main() {
         2, 3, 0
     };
 
-    Drawable square(vertices, indices, shader, {{0, 0}, 0, {1, 1}});
+    Object square(vertices, indices, shader, {{0, 0}, 0, {1, 1}});
     square.Define(GL_STATIC_DRAW, "/Users/ricardito/CLionProjects/OpenGL/res/textures/texture.jpg");
-
+    square.AddComponent<Collider>();
     // empty the buffers to make sure its drawing properly
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -195,7 +197,18 @@ int main() {
     while (!glfwWindowShouldClose(window)) {
         glClear(GL_COLOR_BUFFER_BIT);
 
-        square.Draw(GL_TRIANGLES, camera.viewMatrix, projection);
+        for (Object* object: allObjects) {
+            object->Update();
+        }
+
+        for (Object* object: allObjects) {
+            object->LateUpdate();
+        }
+
+        for (Object* object: allObjects) {
+            object->Draw(GL_TRIANGLES, camera.viewMatrix, projection);
+        }
+
         glfwSwapBuffers(window);
         glfwPollEvents();
     }

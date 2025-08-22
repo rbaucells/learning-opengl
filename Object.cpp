@@ -1,14 +1,9 @@
-#include <iostream>
-
-#include "Common.h"
+#include "main.h"
 #include "stb_image.h"
 #include "glad/gl.h"
-#include "GLFW/glfw3.h"
 
-Drawable::Drawable(std::vector<Vertex> vertices, std::vector<unsigned int> indices, unsigned int shaders, Transform transform) {
+Object::Object(const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices, unsigned int shaders, Transform transform) {
     this -> shaders = shaders;
-    this -> indicesCount = indices.size();
-    this -> verticesCount = vertices.size();
 
     this -> vertices = vertices;
     this -> indices = indices;
@@ -16,9 +11,10 @@ Drawable::Drawable(std::vector<Vertex> vertices, std::vector<unsigned int> indic
 
     glGenVertexArrays(1, &vertexArrayObject);
     glUseProgram(shaders); // activate shaders and get uniform locations
-}
 
-void Drawable::Define(const unsigned int usage, std::string textureFilePath) {
+    allObjects.push_back(this);
+}
+void Object::Define(const unsigned int usage, const std::string& textureFilePath) {
     int width, height, nrChannels;
     unsigned char *data = stbi_load(textureFilePath.c_str(), &width, &height, &nrChannels, 0);
 
@@ -37,10 +33,9 @@ void Drawable::Define(const unsigned int usage, std::string textureFilePath) {
     stbi_image_free(data);
 
     glBindVertexArray(vertexArrayObject);
-    buffers = definePrimative(vertices.data(), verticesCount, indices.data(), indicesCount, usage, texture);
+    buffers = definePrimitive(vertices, indices, usage);
 }
-
-void Drawable::Draw(const unsigned int mode, mat4x4 view, mat4x4 projection) const {
+void Object::Draw(const unsigned int mode, mat4x4 view, mat4x4 projection) const {
 
     // create the model matrix from the transform
     mat4x4 model;
@@ -58,17 +53,29 @@ void Drawable::Draw(const unsigned int mode, mat4x4 view, mat4x4 projection) con
     glUniformMatrix4fv(mvpLocation, 1, GL_FALSE, (const GLfloat*)mvp);
 
     glUseProgram(shaders);
-    drawPrimative(buffers. indexBuffer, indicesCount, mode, vertexArrayObject, texture);
+    drawPrimitive(buffers.indexBuffer, indices.size(), mode, vertexArrayObject, texture);
 }
 
-void Drawable::redefineObject(Vertex newVertices[], const int newVerticesCount, unsigned int newIndices[], const int newIndicesCount, unsigned int usage, std::string filePath) {
-    this -> verticesCount = newVerticesCount;
-    this -> indicesCount = newIndicesCount;
+void Object::Update() {
+    for (const auto & component : components) {
+        component -> Update();
+    }
+}
 
-    glGenTextures(1, &texture);
-    glBindTexture(GL_TEXTURE_2D, texture);
+void Object::FixedUpdate() {
+    for (const auto & component : components) {
+        component -> FixedUpdate();
+    }
+}
 
-    buffers = definePrimative(newVertices, newVerticesCount, newIndices, newIndicesCount, usage, texture);
+void Object::LateUpdate() {
+    for (const auto & component : components) {
+        component -> LateUpdate();
+    }
+}
+
+Object::~Object() {
+    std::erase(allObjects, this);
 }
 
 

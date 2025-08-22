@@ -1,14 +1,14 @@
-#include "Common.h"
+#include "main.h"
 
-Camera::Camera(Vector2 startPos, float startRot) {
+Camera::Camera(vector2 startPos, float startRot) {
     mat4x4_identity(viewMatrix);
-    position = Vector3(startPos.x, startPos.y, 1);
+    position = vector3(startPos.x, startPos.y, 1);
     rotation = startRot;
     UpdateViewMatrix();
 }
 
-void Camera::SetCameraPosition(Vector2 newPos) {
-    position = Vector3(newPos.x, newPos.y, position.z);
+void Camera::SetCameraPosition(vector2 newPos) {
+    position = vector3(newPos.x, newPos.y, position.z);
     UpdateViewMatrix();
 }
 
@@ -17,9 +17,8 @@ void Camera::SetCameraRotation(float newRot) {
     UpdateViewMatrix();
 }
 
-
-void Camera::MoveCamera(Vector2 change) {
-    position += Vector3(change.x, change.y, 0);
+void Camera::MoveCamera(vector2 change) {
+    position += vector3(change.x, change.y, 0);
     UpdateViewMatrix();
 }
 
@@ -27,7 +26,6 @@ void Camera::RotateCamera(float change) {
     rotation += change;
     UpdateViewMatrix();
 }
-
 
 void Camera::UpdateViewMatrix() {
     mat4x4 translationMatrix;
