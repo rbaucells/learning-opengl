@@ -5,7 +5,10 @@
 #include <string>
 
 #include "main.h"
-#include "components/collider.h"
+
+#include "camera.h"
+#include "object.h"
+#include "components/Moving.h"
 #include "glad/gl.h"
 #include "GLFW/glfw3.h"
 #include "linmath/linmath.h"
@@ -182,7 +185,7 @@ int main() {
 
     Object square(vertices, indices, shader, {{0, 0}, 0, {1, 1}});
     square.Define(GL_STATIC_DRAW, "/Users/ricardito/CLionProjects/OpenGL/res/textures/texture.jpg");
-    square.AddComponent<Collider>();
+    square.AddComponent<Moving>();
     // empty the buffers to make sure its drawing properly
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -198,11 +201,11 @@ int main() {
         glClear(GL_COLOR_BUFFER_BIT);
 
         for (Object* object: allObjects) {
-            object->Update();
+            object->update();
         }
 
         for (Object* object: allObjects) {
-            object->LateUpdate();
+            object->lateUpdate();
         }
 
         for (Object* object: allObjects) {

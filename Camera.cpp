@@ -1,4 +1,4 @@
-#include "main.h"
+#include "camera.h"
 
 Camera::Camera(vector2 startPos, float startRot) {
     mat4x4_identity(viewMatrix);

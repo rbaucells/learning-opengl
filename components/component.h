@@ -1,21 +1,20 @@
 #pragma once
-#include <iostream>
 
-// Forward declare the Object class.
+// forward declaration of Object
 class Object;
 
-class component {
+class Component {
 protected:
     Object* object = nullptr;
 public:
-    virtual ~component() = default;
-
-    virtual void Start() {};
-    virtual void Update() {};
-    virtual void LateUpdate() {};
-    virtual void FixedUpdate() {};
-
-    void setMaster(Object* owner) {
+    Component(Object* owner) {
         object = owner;
-    }
+    };
+
+    virtual ~Component() = default;
+
+    virtual void start() {}
+    virtual void update() {}
+    virtual void lateUpdate() {}
+    virtual void fixedUpdate() {}
 };

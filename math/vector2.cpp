@@ -1,5 +1,5 @@
-#include "Math.h"
 #include <cmath>
+#include "mathematics.h"
 
 vector2 vector2::operator+(const vector2 &other) const {
     return vector2{x + other.x, y + other.y};

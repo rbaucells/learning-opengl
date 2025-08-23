@@ -1,20 +1,27 @@
-#include "main.h"
+#include "object.h"
+#include <vector>
 #include "stb_image.h"
+#include "components/component.h"
 #include "glad/gl.h"
+#include "linmath/linmath.h"
 
-Object::Object(const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices, unsigned int shaders, Transform transform) {
-    this -> shaders = shaders;
-
-    this -> vertices = vertices;
-    this -> indices = indices;
-    this -> transform = transform;
+Object::Object(const std::vector<Vertex> &vertices, const std::vector<unsigned int> &indices, unsigned int shaders, Transform transform) {
+    this->shaders = shaders;
+    this->vertices = vertices;
+    this->indices = indices;
+    this->transform = transform;
 
     glGenVertexArrays(1, &vertexArrayObject);
     glUseProgram(shaders); // activate shaders and get uniform locations
 
     allObjects.push_back(this);
 }
-void Object::Define(const unsigned int usage, const std::string& textureFilePath) {
+
+Object::~Object() {
+    std::erase(allObjects, this);
+}
+
+void Object::Define(const unsigned int usage, const std::string &textureFilePath) {
     int width, height, nrChannels;
     unsigned char *data = stbi_load(textureFilePath.c_str(), &width, &height, &nrChannels, 0);
 
@@ -35,8 +42,8 @@ void Object::Define(const unsigned int usage, const std::string& textureFilePath
     glBindVertexArray(vertexArrayObject);
     buffers = definePrimitive(vertices, indices, usage);
 }
-void Object::Draw(const unsigned int mode, mat4x4 view, mat4x4 projection) const {
 
+void Object::Draw(const unsigned int mode, mat4x4 view, mat4x4 projection) const {
     // create the model matrix from the transform
     mat4x4 model;
     mat4x4_identity(model);
@@ -50,32 +57,24 @@ void Object::Draw(const unsigned int mode, mat4x4 view, mat4x4 projection) const
     mat4x4_mul(mvp, projection, mvp);
 
     GLint mvpLocation = glGetUniformLocation(shaders, "mvp");
-    glUniformMatrix4fv(mvpLocation, 1, GL_FALSE, (const GLfloat*)mvp);
+    glUniformMatrix4fv(mvpLocation, 1, GL_FALSE, (const GLfloat *) mvp);
 
     glUseProgram(shaders);
     drawPrimitive(buffers.indexBuffer, indices.size(), mode, vertexArrayObject, texture);
 }
 
-void Object::Update() {
-    for (const auto & component : components) {
-        component -> Update();
+void Object::update() const {
+    for (const auto& component: components) {
+        component -> update();
     }
 }
-
-void Object::FixedUpdate() {
-    for (const auto & component : components) {
-        component -> FixedUpdate();
+void Object::fixedUpdate() const {
+    for (const auto& component: components) {
+        component -> fixedUpdate();
     }
 }
-
-void Object::LateUpdate() {
-    for (const auto & component : components) {
-        component -> LateUpdate();
+void Object::lateUpdate() const {
+    for (const auto& component: components) {
+        component -> lateUpdate();
     }
 }
-
-Object::~Object() {
-    std::erase(allObjects, this);
-}
-
-
