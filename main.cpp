@@ -11,6 +11,8 @@
 #include "GLFW/glfw3.h"
 
 #include "main.h"
+
+#include <thread>
 ColumnMatrix4x4 projection;
 
 // callbacks
@@ -194,16 +196,40 @@ int main() {
 
     framebuffer_size_callback(window, SCREEN_WIDTH, SCREEN_HEIGHT);
 
+    auto lastLoopTime = std::chrono::high_resolution_clock::now();
+    double accumulator = 0.0;
+
+    auto lastFixedUpdateTime = std::chrono::high_resolution_clock::now();
+
     // main update loop
     while (!glfwWindowShouldClose(window)) {
+        auto startOfLoopTime = std::chrono::high_resolution_clock::now();
+        // calculate deltaTime
+        std::chrono::duration<double, std::milli> timeSinceLastUpdateInMilli = startOfLoopTime - lastLoopTime;
+        double deltaTime = timeSinceLastUpdateInMilli.count();
+        lastLoopTime = std::chrono::high_resolution_clock::now();
+
+        accumulator += deltaTime;
+
+        while (accumulator >= fixedUpdateIntervalInMilli) {
+            double fixedDeltaTime = std::chrono::duration<double, std::milli>(std::chrono::high_resolution_clock::now() - lastFixedUpdateTime).count();
+
+            for (Object* object: allObjects) {
+                object -> fixedUpdate(fixedDeltaTime);
+            }
+
+            lastFixedUpdateTime = std::chrono::high_resolution_clock::now();
+            accumulator -= fixedUpdateIntervalInMilli;
+        }
+
         glClear(GL_COLOR_BUFFER_BIT);
 
         for (Object* object: allObjects) {
-            object->update();
+            object->update(deltaTime);
         }
 
         for (Object* object: allObjects) {
-            object->lateUpdate();
+            object->lateUpdate(deltaTime);
         }
 
         for (Object* object: allObjects) {
@@ -212,6 +238,16 @@ int main() {
 
         glfwSwapBuffers(window);
         glfwPollEvents();
+
+        // framerate capping
+        auto endOfLoopTime = std::chrono::high_resolution_clock::now();
+        auto updateTime = std::chrono::duration<double, std::milli>(endOfLoopTime - startOfLoopTime).count();
+        auto targetFrameTimeMs = 1000.0/fps;
+
+        auto timeToSleepMs = targetFrameTimeMs - updateTime;
+
+        if (timeToSleepMs > 0)
+            std::this_thread::sleep_for(std::chrono::duration<double, std::milli>(timeToSleepMs));
     }
 
     // clean uo things

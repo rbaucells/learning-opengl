@@ -1,15 +1,18 @@
 #include "Moving.h"
+
 #include "../object.h"
 
-// Moving::Moving(Object *owner, float speed) : Component(owner) {
-//     this->speed = speed;
-// }
-
 void Moving::start() {
-    std::printf("Hello World!");
+    std::printf("Hello World! \n");
 }
 
-void Moving::update() {
+void Moving::update(const double deltaTime) {
     object->transform.position.x += speed;
+    std::printf("Delta Time: %f \n", deltaTime);
 }
+
+void Moving::fixedUpdate(const double fixedDeltaTime) {
+    std::printf("Fixed Delta Time: %f \n", fixedDeltaTime);
+}
+
 

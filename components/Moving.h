@@ -6,7 +6,8 @@ public:
     // im not specifying my own constructor, use the Component constructor
     using Component::Component;
     void start() override;
-    void update() override;
+    void update(double deltaTime) override;
+    void fixedUpdate(double fixedDeltaTime) override;
 private:
     float speed = 1;
 };

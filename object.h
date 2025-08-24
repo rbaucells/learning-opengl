@@ -19,11 +19,11 @@ public:
 
     void Draw(unsigned int mode, ColumnMatrix4x4 view, ColumnMatrix4x4 projection) const;
 
-    void update() const;
+    void update(double deltaTime) const;
 
-    void fixedUpdate() const;
+    void fixedUpdate(double fixedDeltaTime) const;
 
-    void lateUpdate() const;
+    void lateUpdate(double deltaTime) const;
 
     template<IsComponent T, typename... Args>
     T *AddComponent(Args &&... args) {
@@ -111,5 +111,4 @@ private:
 inline std::vector<Object *> allObjects;
 
 Buffers definePrimitive(std::vector<Vertex> vertices, std::vector<unsigned int> indices, unsigned int usage);
-
 void drawPrimitive(unsigned int indexBuffer, int indicesCount, unsigned int mode, unsigned int vao, unsigned int texture);

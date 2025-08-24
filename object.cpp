@@ -3,7 +3,6 @@
 #include "stb_image.h"
 #include "components/component.h"
 #include "glad/gl.h"
-// #include "linmath/linmath.h"
 
 Object::Object(const std::vector<Vertex> &vertices, const std::vector<unsigned int> &indices, unsigned int shaders, Transform transform) {
     this->shaders = shaders;
@@ -61,18 +60,18 @@ void Object::Draw(const unsigned int mode, ColumnMatrix4x4 view, ColumnMatrix4x4
     drawPrimitive(buffers.indexBuffer, indices.size(), mode, vertexArrayObject, texture);
 }
 
-void Object::update() const {
+void Object::update(const double deltaTime) const {
     for (const auto& component: components) {
-        component -> update();
+        component -> update(deltaTime);
     }
 }
-void Object::fixedUpdate() const {
+void Object::fixedUpdate(const double fixedDeltaTime) const {
     for (const auto& component: components) {
-        component -> fixedUpdate();
+        component -> fixedUpdate(fixedDeltaTime);
     }
 }
-void Object::lateUpdate() const {
+void Object::lateUpdate(const double deltaTime) const {
     for (const auto& component: components) {
-        component -> lateUpdate();
+        component -> lateUpdate(deltaTime);
     }
 }
