@@ -1,11 +1,12 @@
 #include <iomanip>
 #include <iostream>
 #include <sstream>
+#include <cassert>
 
 #include "../math/mathematics.h"
 #include "../dependencies/include/linmath/linmath.h"
 
-std::string getStringFromMatrix(const columnMatrix4x4 &matrix) {
+std::string getStringFromMatrix(const ColumnMatrix4x4 &matrix) {
     std::stringstream result;
     result << std::fixed << std::setprecision(2);
 
@@ -45,59 +46,134 @@ std::string getStringFromBadMatrix(const mat4x4 &matrix) {
 }
 
 int main() {
-    columnMatrix4x4 myMatrix = columnMatrix4x4::identity();
+    // Identity Test //
+    ColumnMatrix4x4 identityMatrix = ColumnMatrix4x4::identity();
+    mat4x4 linmathIdentityMatrix;
+    mat4x4_identity(linmathIdentityMatrix);
 
-    mat4x4 notMyMatrix;
-    mat4x4_identity(notMyMatrix);
+    std::cout << "Identity: \n" << getStringFromMatrix(identityMatrix) << std::endl;
+    std::cout << "linmath identity: \n" << getStringFromBadMatrix(linmathIdentityMatrix) << std::endl;
 
-    static_assert(myMatrix.compareTo(columnMatrix4x4::wrap(notMyMatrix)));
+    assert(identityMatrix.compareTo(ColumnMatrix4x4::wrap(linmathIdentityMatrix)));
+    std::cout << "Passed Identity Matrix Test" << std::endl;
 
-    std::cout << "My Identity Matrix \n" << getStringFromMatrix(myMatrix) << std::endl;
-    std::cout << "Not My Identity Matrix \n" << getStringFromBadMatrix(notMyMatrix) << std::endl;
+    // Arithmetic Test //
+    ColumnMatrix4x4 a = ColumnMatrix4x4::identity().scale(3);
+    ColumnMatrix4x4 b = ColumnMatrix4x4::identity().scale(2);
+    ColumnMatrix4x4 sum = a + b;
 
-    columnMatrix4x4 translatedMatrix = columnMatrix4x4::identity();
-    translatedMatrix = translatedMatrix.translate(5, 5, 5);
+    mat4x4 linmathA;
+    mat4x4_identity(linmathA);
+    mat4x4_scale(linmathA, linmathA, 3);
 
-    mat4x4 translatedNotMyMatrix;
-    mat4x4_identity(translatedNotMyMatrix);
-    mat4x4_translate(translatedNotMyMatrix, 5, 5, 5);
+    mat4x4 linmathB;
+    mat4x4_identity(linmathB);
+    mat4x4_scale(linmathB, linmathB, 2);
 
-    static_assert(translatedMatrix.compareTo(columnMatrix4x4::wrap(translatedNotMyMatrix)));
+    mat4x4 linmathSum;
+    mat4x4_add(linmathSum, linmathA, linmathB);
 
-    std::cout << "My Translated Matrix \n" << getStringFromMatrix(translatedMatrix) << std::endl;
-    std::cout << "Not My Translated Matrix \n" << getStringFromBadMatrix(translatedNotMyMatrix) << std::endl;
+    std::cout << "Sum: \n" << getStringFromMatrix(sum) << std::endl;
+    std::cout << "linmath sum: \n" << getStringFromBadMatrix(linmathSum) << std::endl;
 
-    columnMatrix4x4 transposedMatrix = translatedMatrix.transpose();
+    assert(sum.compareTo(ColumnMatrix4x4::wrap(linmathSum)));
+    std::cout << "Passed Addition Matrix Test" << std::endl;
 
-    mat4x4 transposedNotMyMatrix;
-    mat4x4_transpose(transposedNotMyMatrix, translatedNotMyMatrix);
+    ColumnMatrix4x4 diff = b - a;
 
-    static_assert(transposedMatrix.compareTo(columnMatrix4x4::wrap(transposedNotMyMatrix)));
+    mat4x4 linmathDiff;
+    mat4x4_sub(linmathDiff, linmathB, linmathA);
 
-    std::cout << "My Transposed Matrix \n" << getStringFromMatrix(transposedMatrix) << std::endl;
-    std::cout << "Not My Transposed Matrix \n" << getStringFromBadMatrix(transposedNotMyMatrix) << std::endl;
+    std::cout << "Difference: \n" << getStringFromMatrix(diff) << std::endl;
+    std::cout << "linmath difference: \n" << getStringFromBadMatrix(linmathDiff) << std::endl;
 
-    columnMatrix4x4 rotatedMatrix = transposedMatrix.rotate_x(15);
+    assert (diff.compareTo(ColumnMatrix4x4::wrap(linmathDiff)));
+    std::cout << "Passed Subtraction Matrix Test" << std::endl;
 
-    mat4x4 rotatedNotMyMatrix;
-    mat4x4_rotate_X(rotatedNotMyMatrix, transposedNotMyMatrix, 15);
+    // Transformation Test //
+    ColumnMatrix4x4 base = ColumnMatrix4x4::identity();
+    mat4x4 linmathBase;
+    mat4x4_identity(linmathBase);
 
-    static_assert(rotatedMatrix.compareTo(columnMatrix4x4::wrap(rotatedNotMyMatrix)));
+    ColumnMatrix4x4 translated = base.translate(5, 10, 15);
+    mat4x4 linmathTranslated;
+    mat4x4_translate(linmathTranslated, 5, 10, 15);
 
-    std::cout << "My Rotated Matrix \n" << getStringFromMatrix(rotatedMatrix) << std::endl;
-    std::cout << "Not My Rotated Matrix \n" << getStringFromBadMatrix(rotatedNotMyMatrix) << std::endl;
+    std::cout << "Translated: \n" << getStringFromMatrix(translated) << std::endl;
+    std::cout << "linmath translated: \n" << getStringFromBadMatrix(linmathTranslated) << std::endl;
 
-    columnMatrix4x4 orhoMatrix = columnMatrix4x4::identity();
-    orhoMatrix = orhoMatrix.ortho(-5, 5, -2.5, 2.5, -1, 10);
+    assert(translated.compareTo(ColumnMatrix4x4::wrap(linmathTranslated)));
+    std::cout << "Passed translate Matrix Test" << std::endl;
 
-    mat4x4 orthoNotMyMatrix;
-    mat4x4_identity(orthoNotMyMatrix);
-    mat4x4_ortho(orthoNotMyMatrix, -5, 5, -2.5, 2.5, -1, 10);
+    ColumnMatrix4x4 rotatedX = translated.rotate_x(10);
+    mat4x4 linmathRotatedX;
+    mat4x4_rotate_X(linmathRotatedX, linmathTranslated, 10);
 
-    static_assert(orhoMatrix.compareTo(columnMatrix4x4::wrap(orthoNotMyMatrix)));
+    std::cout << "Rotated X: \n" << getStringFromMatrix(rotatedX) << std::endl;
+    std::cout << "linmath rotated X: \n" << getStringFromBadMatrix(linmathRotatedX) << std::endl;
 
-    std::cout << "My ortho Matrix \n" << getStringFromMatrix(orhoMatrix) << std::endl;
-    std::cout << "Not My ortho Matrix \n" << getStringFromBadMatrix(orthoNotMyMatrix) << std::endl;
+    assert (rotatedX.compareTo(ColumnMatrix4x4::wrap(linmathRotatedX)));
+    std::cout << "Passed rotate x Matrix Test" << std::endl;
 
-    return 0;
+    ColumnMatrix4x4 rotatedY = rotatedX.rotate_y(20);
+    mat4x4 linmathRotatedY;
+    mat4x4_rotate_Y(linmathRotatedY, linmathRotatedX, 20);
+
+    std::cout << "Rotated Y: \n" << getStringFromMatrix(rotatedY) << std::endl;
+    std::cout << "linmath rotated Y: \n" << getStringFromBadMatrix(linmathRotatedY) << std::endl;
+
+    assert (rotatedY.compareTo(ColumnMatrix4x4::wrap(linmathRotatedY)));
+    std::cout << "Passed rotate y Matrix Test" << std::endl;
+
+    ColumnMatrix4x4 rotatedZ = rotatedY.rotate_z(30);
+    mat4x4 linmathRotatedZ;
+    mat4x4_rotate_Z(linmathRotatedZ, linmathRotatedY, 30);
+
+    std::cout << "Rotated Z: \n" << getStringFromMatrix(rotatedZ) << std::endl;
+    std::cout << "linmath rotated Z: \n" << getStringFromBadMatrix(linmathRotatedZ) << std::endl;
+
+    assert (rotatedZ.compareTo(ColumnMatrix4x4::wrap(linmathRotatedZ)));
+    std::cout << "Passed rotate Z Matrix Test" << std::endl;
+
+    ColumnMatrix4x4 scaled = rotatedZ.scale(45);
+    mat4x4 linmathScaled;
+    mat4x4_scale(linmathScaled, linmathRotatedZ, 45);
+
+    std::cout << "Scaled: \n" << getStringFromMatrix(scaled) << std::endl;
+    std::cout << "linmath scaled: \n" << getStringFromBadMatrix(linmathScaled) << std::endl;
+
+    assert(scaled.compareTo(ColumnMatrix4x4::wrap(linmathScaled)));
+    std::cout << "Passed scaling Matrix Test" << std::endl;
+
+    ColumnMatrix4x4 anisotropicScaled = scaled.scale_anisotropic(1, 2, 3);
+    mat4x4 linmathAnisotropicScaled;
+    mat4x4_scale_aniso(linmathAnisotropicScaled, linmathScaled, 1, 2, 3);
+
+    std::cout << "Anisotropic Scaled: \n" << getStringFromMatrix(anisotropicScaled) << std::endl;
+    std::cout << "linmath cnisotropic scaled: \n" << getStringFromBadMatrix(linmathAnisotropicScaled) << std::endl;
+
+    assert(anisotropicScaled.compareTo(ColumnMatrix4x4::wrap(linmathAnisotropicScaled)));
+    std::cout << "Passed anisotropic scaling Matrix Test" << std::endl;
+
+    ColumnMatrix4x4 transposed = anisotropicScaled.transpose();
+    mat4x4 linmathTransposed;
+    mat4x4_transpose(linmathTransposed, linmathAnisotropicScaled);
+
+    std::cout << "Transposed: \n" << getStringFromMatrix(transposed) << std::endl;
+    std::cout << "linmath transposed: \n" << getStringFromBadMatrix(linmathTransposed) << std::endl;
+
+    assert(transposed.compareTo(ColumnMatrix4x4::wrap(linmathTransposed)));
+    std::cout << "Passed transpose Matrix Test" << std::endl;
+
+    ColumnMatrix4x4 ortho = transposed.ortho(-5, 5, -10, 10, 1, -10);
+    mat4x4 linmathOrtho;
+    mat4x4_ortho(linmathOrtho, -5, 5, -10, 10, 1, -10);
+
+    std::cout << "orho: \n" << getStringFromMatrix(ortho) << std::endl;
+    std::cout << "linmath ortho: \n" << getStringFromBadMatrix(linmathOrtho) << std::endl;
+
+    assert(ortho.compareTo(ColumnMatrix4x4::wrap(linmathOrtho)));
+    std::cout << "Passed ortho Matrix test" << std::endl;
+
+    std::cout << "Passed all Tests" << std::endl;
 }

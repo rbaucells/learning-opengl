@@ -1,4 +1,5 @@
 #pragma once
+#include "linmath/linmath.h"
 
 struct vector2 {
     float x = {};
@@ -59,63 +60,65 @@ struct vector3 {
     vector3 cross(const vector3 &other) const;
 };
 
-struct rowMatrix4x4 {
-    rowMatrix4x4() = default;
-    rowMatrix4x4(const rowMatrix4x4& other);
+struct RowMatrix4x4 {
+    RowMatrix4x4() = default;
+    RowMatrix4x4(const RowMatrix4x4& other);
 
-    static rowMatrix4x4 identity();
+    static RowMatrix4x4 identity();
 
-    rowMatrix4x4 operator*(const rowMatrix4x4& other) const;
-    rowMatrix4x4 operator*(float value) const;
-    rowMatrix4x4 operator+(const rowMatrix4x4& other) const;
-    rowMatrix4x4 operator-(const rowMatrix4x4& other) const;
+    RowMatrix4x4 operator*(const RowMatrix4x4& other) const;
+    RowMatrix4x4 operator*(float value) const;
+    RowMatrix4x4 operator+(const RowMatrix4x4& other) const;
+    RowMatrix4x4 operator-(const RowMatrix4x4& other) const;
 
-    rowMatrix4x4 multiply(const rowMatrix4x4& other) const;
-    rowMatrix4x4 scale(float value) const;
-    rowMatrix4x4 scale_anisotropic(float x, float y, float z) const;
-    rowMatrix4x4 add(const rowMatrix4x4& other) const;
-    rowMatrix4x4 subtract(const rowMatrix4x4& other) const;
+    RowMatrix4x4 multiply(const RowMatrix4x4& other) const;
+    RowMatrix4x4 scale(float value) const;
+    RowMatrix4x4 scale_anisotropic(float x, float y, float z) const;
+    RowMatrix4x4 add(const RowMatrix4x4& other) const;
+    RowMatrix4x4 subtract(const RowMatrix4x4& other) const;
 
-    rowMatrix4x4 transpose() const;
-    rowMatrix4x4 translate(float x, float y, float z) const;
+    RowMatrix4x4 transpose() const;
+    RowMatrix4x4 translate(float x, float y, float z) const;
 
-    rowMatrix4x4 rotate_x(float angle) const;
-    rowMatrix4x4 rotate_y(float angle) const;
-    rowMatrix4x4 rotate_z(float angle) const;
+    RowMatrix4x4 rotate_x(float angle) const;
+    RowMatrix4x4 rotate_y(float angle) const;
+    RowMatrix4x4 rotate_z(float angle) const;
 
-    static rowMatrix4x4 ortho(float left, float right, float bottom, float top, float near, float far);
+    static RowMatrix4x4 ortho(float left, float right, float bottom, float top, float near, float far);
 
     float data[4][4] = {{0}, {0}, {0}, {0}};
 };
 
-struct columnMatrix4x4 {
-    columnMatrix4x4() = default;
-    columnMatrix4x4(const columnMatrix4x4& other);
+struct ColumnMatrix4x4 {
+    ColumnMatrix4x4() = default;
+    ColumnMatrix4x4(const ColumnMatrix4x4& other);
 
-    static columnMatrix4x4 identity();
+    static ColumnMatrix4x4 identity();
 
-    columnMatrix4x4 operator*(const columnMatrix4x4 &other) const;
-    columnMatrix4x4 operator*(float value) const;
-    columnMatrix4x4 operator+(const columnMatrix4x4 &other) const;
-    columnMatrix4x4 operator-(const columnMatrix4x4 &other) const;
+    ColumnMatrix4x4 operator*(const ColumnMatrix4x4 &other) const;
+    ColumnMatrix4x4 operator*(float value) const;
+    ColumnMatrix4x4 operator+(const ColumnMatrix4x4 &other) const;
+    ColumnMatrix4x4 operator-(const ColumnMatrix4x4 &other) const;
 
-    columnMatrix4x4 multiply(const columnMatrix4x4 &other) const;
-    columnMatrix4x4 scale(float value) const;
-    columnMatrix4x4 scale_anisotropic(float x, float y, float z) const;
-    columnMatrix4x4 add(const columnMatrix4x4 &other) const;
-    columnMatrix4x4 subtract(const columnMatrix4x4 &other) const;
+    ColumnMatrix4x4 multiply(const ColumnMatrix4x4 &other) const;
+    ColumnMatrix4x4 scale(float value) const;
+    ColumnMatrix4x4 scale_anisotropic(float x, float y, float z) const;
+    ColumnMatrix4x4 add(const ColumnMatrix4x4 &other) const;
+    ColumnMatrix4x4 subtract(const ColumnMatrix4x4 &other) const;
 
-    columnMatrix4x4 transpose() const;
-    columnMatrix4x4 translate(float x, float y, float z) const;
+    ColumnMatrix4x4 transpose() const;
+    ColumnMatrix4x4 translate(float x, float y, float z) const;
 
-    columnMatrix4x4 rotate_x(float angle) const;
-    columnMatrix4x4 rotate_y(float angle) const;
-    columnMatrix4x4 rotate_z(float angle) const;
-    columnMatrix4x4 ortho(float left, float right, float bottom, float top, float near, float far) const;
+    ColumnMatrix4x4 rotate_x(float angle) const;
+    ColumnMatrix4x4 rotate_y(float angle) const;
+    ColumnMatrix4x4 rotate_z(float angle) const;
+    ColumnMatrix4x4 ortho(float left, float right, float bottom, float top, float near, float far) const;
 
-    bool compareTo(const columnMatrix4x4& other) const;
+    bool compareTo(const ColumnMatrix4x4& other) const;
 
-    static columnMatrix4x4 wrap(float* other);
+    static ColumnMatrix4x4 wrap(mat4x4 other);
+
+    operator float*();
 
     float data[4][4] = {{0}, {0}, {0}, {0}};
 };

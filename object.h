@@ -1,6 +1,6 @@
 #pragma once
 #include <memory>
-#include "linmath/linmath.h"
+// #include "linmath/linmath.h"
 #include "math/mathematics.h"
 #include <vector>
 #include "components/component.h"
@@ -17,7 +17,7 @@ public:
 
     void Define(unsigned int usage, const std::string &textureFilePath);
 
-    void Draw(unsigned int mode, mat4x4 view, mat4x4 projection) const;
+    void Draw(unsigned int mode, ColumnMatrix4x4 view, ColumnMatrix4x4 projection) const;
 
     void update() const;
 

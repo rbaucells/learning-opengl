@@ -3,7 +3,7 @@
 #include "stb_image.h"
 #include "components/component.h"
 #include "glad/gl.h"
-#include "linmath/linmath.h"
+// #include "linmath/linmath.h"
 
 Object::Object(const std::vector<Vertex> &vertices, const std::vector<unsigned int> &indices, unsigned int shaders, Transform transform) {
     this->shaders = shaders;
@@ -43,21 +43,19 @@ void Object::Define(const unsigned int usage, const std::string &textureFilePath
     buffers = definePrimitive(vertices, indices, usage);
 }
 
-void Object::Draw(const unsigned int mode, mat4x4 view, mat4x4 projection) const {
+void Object::Draw(const unsigned int mode, ColumnMatrix4x4 view, ColumnMatrix4x4 projection) const {
     // create the model matrix from the transform
-    mat4x4 model;
-    mat4x4_identity(model);
-    mat4x4_translate(model, transform.position.x, transform.position.y, 0.0f);
-    mat4x4_rotate_Z(model, model, transform.rotation);
-    mat4x4_scale_aniso(model, model, transform.scale.x, transform.scale.y, 1.0f);
+    ColumnMatrix4x4 model = ColumnMatrix4x4::identity();
+    model = model.translate(transform.position.x, transform.position.y, 0.0f);
+    model = model.rotate_z(transform.rotation);
+    model = model.scale_anisotropic(transform.scale.x, transform.scale.y, 1.0f);
 
     // combine the matrices into a single MVP matrix
-    mat4x4 mvp;
-    mat4x4_mul(mvp, view, model);
-    mat4x4_mul(mvp, projection, mvp);
+    ColumnMatrix4x4 mvp;
+    mvp = projection * (view * model);
 
     GLint mvpLocation = glGetUniformLocation(shaders, "mvp");
-    glUniformMatrix4fv(mvpLocation, 1, GL_FALSE, (const GLfloat *) mvp);
+    glUniformMatrix4fv(mvpLocation, 1, GL_FALSE, (const GLfloat*) mvp);
 
     glUseProgram(shaders);
     drawPrimitive(buffers.indexBuffer, indices.size(), mode, vertexArrayObject, texture);

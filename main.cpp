@@ -11,9 +11,9 @@
 #include "components/Moving.h"
 #include "glad/gl.h"
 #include "GLFW/glfw3.h"
-#include "linmath/linmath.h"
+// #include "linmath/linmath.h"
 
-mat4x4 projection;
+ColumnMatrix4x4 projection;
 
 // callbacks
 void error_callback(int error, const char* description) {
@@ -34,7 +34,7 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
     SCREEN_WIDTH = width;
     SCREEN_HEIGHT = height;
     glViewport(0, 0, width, height);
-    mat4x4_ortho(projection, -width / 2.0f, width / 2.0f, -height / 2.0f, height / 2.0f, 1, -1000);
+    projection = projection.ortho(-width / 2.0f, width / 2.0f, -height / 2.0f, height / 2.0f, 1, -1000);
 }
 // shading
 std::string GetShaderString(const std::string& filePath) {

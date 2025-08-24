@@ -1,7 +1,7 @@
 #include "camera.h"
 
 Camera::Camera(vector2 startPos, float startRot) {
-    mat4x4_identity(viewMatrix);
+    viewMatrix = viewMatrix.identity();
     position = vector3(startPos.x, startPos.y, 1);
     rotation = startRot;
     UpdateViewMatrix();
@@ -28,14 +28,13 @@ void Camera::RotateCamera(float change) {
 }
 
 void Camera::UpdateViewMatrix() {
-    mat4x4 translationMatrix;
-    mat4x4_translate(translationMatrix, -position.x, -position.y, -position.z);
+    ColumnMatrix4x4 translationMatrix;
+    translationMatrix = translationMatrix.translate(-position.x, -position.y, -position.z);
 
-    mat4x4 rotationMatrix;
-    mat4x4_identity(rotationMatrix);
-    mat4x4_rotate_Z(rotationMatrix, rotationMatrix, rotation);
+    ColumnMatrix4x4 rotationMatrix = ColumnMatrix4x4::identity();
+    rotationMatrix = rotationMatrix.rotate_z(rotation);
 
-    mat4x4_mul(viewMatrix, rotationMatrix, translationMatrix);
+    viewMatrix = rotationMatrix * translationMatrix;
 }
 
 
