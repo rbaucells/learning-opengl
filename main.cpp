@@ -4,15 +4,13 @@
 #include <sstream>
 #include <string>
 
-#include "main.h"
-
 #include "camera.h"
 #include "object.h"
 #include "components/Moving.h"
 #include "glad/gl.h"
 #include "GLFW/glfw3.h"
-// #include "linmath/linmath.h"
 
+#include "main.h"
 ColumnMatrix4x4 projection;
 
 // callbacks
@@ -141,7 +139,7 @@ int main() {
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-    GLFWwindow* window = glfwCreateWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "learn-opengl", nullptr, nullptr);
+    window = glfwCreateWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "learn-opengl", nullptr, nullptr);
     if (!window)
     {
         std::printf("window creation failed");
@@ -172,10 +170,10 @@ int main() {
     glUseProgram(shader);
 
     std::vector<Vertex> vertices = {
-        {{128, 128}, {1, 0, 0, 1}, {1, 1}},
-        {{128, -128}, {0, 1, 0, 1}, {1, 0}},
-        {{-128, -128}, {0, 0, 1, 1}, {0, 0}},
-        {{-128, 128}, {1, 1, 0, 1}, {0, 1}}
+        {{128, 128}, {1, 1, 1, 1}, {1, 1}},
+        {{128, -128}, {1, 1, 1, 1}, {1, 0}},
+        {{-128, -128}, {1, 1, 1, 1}, {0, 0}},
+        {{-128, 128}, {1, 1, 1, 1}, {0, 1}}
     };
 
     std::vector<unsigned int> indices = {
@@ -184,7 +182,7 @@ int main() {
     };
 
     Object square(vertices, indices, shader, {{0, 0}, 0, {1, 1}});
-    square.Define(GL_STATIC_DRAW, "/Users/ricardito/CLionProjects/OpenGL/res/textures/texture.jpg");
+    square.Define(GL_STATIC_DRAW, "/Users/ricardito/CLionProjects/OpenGL/res/textures/box.jpg");
     square.AddComponent<Moving>();
     // empty the buffers to make sure its drawing properly
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
