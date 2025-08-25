@@ -1,8 +1,9 @@
 #pragma once
+#include <vector>
+#include "../input.h"
 
-// forward declaration of Object
+// forward declaration
 class Object;
-
 class Component {
 protected:
     Object* object = nullptr;
@@ -17,4 +18,8 @@ public:
     virtual void update(double deltaTime) {}
     virtual void lateUpdate(double deltaTime) {}
     virtual void fixedUpdate(double fixedDeltaTime) {}
+
+    virtual void onInput(const InputContext& context) {};
+
+    std::vector<InputAction> actionsToListenToo;
 };

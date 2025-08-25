@@ -8,6 +8,7 @@ public:
     void start() override;
     void update(double deltaTime) override;
     void fixedUpdate(double fixedDeltaTime) override;
+    void onInput(const InputContext &context) override;
 private:
-    float speed = 1;
+    float speed = 0.1;
 };

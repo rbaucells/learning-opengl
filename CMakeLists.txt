@@ -3,7 +3,8 @@ project(OpenGL)
 
 set(CMAKE_CXX_STANDARD 20)
 
-add_executable(OpenGL components/moving.cpp components/moving.h components/component.h math/columnMatrix4x4.cpp math/mathematics.h math/rowMatrix4x4.cpp math/vector2.cpp math/vector3.cpp Camera.cpp main.cpp main.h object.cpp object.h camera.h dependencies/stb_image.cpp)
+add_executable(OpenGL components/moving.cpp components/moving.h components/component.h math/columnMatrix4x4.cpp math/mathematics.h math/rowMatrix4x4.cpp math/vector2.cpp math/vector3.cpp Camera.cpp main.cpp main.h object.cpp object.h camera.h dependencies/stb_image.cpp
+        input.h)
 
 target_include_directories(OpenGL PRIVATE dependencies/include)
 
