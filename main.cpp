@@ -67,10 +67,10 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset) {
     invokeInput(InputContext(scroll_y, y));
 }
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods) {
-    // if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
-    //     glfwSetWindowShouldClose(window, GLFW_TRUE);
-
-    const bool pressed = action == GLFW_PRESS;
+    if (action == GLFW_REPEAT) {
+        return;
+    }
+    const bool pressed = (action == GLFW_PRESS);
 
     switch (key) {
         case GLFW_KEY_ESCAPE:
@@ -210,7 +210,7 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
             invokeInput(InputContext(s, pressed));
             break;
         case GLFW_KEY_D:
-            invokeInput(InputContext(x, pressed));
+            invokeInput(InputContext(d, pressed));
             break;
         case GLFW_KEY_F:
             invokeInput(InputContext(f, pressed));
@@ -373,7 +373,7 @@ Buffers definePrimitive(std::vector<Vertex> vertices, std::vector<unsigned int> 
     glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
     // define all the data to use. Use STATIC for objects that are defined once and reused, use DYNAMIC for objects that are redefined multiple times and reused
     glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(Vertex), vertices.data(), usage);
-
+    // define the position vertexAttribute
     glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (const void*) offsetof(Vertex, position));
     // enable the position vertexAttribute
     glEnableVertexAttribArray(0);
@@ -548,10 +548,10 @@ int main() {
     glUseProgram(shader);
 
     std::vector<Vertex> vertices = {
-        {{128, 128}, {1, 1, 1, 1}, {1, 1}},
-        {{128, -128}, {1, 1, 1, 1}, {1, 0}},
-        {{-128, -128}, {1, 1, 1, 1}, {0, 0}},
-        {{-128, 128}, {1, 1, 1, 1}, {0, 1}}
+        {{212.5, 108}, {1, 1, 1, 1}, {1, 1}}, // top right
+        {{-212.5, 108}, {1, 1, 1, 1}, {0, 1}}, // top left
+        {{-212.5, -108}, {1, 1, 1, 1}, {0, 0}}, // bottom left
+        {{212.5, -108}, {1, 1, 1, 1}, {1, 0}} // bottom right
     };
 
     std::vector<unsigned int> indices = {
@@ -560,7 +560,7 @@ int main() {
     };
 
     Object square(vertices, indices, shader, {{0, 0}, 0, {1, 1}});
-    square.Define(GL_STATIC_DRAW, "/Users/ricardito/CLionProjects/OpenGL/res/textures/box.jpg");
+    square.Define(GL_STATIC_DRAW, "/Users/ricardito/CLionProjects/OpenGL/res/textures/dvdvd.jpg", true, GL_REPEAT);
     square.AddComponent<Moving>();
     // empty the buffers to make sure its drawing properly
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);

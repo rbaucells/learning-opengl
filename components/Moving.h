@@ -2,6 +2,8 @@
 #include "component.h"
 
 class Moving : public Component {
+private:
+    vector2 mousePos;
 public:
     // im not specifying my own constructor, use the Component constructor
     using Component::Component;

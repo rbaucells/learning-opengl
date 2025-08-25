@@ -1,5 +1,6 @@
 #include "object.h"
 #include <vector>
+
 #include "stb_image.h"
 #include "components/component.h"
 #include "glad/gl.h"
@@ -20,15 +21,17 @@ Object::~Object() {
     std::erase(allObjects, this);
 }
 
-void Object::Define(const unsigned int usage, const std::string &textureFilePath) {
+void Object::Define(const unsigned int usage, const std::string &textureFilePath, bool flipVertically, int param) {
     int width, height, nrChannels;
+
+    stbi_set_flip_vertically_on_load(flipVertically);
     unsigned char *data = stbi_load(textureFilePath.c_str(), &width, &height, &nrChannels, 0);
 
     glGenTextures(1, &texture);
     glBindTexture(GL_TEXTURE_2D, texture);
 
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, param);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, param);
 
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);

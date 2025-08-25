@@ -15,7 +15,7 @@ public:
 
     Object(const std::vector<Vertex> &vertices, const std::vector<unsigned int> &indices, unsigned int shaders, Transform transform);
 
-    void Define(unsigned int usage, const std::string &textureFilePath);
+    void Define(unsigned int usage, const std::string &textureFilePath, bool flipVertically, int param);
 
     void Draw(unsigned int mode, ColumnMatrix4x4 view, ColumnMatrix4x4 projection) const;
 
