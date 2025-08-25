@@ -88,7 +88,6 @@ struct RowMatrix4x4 {
 
     float data[4][4] = {{0}, {0}, {0}, {0}};
 };
-
 struct ColumnMatrix4x4 {
     ColumnMatrix4x4() = default;
     ColumnMatrix4x4(const ColumnMatrix4x4& other);

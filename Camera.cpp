@@ -1,28 +1,30 @@
+#include <cstdio>
+
 #include "camera.h"
 
-Camera::Camera(vector2 startPos, float startRot) {
-    viewMatrix = viewMatrix.identity();
+Camera::Camera(const vector2& startPos, const float startRot) {
+    viewMatrix = ColumnMatrix4x4::identity();
     position = vector3(startPos.x, startPos.y, 1);
     rotation = startRot;
     UpdateViewMatrix();
 }
 
-void Camera::SetCameraPosition(vector2 newPos) {
+void Camera::SetCameraPosition(const vector2& newPos) {
     position = vector3(newPos.x, newPos.y, position.z);
     UpdateViewMatrix();
 }
 
-void Camera::SetCameraRotation(float newRot) {
+void Camera::SetCameraRotation(const float newRot) {
     rotation = newRot;
     UpdateViewMatrix();
 }
 
-void Camera::MoveCamera(vector2 change) {
+void Camera::MoveCamera(const vector2& change) {
     position += vector3(change.x, change.y, 0);
     UpdateViewMatrix();
 }
 
-void Camera::RotateCamera(float change) {
+void Camera::RotateCamera(const float change) {
     rotation += change;
     UpdateViewMatrix();
 }
@@ -34,8 +36,21 @@ void Camera::UpdateViewMatrix() {
     ColumnMatrix4x4 rotationMatrix = ColumnMatrix4x4::identity();
     rotationMatrix = rotationMatrix.rotate_z(rotation);
 
-    viewMatrix = rotationMatrix * translationMatrix;
+    ColumnMatrix4x4 scaleMatrix = ColumnMatrix4x4::identity();
+    scaleMatrix = scaleMatrix.scale_anisotropic(zooooom, zooooom, 1.0f);
+
+    viewMatrix = scaleMatrix * rotationMatrix * translationMatrix;
 }
 
+void Camera::setZoom(const float value) {
+    if (value > 0) {
+        zooooom = value;
+        std::printf("new camera zoom %f", value);
+        UpdateViewMatrix();
+    }
+}
 
+void Camera::zoom(const float change) {
+    setZoom(zooooom + change);
+}
 

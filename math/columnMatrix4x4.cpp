@@ -231,7 +231,6 @@ bool ColumnMatrix4x4::compareTo(const ColumnMatrix4x4 &other) const {
     }
 
     return true;
-    // return memcmp(data, other.data, sizeof(float) * 16) == 0;
 }
 
 ColumnMatrix4x4 ColumnMatrix4x4::wrap(mat4x4 other) {

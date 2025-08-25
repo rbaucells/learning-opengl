@@ -1,7 +1,7 @@
 #pragma once
 #include "component.h"
 
-class Moving : public Component {
+class myComponent : public Component {
 private:
     vector2 mousePos;
 public:

@@ -1,9 +1,9 @@
-#include "object.h"
-#include <vector>
-
+#include "glad/gl.h"
 #include "stb_image.h"
 #include "components/component.h"
-#include "glad/gl.h"
+#include "object.h"
+
+#include <vector>
 
 Object::Object(const std::vector<Vertex> &vertices, const std::vector<unsigned int> &indices, unsigned int shaders, Transform transform) {
     this->shaders = shaders;

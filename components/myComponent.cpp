@@ -1,14 +1,14 @@
-#include "Moving.h"
-
-#include "../main.h"
+#include "myComponent.h"
 #include "../object.h"
+#include "../main.h"
+#include "../camera.h"
 
 bool wKeyHeld;
 bool sKeyHeld;
 bool aKeyHeld;
 bool dKeyHeld;
 
-void Moving::start() {
+void myComponent::start() {
     std::printf("Hello World! \n");
     actionsToListenToo.push_back(s);
     actionsToListenToo.push_back(w);
@@ -16,22 +16,26 @@ void Moving::start() {
     actionsToListenToo.push_back(d);
 }
 
-void Moving::update(const double deltaTime) {
-    if (wKeyHeld)
-        object -> transform.position.y += 0.5f * deltaTime;
-    if (sKeyHeld)
-        object -> transform.position.y -= 0.5f * deltaTime;
+void myComponent::update(const double deltaTime) {
+    if (wKeyHeld) {
+        // object -> transform.position.y += 0.5f * deltaTime;
+        camera -> zoom(0.1f);
+    }
+    if (sKeyHeld) {
+        // object -> transform.position.y -= 0.5f * deltaTime;
+        camera -> zoom(-0.1f);
+    }
     if (aKeyHeld)
         object -> transform.position.x -= 0.5f * deltaTime;
     if (dKeyHeld)
         object -> transform.position.x += 0.5f * deltaTime;
 }
 
-void Moving::fixedUpdate(const double fixedDeltaTime) {
+void myComponent::fixedUpdate(const double fixedDeltaTime) {
 
 }
 
-void Moving::onInput(const InputContext &context) {
+void myComponent::onInput(const InputContext &context) {
     // button is pressed
     if (context.state) {
         switch (context.action) {

@@ -1,6 +1,10 @@
 #pragma once
 #include "math/mathematics.h"
 
+// forward declaration of GLFW things
+struct GLFWwindow;
+struct GLFWgamepadstate;
+
 enum InputAction {
     esc, f1, f2, f3, f4, f5, f6, f7, f8, f9, f10, f11, f12,
     backtick, one, two, three, four, five, six, seven, eight, nine, zero, hyphen, equals, backspace,
@@ -16,6 +20,7 @@ enum InputAction {
     left_stick, right_stick,
     dpad_up, dpad_down, dpad_right, dpad_left,
     gamepad_view, gamepad_menu, gamepad_guide,
+
     mouse_moved, left_stick_moved, right_stick_moved, left_trigger, right_trigger
 };
 
@@ -24,12 +29,10 @@ struct InputContext {
         this -> action = action;
         this -> extraFloat = extraFloat;
     }
-
     InputContext(const InputAction action, const vector2 extraVector2) {
         this -> action = action;
         this -> extraVector2 = extraVector2;
     }
-
     InputContext(const InputAction action, const bool state) {
         this -> action = action;
         this -> state = state;
@@ -42,3 +45,12 @@ struct InputContext {
 
     bool state = false;
 };
+
+void invokeInput(const InputContext& context);
+
+void cursor_move_callback(GLFWwindow* window, double xpos, double ypos);
+void mouse_button_callback(GLFWwindow* window, int button, int action, int mods);
+void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
+void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods);
+
+void processGamepadEvents(const GLFWgamepadstate& current, const GLFWgamepadstate& last);

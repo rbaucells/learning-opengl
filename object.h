@@ -1,6 +1,5 @@
 #pragma once
 #include <memory>
-// #include "linmath/linmath.h"
 #include "math/mathematics.h"
 #include <vector>
 #include "components/component.h"
@@ -111,4 +110,5 @@ private:
 inline std::vector<Object *> allObjects;
 
 Buffers definePrimitive(std::vector<Vertex> vertices, std::vector<unsigned int> indices, unsigned int usage);
+
 void drawPrimitive(unsigned int indexBuffer, int indicesCount, unsigned int mode, unsigned int vao, unsigned int texture);
