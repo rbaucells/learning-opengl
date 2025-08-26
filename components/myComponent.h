@@ -1,5 +1,6 @@
 #pragma once
 #include "component.h"
+#include "../event.h"
 
 class myComponent : public Component {
 private:
@@ -11,6 +12,8 @@ public:
     void update(double deltaTime) override;
     void fixedUpdate(double fixedDeltaTime) override;
     void onInput(const InputContext &context) override;
+
+    Event<float> OnMyEvent;
 private:
     float speed = 0.1;
 };

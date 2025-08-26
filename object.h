@@ -41,7 +41,7 @@ public:
         // loop until
         for (const auto &component: components) {
             // one of them is the correct type
-            if (T *specificComp = dynamic_cast<T *>(component)) {
+            if (T *specificComp = dynamic_cast<T*>(component.get())) {
                 return specificComp;
             }
         }
@@ -54,7 +54,7 @@ public:
         // same as GetComponent only it adds it to a vector then returns it
         std::vector<T *> foundComponents;
         for (const auto &component: components) {
-            if (T *specificComp = dynamic_cast<T *>(component)) {
+            if (T *specificComp = dynamic_cast<T *>(component.get())) {
                 foundComponents.push_back(specificComp);
             }
         }

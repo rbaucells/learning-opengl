@@ -14,6 +14,8 @@
 #include <string>
 #include <thread>
 
+#include "components/myComponent2.h"
+
 // needed by framebuffer_size_callback() and by object.draw()
 ColumnMatrix4x4 projection;
 
@@ -189,6 +191,7 @@ int main() {
     Object square(vertices, indices, shader, {{0, 0}, 0, {1, 1}});
     square.Define(GL_STATIC_DRAW, "/Users/ricardito/CLionProjects/OpenGL/res/textures/dvdvd.jpg", true, GL_REPEAT);
     square.AddComponent<myComponent>();
+    square.AddComponent<myComponent2>();
     // empty the buffers to make sure its drawing properly
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
     glBindBuffer(GL_ARRAY_BUFFER, 0);

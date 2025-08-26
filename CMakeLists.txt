@@ -5,7 +5,10 @@ set(CMAKE_CXX_STANDARD 20)
 
 add_executable(OpenGL components/myComponent.cpp components/myComponent.h components/component.h math/columnMatrix4x4.cpp math/mathematics.h math/rowMatrix4x4.cpp math/vector2.cpp math/vector3.cpp Camera.cpp main.cpp main.h object.cpp object.h camera.h dependencies/stb_image.cpp
         input.h
-        input.cpp)
+        input.cpp
+        Event.h
+        components/myComponent2.cpp
+        components/myComponent2.h)
 
 target_include_directories(OpenGL PRIVATE dependencies/include)
 

@@ -1,4 +1,6 @@
 #include "input.h"
+
+#include "main.h"
 #include "object.h"
 
 #include "GLFW/glfw3.h"
@@ -375,4 +377,10 @@ void processGamepadEvents(const GLFWgamepadstate& current, const GLFWgamepadstat
     if (std::abs(curRightTrigger - lastRightTrigger) > CHANGE_THRESHOLD) {
         invokeInput(InputContext(right_trigger, curRightTrigger));
     }
+}
+
+vector2 mousePosToScreenPos(const vector2& mousePos) {
+    float x = mousePos.x - SCREEN_WIDTH * 0.5f;
+    float y = SCREEN_HEIGHT * 0.5f - mousePos.y;
+    return vector2(x, y);
 }

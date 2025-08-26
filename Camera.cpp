@@ -48,6 +48,11 @@ void Camera::setZoom(const float value) {
         std::printf("new camera zoom %f", value);
         UpdateViewMatrix();
     }
+    else {
+        zooooom = 0;
+        std::printf("new camera zoom %d", 0);
+        UpdateViewMatrix();
+    }
 }
 
 void Camera::zoom(const float change) {
