@@ -3,13 +3,6 @@
 #include "renderer.h"
 #include "../object.h"
 
-bool wKeyHeld;
-bool aKeyHeld;
-bool sKeyHeld;
-bool dKeyHeld;
-
-Renderer* renderer;
-
 myComponent::myComponent(Object* owner, float speed) : Component(owner) {
     this->speed = speed;
 }
@@ -27,44 +20,31 @@ void myComponent::start() {
 
 void myComponent::update(const double deltaTime) {
     if (wKeyHeld) {
-        if (renderer->alpha < 1)
-            renderer -> alpha += 0.05f;
+        renderer -> alpha += 0.05f;
+    }
+    if (sKeyHeld) {
+        renderer -> alpha -= 0.05f;
     }
 
-    if (sKeyHeld) {
-        if (renderer->alpha > 0)
-            renderer -> alpha -= 0.05f;
-    }
-    // if (wKeyHeld) {
-    //     object->transform.position.y += speed * deltaTime;
-    // }
-    //
-    // if (aKeyHeld) {
-    //     object->transform.position.x -= speed * deltaTime;
-    // }
-    //
-    // if (sKeyHeld) {
-    //     object->transform.position.y -= speed * deltaTime;
-    // }
-    //
-    // if (dKeyHeld) {
-    //     object->transform.position.x += speed * deltaTime;
-    // }
+    renderer->alpha = clamp<float>(renderer->alpha, 0, 1);
 }
 
 void myComponent::fixedUpdate(const double fixedDeltaTime) {
+
 }
 
 void myComponent::onInput(const InputContext &context) {
     if (context.state) {
         switch (context.action) {
             case w:
+                std::printf("Set w key to held \n");
                 wKeyHeld = true;
                 break;
             case a:
                 aKeyHeld = true;
                 break;
             case s:
+                std::printf("Set s key to held \n");
                 sKeyHeld = true;
                 break;
             case d:
@@ -76,12 +56,14 @@ void myComponent::onInput(const InputContext &context) {
     } else {
         switch (context.action) {
             case w:
+                std::printf("Set w key to not held \n");
                 wKeyHeld = false;
                 break;
             case a:
                 aKeyHeld = false;
                 break;
             case s:
+                std::printf("Set w key to not held \n");
                 sKeyHeld = false;
                 break;
             case d:

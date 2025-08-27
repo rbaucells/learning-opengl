@@ -5,7 +5,6 @@
 #include "camera.h"
 #include "object.h"
 #include "components/myComponent.h"
-#include "components/myComponent2.h"
 #include "main.h"
 
 #include <complex>
@@ -36,7 +35,7 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
     SCREEN_WIDTH = width;
     SCREEN_HEIGHT = height;
     glViewport(0, 0, width, height);
-    projection = projection.ortho(-static_cast<float>(width) / 2.0f, static_cast<float>(width) / 2.0f, -static_cast<float>(height) / 2.0f, static_cast<float>(height) / 2.0f, 1, -1000);
+    projection = projection.ortho(-static_cast<float>(width) / 2.0f, static_cast<float>(width) / 2.0f, -static_cast<float>(height) / 2.0f, static_cast<float>(height) / 2.0f, 0, 1);
 }
 
 // shading
@@ -189,9 +188,17 @@ int main() {
         2, 3, 0
     };
 
+    // Object otherSquare({{0, 0}, 0, {1, 1}});
+    // otherSquare.AddComponent<Renderer>(vertices, indices, GL_STATIC_DRAW, "/Users/ricardito/CLionProjects/OpenGL/res/textures/dvdvd.jpg", true, GL_CLAMP, shader);
+    // otherSquare.AddComponent<myComponent>(0.5);
+
     Object square({{0, 0}, 0, {1, 1}});
-    square.AddComponent<Renderer>(vertices, indices, GL_STATIC_DRAW, "/Users/ricardito/CLionProjects/OpenGL/res/textures/super-mario-transparent-background-20.png", true, GL_CLAMP, shader);
+    square.AddComponent<Renderer>(vertices, indices, GL_STATIC_DRAW, "/Users/ricardito/CLionProjects/OpenGL/res/textures/super-mario-transparent-background-20.png", true, GL_CLAMP, shader, 1);
     square.AddComponent<myComponent>(0.5);
+
+    Object otherSquare({{0, 0}, 0, {1, 1}});
+    otherSquare.AddComponent<Renderer>(vertices, indices, GL_STATIC_DRAW, "/Users/ricardito/CLionProjects/OpenGL/res/textures/dvdvd.jpg", true, GL_CLAMP, shader, 2);
+    otherSquare.AddComponent<myComponent>(0.5);
 
     // empty the buffers to make sure its drawing properly
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
@@ -255,6 +262,11 @@ int main() {
             object->lateUpdate(deltaTime);
         }
 
+        // renders objects from back to front. the closer to 0, the closer to the camera
+        std::ranges::sort(allObjects, [](const Object* a, const Object* b) {
+            return a->GetComponent<Renderer>()->layer > b->GetComponent<Renderer>()->layer;
+        });
+
         for (Object* object: allObjects) {
             if (auto renderer = object->GetComponent<Renderer>()) {
                 renderer -> Draw(camera->viewMatrix, projection, GL_TRIANGLES);
@@ -267,6 +279,7 @@ int main() {
         // framerate capping
         auto endOfLoopTime = std::chrono::high_resolution_clock::now();
         auto updateTime = std::chrono::duration<double, std::milli>(endOfLoopTime - startOfLoopTime).count();
+
         auto targetFrameTimeMs = 1000.0/fps;
 
         const auto timeToSleepMs = targetFrameTimeMs - updateTime;

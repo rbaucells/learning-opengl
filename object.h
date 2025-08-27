@@ -14,11 +14,7 @@ public:
     std::vector<std::unique_ptr<Component> > components;
     Transform transform;
 
-    // Object(const std::vector<Vertex> &vertices, const std::vector<unsigned int> &indices, unsigned int shaders, Transform transform);
     Object(const Transform &transform);
-    // void Define(unsigned int usage, const std::string &textureFilePath, bool flipTexture, int textureParam);
-    //
-    // void Draw(unsigned int mode, ColumnMatrix4x4 view, ColumnMatrix4x4 projection) const;
 
     void update(double deltaTime) const;
 
@@ -57,6 +53,31 @@ public:
         std::vector<T *> foundComponents;
         for (const auto &component: components) {
             if (T *specificComp = dynamic_cast<T *>(component.get())) {
+                foundComponents.push_back(specificComp);
+            }
+        }
+        return foundComponents;
+    }
+
+    template<IsComponent T>
+    const T *GetComponent() const {
+        // loop until
+        for (const auto &component: components) {
+            // one of them is the correct type
+            if (const T *specificComp = dynamic_cast<const T*>(component.get())) {
+                return specificComp;
+            }
+        }
+        // nothing was found
+        return nullptr;
+    }
+
+    template<IsComponent T>
+    std::vector<const T*> GetComponents() const {
+        // same as GetComponent only it adds it to a vector then returns it
+        std::vector<const T *> foundComponents;
+        for (const auto &component: components) {
+            if (const T *specificComp = dynamic_cast<const T *>(component.get())) {
                 foundComponents.push_back(specificComp);
             }
         }

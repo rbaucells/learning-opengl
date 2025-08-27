@@ -6,10 +6,11 @@
 #include "stb_image.h"
 #include "glad/gl.h"
 
-Renderer::Renderer(Object *owner, const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices, const unsigned int usage, const std::string& texturePath, const bool flipTexture, const int textureParam, unsigned int shaderProgram) : Component(owner) {
+Renderer::Renderer(Object *owner, const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices, const unsigned int usage, const std::string& texturePath, const bool flipTexture, const int textureParam, unsigned int shaderProgram, int layer) : Component(owner) {
     this->vertices = vertices;
     this->indices = indices;
     this->shaderProgram = shaderProgram;
+    this->layer = layer;
 
     int width, height;
     stbi_set_flip_vertically_on_load(flipTexture);

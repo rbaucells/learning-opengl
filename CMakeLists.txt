@@ -7,8 +7,6 @@ add_executable(OpenGL components/myComponent.cpp components/myComponent.h compon
         input.h
         input.cpp
         Event.h
-        components/myComponent2.cpp
-        components/myComponent2.h
         components/Renderer.cpp
         components/Renderer.h)
 

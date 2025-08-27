@@ -2,9 +2,18 @@
 #include "component.h"
 #include "../event.h"
 
+class Renderer;
+
 class myComponent : public Component {
 private:
     float speed;
+
+    bool wKeyHeld;
+    bool aKeyHeld;
+    bool sKeyHeld;
+    bool dKeyHeld;
+
+    Renderer* renderer;
 public:
     // im not specifying my own constructor, use the Component constructor
     // using Component::Component;

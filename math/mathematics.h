@@ -137,3 +137,17 @@ struct Buffers {
     unsigned int vertexBuffer;
     unsigned int indexBuffer;
 };
+
+template<typename T>
+concept number = std::is_arithmetic_v<T>;
+
+template<number T>
+T clamp(T value, T min, T max) {
+    if (value > max)
+        return max;
+
+    if (value < min)
+        return min;
+
+    return value;
+}

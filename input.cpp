@@ -11,6 +11,7 @@ void invokeInput(const InputContext &context) {
             for (const InputAction compAction : component->actionsToListenToo) {
                 if (compAction == context.action) {
                     component->onInput(context);
+                    break;
                 }
             }
         }

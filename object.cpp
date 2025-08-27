@@ -1,5 +1,3 @@
-#include "glad/gl.h"
-#include "stb_image.h"
 #include "components/component.h"
 #include "object.h"
 

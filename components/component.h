@@ -1,6 +1,7 @@
 #pragma once
 #include <vector>
 #include "../input.h"
+#include "../event.h"
 
 // forward declaration
 class Object;
@@ -22,4 +23,6 @@ public:
     virtual void onInput(const InputContext& context) {};
 
     std::vector<InputAction> actionsToListenToo;
+
+    Event<bool> myEvent;
 };
