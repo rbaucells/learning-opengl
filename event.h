@@ -13,10 +13,10 @@ public:
 
     template<class T>
     void likeAndSubscribe(T* instance, void (T::*method)(Args...)) {
+        // push back the function signature from a class instance
         handlers.push_back([=](Args... args) {
             (instance->*method)(args...);
         });
-        // push back the function signature from a class instance
     }
 
     void invoke(Args... args) {

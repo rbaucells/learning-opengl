@@ -5,6 +5,7 @@
 #include "camera.h"
 #include "object.h"
 #include "components/myComponent.h"
+#include "components/myComponent2.h"
 #include "main.h"
 
 #include <complex>
@@ -14,7 +15,7 @@
 #include <string>
 #include <thread>
 
-#include "components/myComponent2.h"
+#include "components/renderer.h"
 
 // needed by framebuffer_size_callback() and by object.draw()
 ColumnMatrix4x4 projection;
@@ -104,13 +105,13 @@ Buffers definePrimitive(std::vector<Vertex> vertices, std::vector<unsigned int> 
     // enable the position vertexAttribute
     glEnableVertexAttribArray(0);
     // define the color attribute
-    glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), (const void*) offsetof(Vertex, color));
-    // enable the color vertexAttribute
-    glEnableVertexAttribArray(1);
+    // glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (const void*) offsetof(Vertex, color));
+    // // enable the color vertexAttribute
+    // glEnableVertexAttribArray(1);
     // define the texture attribute
-    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (const void*) offsetof(Vertex, uv));
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (const void*) offsetof(Vertex, uv));
     // enable the texture attribute
-    glEnableVertexAttribArray(2);
+    glEnableVertexAttribArray(1);
 
     unsigned int indexBuffer;
     glGenBuffers(1, &indexBuffer);
@@ -177,10 +178,10 @@ int main() {
     glUseProgram(shader);
 
     std::vector<Vertex> vertices = {
-        {{212.5, 108}, {1, 1, 1, 1}, {1, 1}}, // top right
-        {{-212.5, 108}, {1, 1, 1, 1}, {0, 1}}, // top left
-        {{-212.5, -108}, {1, 1, 1, 1}, {0, 0}}, // bottom left
-        {{212.5, -108}, {1, 1, 1, 1}, {1, 0}} // bottom right
+        {{212.5, 108}, {1, 1}}, // top right
+        {{-212.5, 108}, {0, 1}}, // top left
+        {{-212.5, -108}, {0, 0}}, // bottom left
+        {{212.5, -108}, {1, 0}} // bottom right
     };
 
     std::vector<unsigned int> indices = {
@@ -188,10 +189,10 @@ int main() {
         2, 3, 0
     };
 
-    Object square(vertices, indices, shader, {{0, 0}, 0, {1, 1}});
-    square.Define(GL_STATIC_DRAW, "/Users/ricardito/CLionProjects/OpenGL/res/textures/dvdvd.jpg", true, GL_REPEAT);
-    square.AddComponent<myComponent>();
-    square.AddComponent<myComponent2>();
+    Object square({{0, 0}, 0, {1, 1}});
+    square.AddComponent<Renderer>(vertices, indices, GL_STATIC_DRAW, "/Users/ricardito/CLionProjects/OpenGL/res/textures/super-mario-transparent-background-20.png", true, GL_CLAMP, shader);
+    square.AddComponent<myComponent>(0.5);
+
     // empty the buffers to make sure its drawing properly
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -199,7 +200,7 @@ int main() {
     glBindVertexArray(0);
 
     auto mainCamera = Camera({0, 0}, 0);
-    camera = &mainCamera;
+    camera = &mainCamera; // doesnt matter because scope lives for entirity of app
     // update the window size initialiy
     framebuffer_size_callback(mainWindow, SCREEN_WIDTH, SCREEN_HEIGHT);
 
@@ -216,6 +217,15 @@ int main() {
         std::chrono::duration<double, std::milli> timeSinceLastUpdateInMilli = startOfLoopTime - lastLoopTime;
         double deltaTime = timeSinceLastUpdateInMilli.count();
         lastLoopTime = std::chrono::high_resolution_clock::now();
+
+        // if there are some components left to be "started", start em and remove them from the queueueue
+        if (!callStartBeforeNextUpdate.empty()) {
+            for (Component* component : callStartBeforeNextUpdate) {
+                component->start();
+            }
+
+            callStartBeforeNextUpdate.clear();
+        }
 
         GLFWgamepadstate currentGamepadState;
         glfwGetGamepadState(GLFW_JOYSTICK_1, &currentGamepadState);
@@ -246,7 +256,9 @@ int main() {
         }
 
         for (Object* object: allObjects) {
-            object->Draw(GL_TRIANGLES, mainCamera.viewMatrix, projection);
+            if (auto renderer = object->GetComponent<Renderer>()) {
+                renderer -> Draw(camera->viewMatrix, projection, GL_TRIANGLES);
+            }
         }
 
         glfwSwapBuffers(mainWindow);
@@ -257,7 +269,7 @@ int main() {
         auto updateTime = std::chrono::duration<double, std::milli>(endOfLoopTime - startOfLoopTime).count();
         auto targetFrameTimeMs = 1000.0/fps;
 
-        auto timeToSleepMs = targetFrameTimeMs - updateTime;
+        const auto timeToSleepMs = targetFrameTimeMs - updateTime;
 
         if (timeToSleepMs > 0)
             std::this_thread::sleep_for(std::chrono::duration<double, std::milli>(timeToSleepMs));

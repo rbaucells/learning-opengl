@@ -2,6 +2,8 @@
 #include <memory>
 #include "math/mathematics.h"
 #include <vector>
+
+#include "main.h"
 #include "components/component.h"
 
 template<typename T>
@@ -12,11 +14,11 @@ public:
     std::vector<std::unique_ptr<Component> > components;
     Transform transform;
 
-    Object(const std::vector<Vertex> &vertices, const std::vector<unsigned int> &indices, unsigned int shaders, Transform transform);
-
-    void Define(unsigned int usage, const std::string &textureFilePath, bool flipVertically, int param);
-
-    void Draw(unsigned int mode, ColumnMatrix4x4 view, ColumnMatrix4x4 projection) const;
+    // Object(const std::vector<Vertex> &vertices, const std::vector<unsigned int> &indices, unsigned int shaders, Transform transform);
+    Object(const Transform &transform);
+    // void Define(unsigned int usage, const std::string &textureFilePath, bool flipTexture, int textureParam);
+    //
+    // void Draw(unsigned int mode, ColumnMatrix4x4 view, ColumnMatrix4x4 projection) const;
 
     void update(double deltaTime) const;
 
@@ -28,9 +30,9 @@ public:
     T *AddComponent(Args &&... args) {
         auto newComponent = std::make_unique<T>(this, std::forward<Args>(args)...);
 
-        newComponent->start();
-
         T *componentPtr = newComponent.get();
+
+        callStartBeforeNextUpdate.push_back(componentPtr);
         components.push_back(std::move(newComponent));
 
         return componentPtr;

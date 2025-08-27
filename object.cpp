@@ -5,62 +5,14 @@
 
 #include <vector>
 
-Object::Object(const std::vector<Vertex> &vertices, const std::vector<unsigned int> &indices, unsigned int shaders, Transform transform) {
-    this->shaders = shaders;
-    this->vertices = vertices;
-    this->indices = indices;
-    this->transform = transform;
-
-    glGenVertexArrays(1, &vertexArrayObject);
-    glUseProgram(shaders); // activate shaders and get uniform locations
+Object::Object(const Transform &transform) {
+    this -> transform = transform;
 
     allObjects.push_back(this);
 }
 
 Object::~Object() {
     std::erase(allObjects, this);
-}
-
-void Object::Define(const unsigned int usage, const std::string &textureFilePath, bool flipVertically, int param) {
-    int width, height, nrChannels;
-
-    stbi_set_flip_vertically_on_load(flipVertically);
-    unsigned char *data = stbi_load(textureFilePath.c_str(), &width, &height, &nrChannels, 0);
-
-    glGenTextures(1, &texture);
-    glBindTexture(GL_TEXTURE_2D, texture);
-
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, param);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, param);
-
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
-    glGenerateMipmap(GL_TEXTURE_2D);
-
-    stbi_image_free(data);
-
-    glBindVertexArray(vertexArrayObject);
-    buffers = definePrimitive(vertices, indices, usage);
-}
-
-void Object::Draw(const unsigned int mode, ColumnMatrix4x4 view, ColumnMatrix4x4 projection) const {
-    // create the model matrix from the transform
-    ColumnMatrix4x4 model = ColumnMatrix4x4::identity();
-    model = model.translate(transform.position.x, transform.position.y, 0.0f);
-    model = model.rotate_z(transform.rotation);
-    model = model.scale_anisotropic(transform.scale.x, transform.scale.y, 1.0f);
-
-    // combine the matrices into a single MVP matrix
-    ColumnMatrix4x4 mvp;
-    mvp = projection * (view * model);
-
-    GLint mvpLocation = glGetUniformLocation(shaders, "mvp");
-    glUniformMatrix4fv(mvpLocation, 1, GL_FALSE, (const GLfloat*) mvp);
-
-    glUseProgram(shaders);
-    drawPrimitive(buffers.indexBuffer, indices.size(), mode, vertexArrayObject, texture);
 }
 
 void Object::update(const double deltaTime) const {

@@ -128,13 +128,8 @@ struct Transform {
     vector2 scale;
 };
 
-struct Color {
-    float r, g, b, a;
-};
-
 struct Vertex {
     vector2 position;
-    Color color;
     vector2 uv;
 };
 

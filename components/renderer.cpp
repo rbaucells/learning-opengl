@@ -1,0 +1,86 @@
+#include "renderer.h"
+
+#include <iostream>
+
+#include "../object.h"
+#include "stb_image.h"
+#include "glad/gl.h"
+
+Renderer::Renderer(Object *owner, const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices, const unsigned int usage, const std::string& texturePath, const bool flipTexture, const int textureParam, unsigned int shaderProgram) : Component(owner) {
+    this->vertices = vertices;
+    this->indices = indices;
+    this->shaderProgram = shaderProgram;
+
+    int width, height;
+    stbi_set_flip_vertically_on_load(flipTexture);
+    unsigned char *data = stbi_load(texturePath.c_str(), &width, &height, &numberOfChannels, 0);
+
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+    glGenTextures(1, &texture);
+    glBindTexture(GL_TEXTURE_2D, texture);
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, textureParam);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, textureParam);
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    int format = 0;
+
+    // Use a switch statement to handle all possible channel counts
+    switch (numberOfChannels) {
+        case 1:
+            format = GL_R;
+            break;
+        case 2:
+            format = GL_RG;
+            break;
+        case 3:
+            format = GL_RGB;
+            break;
+        case 4:
+            format = GL_RGBA;
+            break;
+        default:
+            std::cout << "Unsupported number of texture channels: " << numberOfChannels << std::endl;
+            stbi_image_free(data);
+            return;
+    }
+
+    glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
+    glGenerateMipmap(GL_TEXTURE_2D);
+
+    stbi_image_free(data);
+
+    glGenVertexArrays(1, &vao);
+    glBindVertexArray(vao);
+
+    buffers = definePrimitive(vertices, indices, usage);
+}
+
+void Renderer::Draw(const ColumnMatrix4x4& view, const ColumnMatrix4x4 &projection, const int mode) const {
+    // create the model matrix from the transform
+    ColumnMatrix4x4 model = ColumnMatrix4x4::identity();
+    model = model.translate(object->transform.position.x, object->transform.position.y, 0.0f);
+    model = model.rotate_z(object->transform.rotation);
+    model = model.scale_anisotropic(object->transform.scale.x, object->transform.scale.y, 1.0f);
+
+    // combine the matrices into a single MVP matrix
+    ColumnMatrix4x4 mvp = projection * (view * model);
+
+    glUseProgram(shaderProgram);
+
+    GLint mvpLocation = glGetUniformLocation(shaderProgram, "mvp");
+    glUniformMatrix4fv(mvpLocation, 1, GL_FALSE, (const GLfloat*) mvp);
+
+    GLint numberOfChannelsLocation = glGetUniformLocation(shaderProgram, "channels");
+    glUniform1i(numberOfChannelsLocation, numberOfChannels);
+
+    GLint alphaLocation = glGetUniformLocation(shaderProgram, "alpha");
+    glUniform1f(alphaLocation, alpha);
+
+    drawPrimitive(buffers.indexBuffer, indices.size(), mode, vao, texture);
+}
+
