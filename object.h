@@ -12,16 +12,21 @@ concept IsComponent = std::is_base_of_v<Component, T>;
 
 class Object {
 public:
+    const std::string name;
+    const int tag;
+    bool activated = true;
     std::vector<std::unique_ptr<Component> > components;
     Transform transform;
 
-    Object(const Transform &transform);
+    Object(const std::string &name, int objectTag, const Transform &transform);
 
     void update(double deltaTime) const;
 
     void fixedUpdate(double fixedDeltaTime) const;
 
     void lateUpdate(double deltaTime) const;
+
+    void destroy();
 
     template<IsComponent T, typename... Args>
     T *AddComponent(Args &&... args) {
@@ -120,6 +125,10 @@ public:
         }
     }
 
+    static Object *findObjectByName(const std::string &name);
+
+    static Object *findObjectByTag(int tag);
+
 private:
     Buffers buffers = {};
     std::vector<Vertex> vertices = {};
@@ -134,3 +143,5 @@ private:
 Buffers definePrimitive(std::vector<Vertex> vertices, std::vector<unsigned int> indices, unsigned int usage);
 
 void drawPrimitive(unsigned int indexBuffer, int indicesCount, unsigned int mode, unsigned int vao, unsigned int texture);
+
+inline std::vector<Object *> allObjects;

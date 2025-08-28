@@ -24,6 +24,23 @@ public:
         });
     }
 
+    template<class T>
+    void unSubscribe(T *instance, void (T::*method)(Args...) const) {
+        // remove the function siganture from the handlers
+        std::erase(handlers, [instance, method](Args... args) {
+            (instance->*method)(args...);
+        });
+    }
+
+    template<class T>
+    void unSubscribe(T *instance, void (T::*method)(Args...)) {
+        // remove the function siganture from the handlers
+        std::erase(handlers, [instance, method](Args... args) {
+            (instance->*method)(args...);
+        });
+    }
+
+
     void invoke(Args... args) {
         if (handlers.empty())
             return;

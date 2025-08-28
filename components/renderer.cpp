@@ -79,9 +79,7 @@ Renderer::~Renderer() {
         // get reference to the vector of renderers for that layer
         std::vector<Renderer*>& renderers = it->second;
 
-        renderers.erase(
-            std::remove(renderers.begin(), renderers.end(), this),
-            renderers.end());
+        std::erase(renderers, this);
 
 
         // if there are no renderers, delete the vector from the map

@@ -7,7 +7,6 @@ myComponent::myComponent(Object* owner, float speed) : Component(owner) {
     this->speed = speed;
 }
 
-
 void myComponent::start() {
     std::printf("Hello World! \n");
     w_event.subscribe(this, &myComponent::onUpInput);

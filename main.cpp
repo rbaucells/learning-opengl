@@ -154,7 +154,6 @@ int main() {
         std::printf("window creation failed");
         exit(0);
     }
-
     // lmk when something changes
     glfwSetWindowCloseCallback(mainWindow, close_callback);
     glfwSetKeyCallback(mainWindow, key_callback);
@@ -192,10 +191,6 @@ int main() {
         0, 1, 2,
         2, 3, 0
     };
-
-    // Object otherSquare({{0, 0}, 0, {1, 1}});
-    // otherSquare.AddComponent<Renderer>(vertices, indices, GL_STATIC_DRAW, "/Users/ricardito/CLionProjects/OpenGL/res/textures/dvdvd.jpg", true, GL_CLAMP, shader);
-    // otherSquare.AddComponent<myComponent>(0.5);
 
     Object square({{0, 0}, 0, {1, 1}});
     square.AddComponent<Renderer>(vertices, indices, GL_STATIC_DRAW, "/Users/ricardito/CLionProjects/OpenGL/res/textures/super-mario-transparent-background-20.png", true, GL_CLAMP, shader, 2);
