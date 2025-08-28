@@ -2,6 +2,8 @@
 #include "camera.h"
 #include <vector>
 
+#include "event.h"
+
 class Component;
 
 // variables
@@ -17,3 +19,7 @@ constexpr float fixedUpdatePerSecond = 60;
 constexpr int fps = 60;
 
 constexpr float fixedUpdateIntervalInMilli = 1000.0f / fixedUpdatePerSecond;
+
+inline Event<double> updateEvent;
+inline Event<double> lateUpdateEvent;
+inline Event<double> fixedUpdateEvent;

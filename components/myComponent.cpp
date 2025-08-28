@@ -10,10 +10,11 @@ myComponent::myComponent(Object* owner, float speed) : Component(owner) {
 
 void myComponent::start() {
     std::printf("Hello World! \n");
-    actionsToListenToo.push_back(w);
-    actionsToListenToo.push_back(a);
-    actionsToListenToo.push_back(s);
-    actionsToListenToo.push_back(d);
+    w_event.subscribe(this, &myComponent::onUpInput);
+    up_event.subscribe(this, &myComponent::onUpInput);
+
+    s_event.subscribe(this, &myComponent::onDownInput);
+    down_event.subscribe(this, &myComponent::onDownInput);
 
     renderer = object->GetComponent<Renderer>();
 }
@@ -33,44 +34,11 @@ void myComponent::fixedUpdate(const double fixedDeltaTime) {
 
 }
 
-void myComponent::onInput(const InputContext &context) {
-    if (context.state) {
-        switch (context.action) {
-            case w:
-                std::printf("Set w key to held \n");
-                wKeyHeld = true;
-                break;
-            case a:
-                aKeyHeld = true;
-                break;
-            case s:
-                std::printf("Set s key to held \n");
-                sKeyHeld = true;
-                break;
-            case d:
-                dKeyHeld = true;
-                break;
-            default:
-                break;
-        }
-    } else {
-        switch (context.action) {
-            case w:
-                std::printf("Set w key to not held \n");
-                wKeyHeld = false;
-                break;
-            case a:
-                aKeyHeld = false;
-                break;
-            case s:
-                std::printf("Set w key to not held \n");
-                sKeyHeld = false;
-                break;
-            case d:
-                dKeyHeld = false;
-                break;
-            default:
-                break;
-        }
-    }
+void myComponent::onDownInput(bool pressed) {
+    sKeyHeld = pressed;
 }
+
+void myComponent::onUpInput(bool pressed) {
+    wKeyHeld = pressed;
+}
+

@@ -10,6 +10,7 @@
 #include <complex>
 #include <fstream>
 #include <iostream>
+#include <ranges>
 #include <sstream>
 #include <string>
 #include <thread>
@@ -20,18 +21,20 @@
 ColumnMatrix4x4 projection;
 
 // callbacks
-void error_callback(int error, const char* description) {
+void error_callback(int error, const char *description) {
     std::printf("Error with code'%d': %s\n", error, description);
 }
+
 void debugErrorCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar *message, const void *userParam) {
     std::string messageString(message, length);
     std::cout << severity << ": OpenGL error: %s\n" << messageString.c_str() << std::endl;
 };
-void close_callback(GLFWwindow* window) {
+
+void close_callback(GLFWwindow *window) {
     std::printf("user closing window");
 }
 
-void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
+void framebuffer_size_callback(GLFWwindow *window, int width, int height) {
     SCREEN_WIDTH = width;
     SCREEN_HEIGHT = height;
     glViewport(0, 0, width, height);
@@ -39,7 +42,7 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
 }
 
 // shading
-std::string GetShaderString(const std::string& filePath) {
+std::string GetShaderString(const std::string &filePath) {
     std::fstream fileStream(filePath);
 
     std::string line;
@@ -51,9 +54,10 @@ std::string GetShaderString(const std::string& filePath) {
 
     return ss.str();
 }
-unsigned int CompileShader(unsigned int type, const std::string& source) {
+
+unsigned int CompileShader(unsigned int type, const std::string &source) {
     const unsigned int id = glCreateShader(type);
-    const char* src = source.c_str();
+    const char *src = source.c_str();
     glShaderSource(id, 1, &src, nullptr);
     glCompileShader(id);
 
@@ -65,14 +69,15 @@ unsigned int CompileShader(unsigned int type, const std::string& source) {
         glGetShaderiv(id, GL_INFO_LOG_LENGTH, &lenght);
         char message[lenght];
         glGetShaderInfoLog(id, lenght, &lenght, message);
-        std::cout << "Failed to compile shader! \n" <<  message << std::endl;
+        std::cout << "Failed to compile shader! \n" << message << std::endl;
         glDeleteShader(id);
         return 0;
     }
 
     return id;
 }
-unsigned int CreateShader(const std::string& vertexShader, const std::string& fragmentShader) {
+
+unsigned int CreateShader(const std::string &vertexShader, const std::string &fragmentShader) {
     unsigned int program = glCreateProgram();
     unsigned int vertexShaderId = CompileShader(GL_VERTEX_SHADER, vertexShader);
     unsigned int fragmentShaderId = CompileShader(GL_FRAGMENT_SHADER, fragmentShader);
@@ -100,7 +105,7 @@ Buffers definePrimitive(std::vector<Vertex> vertices, std::vector<unsigned int> 
     // define all the data to use. Use STATIC for objects that are defined once and reused, use DYNAMIC for objects that are redefined multiple times and reused
     glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(Vertex), vertices.data(), usage);
     // define the position vertexAttribute
-    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (const void*) offsetof(Vertex, position));
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (const void *) offsetof(Vertex, position));
     // enable the position vertexAttribute
     glEnableVertexAttribArray(0);
     // define the color attribute
@@ -108,7 +113,7 @@ Buffers definePrimitive(std::vector<Vertex> vertices, std::vector<unsigned int> 
     // // enable the color vertexAttribute
     // glEnableVertexAttribArray(1);
     // define the texture attribute
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (const void*) offsetof(Vertex, uv));
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (const void *) offsetof(Vertex, uv));
     // enable the texture attribute
     glEnableVertexAttribArray(1);
 
@@ -119,6 +124,7 @@ Buffers definePrimitive(std::vector<Vertex> vertices, std::vector<unsigned int> 
 
     return {vertexBuffer, indexBuffer};
 }
+
 void drawPrimitive(unsigned int indexBuffer, const int indicesCount, unsigned int mode, unsigned int vao, unsigned int texture) {
     glBindTexture(GL_TEXTURE_2D, texture);
     // bind the vertexArray
@@ -144,8 +150,7 @@ int main() {
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
     mainWindow = glfwCreateWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "learn-opengl", nullptr, nullptr);
-    if (!mainWindow)
-    {
+    if (!mainWindow) {
         std::printf("window creation failed");
         exit(0);
     }
@@ -193,11 +198,11 @@ int main() {
     // otherSquare.AddComponent<myComponent>(0.5);
 
     Object square({{0, 0}, 0, {1, 1}});
-    square.AddComponent<Renderer>(vertices, indices, GL_STATIC_DRAW, "/Users/ricardito/CLionProjects/OpenGL/res/textures/super-mario-transparent-background-20.png", true, GL_CLAMP, shader, 1);
+    square.AddComponent<Renderer>(vertices, indices, GL_STATIC_DRAW, "/Users/ricardito/CLionProjects/OpenGL/res/textures/super-mario-transparent-background-20.png", true, GL_CLAMP, shader, 2);
     square.AddComponent<myComponent>(0.5);
 
     Object otherSquare({{0, 0}, 0, {1, 1}});
-    otherSquare.AddComponent<Renderer>(vertices, indices, GL_STATIC_DRAW, "/Users/ricardito/CLionProjects/OpenGL/res/textures/dvdvd.jpg", true, GL_CLAMP, shader, 2);
+    otherSquare.AddComponent<Renderer>(vertices, indices, GL_STATIC_DRAW, "/Users/ricardito/CLionProjects/OpenGL/res/textures/dvdvd.jpg", true, GL_CLAMP, shader, 1);
     otherSquare.AddComponent<myComponent>(0.5);
 
     // empty the buffers to make sure its drawing properly
@@ -227,7 +232,7 @@ int main() {
 
         // if there are some components left to be "started", start em and remove them from the queueueue
         if (!callStartBeforeNextUpdate.empty()) {
-            for (Component* component : callStartBeforeNextUpdate) {
+            for (Component *component: callStartBeforeNextUpdate) {
                 component->start();
             }
 
@@ -244,9 +249,7 @@ int main() {
         while (accumulator >= fixedUpdateIntervalInMilli) {
             double fixedDeltaTime = std::chrono::duration<double, std::milli>(std::chrono::high_resolution_clock::now() - lastFixedUpdateTime).count();
 
-            for (Object* object: allObjects) {
-                object -> fixedUpdate(fixedDeltaTime);
-            }
+            fixedUpdateEvent.invoke(fixedDeltaTime);
 
             lastFixedUpdateTime = std::chrono::high_resolution_clock::now();
             accumulator -= fixedUpdateIntervalInMilli;
@@ -254,22 +257,13 @@ int main() {
 
         glClear(GL_COLOR_BUFFER_BIT);
 
-        for (Object* object: allObjects) {
-            object->update(deltaTime);
-        }
+        updateEvent.invoke(deltaTime);
+        lateUpdateEvent.invoke(deltaTime);
 
-        for (Object* object: allObjects) {
-            object->lateUpdate(deltaTime);
-        }
-
-        // renders objects from back to front. the closer to 0, the closer to the camera
-        std::ranges::sort(allObjects, [](const Object* a, const Object* b) {
-            return a->GetComponent<Renderer>()->layer > b->GetComponent<Renderer>()->layer;
-        });
-
-        for (Object* object: allObjects) {
-            if (auto renderer = object->GetComponent<Renderer>()) {
-                renderer -> Draw(camera->viewMatrix, projection, GL_TRIANGLES);
+        // iterate through all the renderers in reverse. AKA: from back to front
+        for (auto& renderersInLayer : std::ranges::reverse_view(allRenderers)) {
+            for (const auto& renderer: renderersInLayer.second) {
+                renderer->Draw(camera->viewMatrix, projection, GL_TRIANGLES);
             }
         }
 
@@ -280,7 +274,7 @@ int main() {
         auto endOfLoopTime = std::chrono::high_resolution_clock::now();
         auto updateTime = std::chrono::duration<double, std::milli>(endOfLoopTime - startOfLoopTime).count();
 
-        auto targetFrameTimeMs = 1000.0/fps;
+        auto targetFrameTimeMs = 1000.0 / fps;
 
         const auto timeToSleepMs = targetFrameTimeMs - updateTime;
 

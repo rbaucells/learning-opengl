@@ -5,45 +5,37 @@
 
 #include "GLFW/glfw3.h"
 
-void invokeInput(const InputContext &context) {
-    for (const Object* object : allObjects) {
-        for (const auto& component : object->components) {
-            for (const InputAction compAction : component->actionsToListenToo) {
-                if (compAction == context.action) {
-                    component->onInput(context);
-                    break;
-                }
-            }
-        }
-    }
-}
-
-void cursor_move_callback(GLFWwindow *window, double xpos, double ypos)  {
+void cursor_move_callback(GLFWwindow *window, double xpos, double ypos) {
     const auto x = static_cast<float>(xpos);
     const auto y = static_cast<float>(ypos);
-    invokeInput(InputContext(mouse_moved, {x, y}));
+    mouse_moved_event.invoke({x, y});
 }
+
 void mouse_button_callback(GLFWwindow *window, int button, int action, int mods) {
     bool pressed = action == GLFW_PRESS;
     switch (button) {
         case GLFW_MOUSE_BUTTON_LEFT:
-            invokeInput(InputContext(left_click, pressed));
+            left_click_event.invoke(pressed);
             break;
         case GLFW_MOUSE_BUTTON_RIGHT:
-            invokeInput(InputContext(right_click, pressed));
+            right_click_event.invoke(pressed);
             break;
         case GLFW_MOUSE_BUTTON_MIDDLE:
-            invokeInput(InputContext(middle_click, pressed));
+            middle_click_event.invoke(pressed);
+            break;
+        default:
             break;
     }
 }
+
 void scroll_callback(GLFWwindow *window, double xoffset, double yoffset) {
     const auto x = static_cast<float>(xoffset);
     const auto y = static_cast<float>(yoffset);
-    invokeInput(InputContext(scroll_x, x));
-    invokeInput(InputContext(scroll_y, y));
+    scroll_x_event.invoke(x);
+    scroll_y_event.invoke(y);
 }
-void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods) {
+
+void key_callback(GLFWwindow *window, int key, int scancode, int action, int mods) {
     if (action == GLFW_REPEAT) {
         return;
     }
@@ -51,239 +43,235 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 
     switch (key) {
         case GLFW_KEY_ESCAPE:
-            invokeInput(InputContext(esc, pressed));
+            esc_event.invoke(pressed);
             break;
         case GLFW_KEY_F1:
-            invokeInput(InputContext(f1, pressed));
+            f1_event.invoke(pressed);
             break;
         case GLFW_KEY_F2:
-            invokeInput(InputContext(f2, pressed));
+            f2_event.invoke(pressed);
             break;
         case GLFW_KEY_F3:
-            invokeInput(InputContext(f3, pressed));
+            f3_event.invoke(pressed);
             break;
         case GLFW_KEY_F4:
-            invokeInput(InputContext(f4, pressed));
+            f4_event.invoke(pressed);
             break;
         case GLFW_KEY_F5:
-            invokeInput(InputContext(f5, pressed));
+            f5_event.invoke(pressed);
             break;
         case GLFW_KEY_F6:
-            invokeInput(InputContext(f6, pressed));
+            f6_event.invoke(pressed);
             break;
         case GLFW_KEY_F7:
-            invokeInput(InputContext(f7, pressed));
+            f7_event.invoke(pressed);
             break;
         case GLFW_KEY_F8:
-            invokeInput(InputContext(f8, pressed));
+            f8_event.invoke(pressed);
             break;
         case GLFW_KEY_F9:
-            invokeInput(InputContext(f9, pressed));
+            f9_event.invoke(pressed);
             break;
         case GLFW_KEY_F10:
-            invokeInput(InputContext(f10, pressed));
+            f10_event.invoke(pressed);
             break;
         case GLFW_KEY_F11:
-            invokeInput(InputContext(f11, pressed));
+            f11_event.invoke(pressed);
             break;
         case GLFW_KEY_F12:
-            invokeInput(InputContext(f12, pressed));
+            f12_event.invoke(pressed);
             break;
         case GLFW_KEY_GRAVE_ACCENT:
-            invokeInput(InputContext(backtick, pressed));
+            backtick_event.invoke(pressed);
             break;
         case GLFW_KEY_1:
-            invokeInput(InputContext(one, pressed));
+            one_event.invoke(pressed);
             break;
         case GLFW_KEY_2:
-            invokeInput(InputContext(two, pressed));
+            two_event.invoke(pressed);
             break;
         case GLFW_KEY_3:
-            invokeInput(InputContext(three, pressed));
+            three_event.invoke(pressed);
             break;
         case GLFW_KEY_4:
-            invokeInput(InputContext(four, pressed));
+            four_event.invoke(pressed);
             break;
         case GLFW_KEY_5:
-            invokeInput(InputContext(five, pressed));
+            five_event.invoke(pressed);
             break;
         case GLFW_KEY_6:
-            invokeInput(InputContext(six, pressed));
+            six_event.invoke(pressed);
             break;
         case GLFW_KEY_7:
-            invokeInput(InputContext(seven, pressed));
+            seven_event.invoke(pressed);
             break;
         case GLFW_KEY_8:
-            invokeInput(InputContext(eight, pressed));
+            eight_event.invoke(pressed);
             break;
         case GLFW_KEY_9:
-            invokeInput(InputContext(nine, pressed));
+            nine_event.invoke(pressed);
             break;
         case GLFW_KEY_0:
-            invokeInput(InputContext(zero, pressed));
+            zero_event.invoke(pressed);
             break;
         case GLFW_KEY_MINUS:
-            invokeInput(InputContext(hyphen, pressed));
+            hyphen_event.invoke(pressed);
             break;
         case GLFW_KEY_EQUAL:
-            invokeInput(InputContext(equals, pressed));
+            equals_event.invoke(pressed);
             break;
         case GLFW_KEY_BACKSPACE:
-            invokeInput(InputContext(backspace, pressed));
+            backspace_event.invoke(pressed);
             break;
         case GLFW_KEY_TAB:
-            invokeInput(InputContext(tab, pressed));
+            tab_event.invoke(pressed);
             break;
         case GLFW_KEY_Q:
-            invokeInput(InputContext(q, pressed));
+            q_event.invoke(pressed);
             break;
         case GLFW_KEY_W:
-            invokeInput(InputContext(w, pressed));
+            w_event.invoke(pressed);
             break;
         case GLFW_KEY_E:
-            invokeInput(InputContext(e, pressed));
+            e_event.invoke(pressed);
             break;
         case GLFW_KEY_R:
-            invokeInput(InputContext(r, pressed));
+            r_event.invoke(pressed);
             break;
         case GLFW_KEY_T:
-            invokeInput(InputContext(t, pressed));
+            t_event.invoke(pressed);
             break;
         case GLFW_KEY_Y:
-            invokeInput(InputContext(y, pressed));
-            break;
+            y_event.invoke(pressed);
             break;
         case GLFW_KEY_U:
-            invokeInput(InputContext(u, pressed));
-            break;
+            u_event.invoke(pressed);
             break;
         case GLFW_KEY_I:
-            invokeInput(InputContext(i, pressed));
-            break;
+            i_event.invoke(pressed);
             break;
         case GLFW_KEY_O:
-            invokeInput(InputContext(o, pressed));
-            break;
+            o_event.invoke(pressed);
             break;
         case GLFW_KEY_P:
-            invokeInput(InputContext(p, pressed));
+            p_event.invoke(pressed);
             break;
         case GLFW_KEY_LEFT_BRACKET:
-            invokeInput(InputContext(left_bracket, pressed));
+            left_bracket_event.invoke(pressed);
             break;
         case GLFW_KEY_RIGHT_BRACKET:
-            invokeInput(InputContext(right_bracket, pressed));
+            right_bracket_event.invoke(pressed);
             break;
         case GLFW_KEY_BACKSLASH:
-            invokeInput(InputContext(back_slash, pressed));
+            back_slash_event.invoke(pressed);
             break;
         case GLFW_KEY_CAPS_LOCK:
-            invokeInput(InputContext(caps_lock, pressed));
+            caps_lock_event.invoke(pressed);
             break;
         case GLFW_KEY_A:
-            invokeInput(InputContext(a, pressed));
+            a_event.invoke(pressed);
             break;
         case GLFW_KEY_S:
-            invokeInput(InputContext(s, pressed));
+            s_event.invoke(pressed);
             break;
         case GLFW_KEY_D:
-            invokeInput(InputContext(d, pressed));
+            d_event.invoke(pressed);
             break;
         case GLFW_KEY_F:
-            invokeInput(InputContext(f, pressed));
+            f_event.invoke(pressed);
             break;
         case GLFW_KEY_G:
-            invokeInput(InputContext(g, pressed));
+            g_event.invoke(pressed);
             break;
         case GLFW_KEY_H:
-            invokeInput(InputContext(h, pressed));
+            h_event.invoke(pressed);
             break;
         case GLFW_KEY_J:
-            invokeInput(InputContext(j, pressed));
+            j_event.invoke(pressed);
             break;
         case GLFW_KEY_K:
-            invokeInput(InputContext(k, pressed));
+            k_event.invoke(pressed);
             break;
         case GLFW_KEY_L:
-            invokeInput(InputContext(l, pressed));
+            l_event.invoke(pressed);
             break;
         case GLFW_KEY_SEMICOLON:
-            invokeInput(InputContext(semicolon, pressed));
+            semicolon_event.invoke(pressed);
             break;
         case GLFW_KEY_APOSTROPHE:
-            invokeInput(InputContext(apostrophe, pressed));
+            apostrophe_event.invoke(pressed);
             break;
         case GLFW_KEY_ENTER:
         case GLFW_KEY_KP_ENTER:
-            invokeInput(InputContext(enter, pressed));
+            enter_event.invoke(pressed);
             break;
         case GLFW_KEY_LEFT_SHIFT:
         case GLFW_KEY_RIGHT_SHIFT:
-            invokeInput(InputContext(shift, pressed));
+            shift_event.invoke(pressed);
             break;
         case GLFW_KEY_Z:
-            invokeInput(InputContext(z, pressed));
+            z_event.invoke(pressed);
             break;
         case GLFW_KEY_X:
-            invokeInput(InputContext(x, pressed));
+            x_event.invoke(pressed);
             break;
         case GLFW_KEY_C:
-            invokeInput(InputContext(c, pressed));
+            c_event.invoke(pressed);
             break;
         case GLFW_KEY_V:
-            invokeInput(InputContext(v, pressed));
+            v_event.invoke(pressed);
             break;
         case GLFW_KEY_B:
-            invokeInput(InputContext(b, pressed));
+            b_event.invoke(pressed);
             break;
         case GLFW_KEY_N:
-            invokeInput(InputContext(n, pressed));
+            n_event.invoke(pressed);
             break;
         case GLFW_KEY_M:
-            invokeInput(InputContext(m, pressed));
+            m_event.invoke(pressed);
             break;
         case GLFW_KEY_COMMA:
-            invokeInput(InputContext(comma, pressed));
+            comma_event.invoke(pressed);
             break;
         case GLFW_KEY_PERIOD:
-            invokeInput(InputContext(period, pressed));
+            period_event.invoke(pressed);
             break;
         case GLFW_KEY_SLASH:
-            invokeInput(InputContext(forward_slash, pressed));
+            forward_slash_event.invoke(pressed);
             break;
         case GLFW_KEY_LEFT_CONTROL:
         case GLFW_KEY_RIGHT_CONTROL:
-            invokeInput(InputContext(control, pressed));
+            control_event.invoke(pressed);
             break;
         case GLFW_KEY_LEFT_ALT:
         case GLFW_KEY_RIGHT_ALT:
-            invokeInput(InputContext(alt, pressed));
+            alt_event.invoke(pressed);
             break;
         case GLFW_KEY_RIGHT_SUPER:
         case GLFW_KEY_LEFT_SUPER:
-            invokeInput(InputContext(super, pressed));
+            super_event.invoke(pressed);
             break;
         case GLFW_KEY_SPACE:
-            invokeInput(InputContext(space, pressed));
+            space_event.invoke(pressed);
             break;
         case GLFW_KEY_UP:
-            invokeInput(InputContext(up, pressed));
+            up_event.invoke(pressed);
             break;
         case GLFW_KEY_DOWN:
-            invokeInput(InputContext(down, pressed));
+            down_event.invoke(pressed);
             break;
         case GLFW_KEY_RIGHT:
-            invokeInput(InputContext(right, pressed));
+            right_event.invoke(pressed);
             break;
         case GLFW_KEY_LEFT:
-            invokeInput(InputContext(left, pressed));
+            left_event.invoke(pressed);
             break;
         default:
             break;
     }
 }
 
-void processGamepadEvents(const GLFWgamepadstate& current, const GLFWgamepadstate& last) {
+void processGamepadEvents(const GLFWgamepadstate &current, const GLFWgamepadstate &last) {
     for (int i = 0; i < 14; i++) {
         // if the button state changed
         if (current.buttons[i] != last.buttons[i]) {
@@ -291,46 +279,46 @@ void processGamepadEvents(const GLFWgamepadstate& current, const GLFWgamepadstat
 
             switch (i) {
                 case GLFW_GAMEPAD_BUTTON_A:
-                    invokeInput(InputContext(gamepad_south, currentState));
+                    gamepad_south_event.invoke(currentState);
                     break;
                 case GLFW_GAMEPAD_BUTTON_B:
-                    invokeInput(InputContext(gamepad_east, currentState));
+                    gamepad_east_event.invoke(currentState);
                     break;
                 case GLFW_GAMEPAD_BUTTON_X:
-                    invokeInput(InputContext(gamepad_west, currentState));
+                    gamepad_west_event.invoke(currentState);
                     break;
                 case GLFW_GAMEPAD_BUTTON_Y:
-                    invokeInput(InputContext(gamepad_north, currentState));
+                    gamepad_north_event.invoke(currentState);
                     break;
                 case GLFW_GAMEPAD_BUTTON_DPAD_UP:
-                    invokeInput(InputContext(dpad_up, currentState));
+                    dpad_up_event.invoke(currentState);
                     break;
                 case GLFW_GAMEPAD_BUTTON_DPAD_DOWN:
-                    invokeInput(InputContext(dpad_down, currentState));
+                    dpad_down_event.invoke(currentState);
                     break;
                 case GLFW_GAMEPAD_BUTTON_DPAD_RIGHT:
-                    invokeInput(InputContext(dpad_right, currentState));
+                    dpad_right_event.invoke(currentState);
                     break;
                 case GLFW_GAMEPAD_BUTTON_BACK:
-                    invokeInput(InputContext(gamepad_view, currentState));
+                    gamepad_view_event.invoke(currentState);
                     break;
                 case GLFW_GAMEPAD_BUTTON_START:
-                    invokeInput(InputContext(gamepad_menu, currentState));
+                    gamepad_menu_event.invoke(currentState);
                     break;
                 case GLFW_GAMEPAD_BUTTON_GUIDE:
-                    invokeInput(InputContext(gamepad_guide, currentState));
+                    gamepad_guide_event.invoke(currentState);
                     break;
                 case GLFW_GAMEPAD_BUTTON_LEFT_BUMPER:
-                    invokeInput(InputContext(left_bumper, currentState));
+                    left_bumper_event.invoke(currentState);
                     break;
                 case GLFW_GAMEPAD_BUTTON_RIGHT_BUMPER:
-                    invokeInput(InputContext(right_bumper, currentState));
+                    right_bumper_event.invoke(currentState);
                     break;
                 case GLFW_GAMEPAD_BUTTON_LEFT_THUMB:
-                    invokeInput(InputContext(left_stick, currentState));
+                    left_stick_event.invoke(currentState);
                     break;
                 case GLFW_GAMEPAD_BUTTON_RIGHT_THUMB:
-                    invokeInput(InputContext(right_stick, currentState));
+                    right_stick_event.invoke(currentState);
                     break;
                 default:
                     break;
@@ -361,27 +349,21 @@ void processGamepadEvents(const GLFWgamepadstate& current, const GLFWgamepadstat
 
     // if there was change on the left stick
     if (std::abs(curLeftX - lastLeftX) > CHANGE_THRESHOLD || std::abs(curLeftY - lastLeftY) > CHANGE_THRESHOLD) {
-        invokeInput(InputContext(left_stick_moved, {curLeftX, curLeftY}));
+        left_stick_moved_event.invoke({curLeftX, curLeftY});
     }
 
     // if there was change on the right stick
     if (std::abs(curRightX - lastRightX) > CHANGE_THRESHOLD || std::abs(curRightY - lastRightY) > CHANGE_THRESHOLD) {
-        invokeInput(InputContext(right_stick_moved, {curRightX, curRightY}));
+        right_stick_moved_event.invoke({curRightX, lastRightX});
     }
 
     // if there was a change on the left trigger
     if (std::abs(curLeftTrigger - lastLeftTrigger) > CHANGE_THRESHOLD) {
-        invokeInput(InputContext(left_trigger, curLeftTrigger));
+        left_trigger_event.invoke(curLeftTrigger);
     }
 
     // if there was a change on the right trigger
     if (std::abs(curRightTrigger - lastRightTrigger) > CHANGE_THRESHOLD) {
-        invokeInput(InputContext(right_trigger, curRightTrigger));
+        left_trigger_event.invoke(curRightTrigger);
     }
-}
-
-vector2 mousePosToScreenPos(const vector2& mousePos) {
-    float x = mousePos.x - SCREEN_WIDTH * 0.5f;
-    float y = SCREEN_HEIGHT * 0.5f - mousePos.y;
-    return vector2(x, y);
 }

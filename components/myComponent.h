@@ -14,6 +14,9 @@ private:
     bool dKeyHeld;
 
     Renderer* renderer;
+
+    void onUpInput(bool pressed);
+    void onDownInput(bool pressed);
 public:
     // im not specifying my own constructor, use the Component constructor
     // using Component::Component;
@@ -21,7 +24,4 @@ public:
     void start() override;
     void update(double deltaTime) override;
     void fixedUpdate(double fixedDeltaTime) override;
-    void onInput(const InputContext &context) override;
-
-    Event<float> OnMyEvent;
 };

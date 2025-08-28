@@ -19,10 +19,4 @@ public:
     virtual void update(double deltaTime) {}
     virtual void lateUpdate(double deltaTime) {}
     virtual void fixedUpdate(double fixedDeltaTime) {}
-
-    virtual void onInput(const InputContext& context) {};
-
-    std::vector<InputAction> actionsToListenToo;
-
-    Event<bool> myEvent;
 };

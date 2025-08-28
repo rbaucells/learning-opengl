@@ -12,6 +12,15 @@ Renderer::Renderer(Object *owner, const std::vector<Vertex>& vertices, const std
     this->shaderProgram = shaderProgram;
     this->layer = layer;
 
+    if (auto it = allRenderers.find(layer); it != allRenderers.end()) {
+        // the layer already exists
+        it->second.push_back(this);
+    }
+    else {
+        // the layer doesnt exist
+        allRenderers[layer] = {this};
+    }
+
     int width, height;
     stbi_set_flip_vertically_on_load(flipTexture);
     unsigned char *data = stbi_load(texturePath.c_str(), &width, &height, &numberOfChannels, 0);
@@ -60,6 +69,28 @@ Renderer::Renderer(Object *owner, const std::vector<Vertex>& vertices, const std
 
     buffers = definePrimitive(vertices, indices, usage);
 }
+
+Renderer::~Renderer() {
+    // get iterator for layer in map
+    auto it = allRenderers.find(layer);
+
+    // if the layer already exists
+    if (it != allRenderers.end()) {
+        // get reference to the vector of renderers for that layer
+        std::vector<Renderer*>& renderers = it->second;
+
+        renderers.erase(
+            std::remove(renderers.begin(), renderers.end(), this),
+            renderers.end());
+
+
+        // if there are no renderers, delete the vector from the map
+        if (renderers.empty()) {
+            allRenderers.erase(it);
+        }
+    }
+}
+
 
 void Renderer::Draw(const ColumnMatrix4x4& view, const ColumnMatrix4x4 &projection, const int mode) const {
     // create the model matrix from the transform

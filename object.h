@@ -1,4 +1,5 @@
 #pragma once
+#include <map>
 #include <memory>
 #include "math/mathematics.h"
 #include <vector>
@@ -39,7 +40,7 @@ public:
         // loop until
         for (const auto &component: components) {
             // one of them is the correct type
-            if (T *specificComp = dynamic_cast<T*>(component.get())) {
+            if (T *specificComp = dynamic_cast<T *>(component.get())) {
                 return specificComp;
             }
         }
@@ -64,7 +65,7 @@ public:
         // loop until
         for (const auto &component: components) {
             // one of them is the correct type
-            if (const T *specificComp = dynamic_cast<const T*>(component.get())) {
+            if (const T *specificComp = dynamic_cast<const T *>(component.get())) {
                 return specificComp;
             }
         }
@@ -73,7 +74,7 @@ public:
     }
 
     template<IsComponent T>
-    std::vector<const T*> GetComponents() const {
+    std::vector<const T *> GetComponents() const {
         // same as GetComponent only it adds it to a vector then returns it
         std::vector<const T *> foundComponents;
         for (const auto &component: components) {
@@ -119,8 +120,6 @@ public:
         }
     }
 
-    ~Object();
-
 private:
     Buffers buffers = {};
     std::vector<Vertex> vertices = {};
@@ -130,7 +129,7 @@ private:
     unsigned int texture = 0;
 };
 
-inline std::vector<Object *> allObjects;
+// inline std::vector<Object*> allObjects;
 
 Buffers definePrimitive(std::vector<Vertex> vertices, std::vector<unsigned int> indices, unsigned int usage);
 
