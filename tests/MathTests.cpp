@@ -175,5 +175,14 @@ int main() {
     assert(ortho.compareTo(ColumnMatrix4x4::wrap(linmathOrtho)));
     std::cout << "Passed ortho Matrix test" << std::endl;
 
+    ColumnMatrix4x4 inverse = ortho.inverse();
+    mat4x4 linmathInverse;
+    mat4x4_invert(linmathInverse, linmathOrtho);
+
+    std::cout << "inverse: \n" << getStringFromMatrix(inverse) << std::endl;
+    std::cout << "linmath inverse: \n" << getStringFromBadMatrix(linmathInverse) << std::endl;
+
+    assert(inverse.compareTo(ColumnMatrix4x4::wrap(linmathInverse)));
+
     std::cout << "Passed all Tests" << std::endl;
 }

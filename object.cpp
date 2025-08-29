@@ -4,9 +4,7 @@
 
 #include <vector>
 
-Object::Object(const std::string &objectName, const int objectTag, const Transform &transform) : name(objectName), tag(objectTag) {
-    this->transform = transform;
-
+Object::Object(const std::string &objectName, const int objectTag, const Transform &transform) : name(objectName), tag(objectTag), transform(transform) {
     allObjects.push_back(this);
 
     // when its update/lateUpdate/fixedUpdate time, lmk
@@ -41,6 +39,7 @@ void Object::lateUpdate(double deltaTime) const {
 
 void Object::destroy() {
     components.clear(); // kill al the components
+    std::erase(allObjects, this);
     delete this; // kys
 }
 

@@ -39,6 +39,7 @@ vector3& vector3::operator/=(float scalar) {
     return *this;
 }
 
+
 float vector3::magnitude() const {
     return std::sqrt((x * x) + (y * y) + (z * z));
 }

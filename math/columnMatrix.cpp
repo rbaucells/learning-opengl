@@ -3,18 +3,18 @@
 #include <cstring>
 #include <float.h>
 
-ColumnMatrix4x4::ColumnMatrix4x4(const ColumnMatrix4x4 &other) {
+ColumnMatrix::ColumnMatrix(const ColumnMatrix &other) {
     // mem copy
     memcpy(data, other.data, sizeof(float) * 16);
 }
 
-ColumnMatrix4x4 ColumnMatrix4x4::identity() {
+static ColumnMatrix ColumnMatrix::identity(int dimensions);
     /// 1, 0, 0, 0
     /// 0, 1, 0, 0
     /// 0, 0, 1, 0
     /// 0, 0, 0, 1
 
-    ColumnMatrix4x4 result;
+    ColumnMatrix result;
 
     for (int c = 0; c < 4; c++) {
         result.data[c][c] = 1;
@@ -23,24 +23,24 @@ ColumnMatrix4x4 ColumnMatrix4x4::identity() {
     return result;
 }
 
-ColumnMatrix4x4 ColumnMatrix4x4::operator*(const ColumnMatrix4x4 &other) const {
+ColumnMatrix ColumnMatrix::operator*(const ColumnMatrix &other) const {
     return multiply(other);
 }
 
-ColumnMatrix4x4 ColumnMatrix4x4::operator*(const float value) const {
+ColumnMatrix ColumnMatrix::operator*(const float value) const {
     return scale(value);
 }
 
-ColumnMatrix4x4 ColumnMatrix4x4::operator+(const ColumnMatrix4x4 &other) const {
+ColumnMatrix ColumnMatrix::operator+(const ColumnMatrix &other) const {
     return add(other);
 }
 
-ColumnMatrix4x4 ColumnMatrix4x4::operator-(const ColumnMatrix4x4 &other) const {
+ColumnMatrix ColumnMatrix::operator-(const ColumnMatrix &other) const {
     return subtract(other);
 }
 
-ColumnMatrix4x4 ColumnMatrix4x4::add(const ColumnMatrix4x4 &other) const {
-    ColumnMatrix4x4 result;
+ColumnMatrix ColumnMatrix::add(const ColumnMatrix &other) const {
+    ColumnMatrix result;
 
     for (int c = 0; c < 4; c++) {
         for (int r = 0; r < 4; r++) {
@@ -51,8 +51,8 @@ ColumnMatrix4x4 ColumnMatrix4x4::add(const ColumnMatrix4x4 &other) const {
     return result;
 }
 
-ColumnMatrix4x4 ColumnMatrix4x4::subtract(const ColumnMatrix4x4 &other) const {
-    ColumnMatrix4x4 result;
+ColumnMatrix ColumnMatrix::subtract(const ColumnMatrix &other) const {
+    ColumnMatrix result;
 
     for (int c = 0; c < 4; c++) {
         for (int r = 0; r < 4; r++) {
@@ -63,8 +63,8 @@ ColumnMatrix4x4 ColumnMatrix4x4::subtract(const ColumnMatrix4x4 &other) const {
     return result;
 }
 
-ColumnMatrix4x4 ColumnMatrix4x4::multiply(const ColumnMatrix4x4 &other) const {
-    // ColumnMatrix4x4 result;
+ColumnMatrix ColumnMatrix::multiply(const ColumnMatrix &other) const {
+    // ColumnMatrix result;
 
     // for (int r = 0; r < 4; r++) {
     //     float left[4];
@@ -81,7 +81,7 @@ ColumnMatrix4x4 ColumnMatrix4x4::multiply(const ColumnMatrix4x4 &other) const {
     // }
     // return result;
 
-    // ColumnMatrix4x4 result;
+    // ColumnMatrix result;
 
     // for (int r = 0; r < 4; r++) {
     //     float row[4];
@@ -105,7 +105,7 @@ ColumnMatrix4x4 ColumnMatrix4x4::multiply(const ColumnMatrix4x4 &other) const {
     /// 0, 0, 1, 0
     /// 0, 0, 0, 1
 
-    ColumnMatrix4x4 result;
+    ColumnMatrix result;
 
     for (int c = 0; c < 4; c++) {
         for (int r = 0; r < 4; r++) {
@@ -118,8 +118,8 @@ ColumnMatrix4x4 ColumnMatrix4x4::multiply(const ColumnMatrix4x4 &other) const {
     return result;
 }
 
-ColumnMatrix4x4 ColumnMatrix4x4::scale(const float value) const {
-    ColumnMatrix4x4 result;
+ColumnMatrix ColumnMatrix::scale(const float value) const {
+    ColumnMatrix result;
 
     for (int c = 0; c < 4; c++) {
         for (int r = 0; r < 4; r++) {
@@ -130,8 +130,8 @@ ColumnMatrix4x4 ColumnMatrix4x4::scale(const float value) const {
     return result;
 }
 
-ColumnMatrix4x4 ColumnMatrix4x4::scale_anisotropic(const float x, const float y, const float z) const {
-    ColumnMatrix4x4 scaleMatrix = identity();
+ColumnMatrix ColumnMatrix::scale_anisotropic(const float x, const float y, const float z) const {
+    ColumnMatrix scaleMatrix = identity();
 
     scaleMatrix.data[0][0] = x;
     scaleMatrix.data[1][1] = y;
@@ -140,8 +140,8 @@ ColumnMatrix4x4 ColumnMatrix4x4::scale_anisotropic(const float x, const float y,
     return multiply(scaleMatrix);
 }
 
-ColumnMatrix4x4 ColumnMatrix4x4::transpose() const {
-    ColumnMatrix4x4 result;
+ColumnMatrix ColumnMatrix::transpose() const {
+    ColumnMatrix result;
 
     for (int c = 0; c < 4; c++) {
         for (int r = 0; r < 4; r++) {
@@ -152,12 +152,12 @@ ColumnMatrix4x4 ColumnMatrix4x4::transpose() const {
     return result;
 }
 
-ColumnMatrix4x4 ColumnMatrix4x4::translate(const float x, const float y, const float z) const {
+ColumnMatrix ColumnMatrix::translate(const float x, const float y, const float z) const {
     /// 1, 0, 0, x
     /// 0, 1, 0, y
     /// 0, 0, 1, z
     /// 0, 0, 0, 1
-    ColumnMatrix4x4 translationMatrix = ColumnMatrix4x4::identity();
+    ColumnMatrix translationMatrix = ColumnMatrix::identity();
 
     translationMatrix.data[3][0] = x;
     translationMatrix.data[3][1] = y;
@@ -166,11 +166,11 @@ ColumnMatrix4x4 ColumnMatrix4x4::translate(const float x, const float y, const f
     return translationMatrix;
 }
 
-ColumnMatrix4x4 ColumnMatrix4x4::rotate_x(const float angle) const {
+ColumnMatrix ColumnMatrix::rotate_x(const float angle) const {
     const float sin = std::sinf(angle);
     const float cos = std::cosf(angle);
 
-    ColumnMatrix4x4 rotationMatrix = ColumnMatrix4x4::identity();
+    ColumnMatrix rotationMatrix = ColumnMatrix::identity();
 
     rotationMatrix.data[1][1] = cos;
     rotationMatrix.data[1][2] = sin;
@@ -180,11 +180,11 @@ ColumnMatrix4x4 ColumnMatrix4x4::rotate_x(const float angle) const {
     return multiply(rotationMatrix);
 }
 
-ColumnMatrix4x4 ColumnMatrix4x4::rotate_y(const float angle) const {
+ColumnMatrix ColumnMatrix::rotate_y(const float angle) const {
     const float sin = std::sinf(angle);
     const float cos = std::cosf(angle);
 
-    ColumnMatrix4x4 rotationMatrix = ColumnMatrix4x4::identity();
+    ColumnMatrix rotationMatrix = ColumnMatrix::identity();
 
     rotationMatrix.data[0][0] = cos;
     rotationMatrix.data[0][2] = -sin;
@@ -194,11 +194,11 @@ ColumnMatrix4x4 ColumnMatrix4x4::rotate_y(const float angle) const {
     return multiply(rotationMatrix);
 }
 
-ColumnMatrix4x4 ColumnMatrix4x4::rotate_z(const float angle) const {
+ColumnMatrix ColumnMatrix::rotate_z(const float angle) const {
     const float sin = std::sinf(angle);
     const float cos = std::cosf(angle);
 
-    ColumnMatrix4x4 rotationMatrix = ColumnMatrix4x4::identity();
+    ColumnMatrix rotationMatrix = ColumnMatrix::identity();
 
     rotationMatrix.data[0][0] = cos;
     rotationMatrix.data[0][1] = sin;
@@ -208,9 +208,9 @@ ColumnMatrix4x4 ColumnMatrix4x4::rotate_z(const float angle) const {
     return multiply(rotationMatrix);
 }
 
-ColumnMatrix4x4 ColumnMatrix4x4::ortho(const float left, const float right, const float bottom, const float top, const float near, const float far) const {
+ColumnMatrix ColumnMatrix::ortho(const float left, const float right, const float bottom, const float top, const float near, const float far) const {
     // identity
-    ColumnMatrix4x4 transformation = identity();
+    ColumnMatrix transformation = identity();
     // transformation
     transformation.data[0][0] = 2.0f / (right - left);
     transformation.data[1][1] = 2.0f / (top - bottom);
@@ -222,7 +222,7 @@ ColumnMatrix4x4 ColumnMatrix4x4::ortho(const float left, const float right, cons
     return transformation;
 }
 
-bool ColumnMatrix4x4::compareTo(const ColumnMatrix4x4 &other) const {
+bool ColumnMatrix::compareTo(const ColumnMatrix &other) const {
     for (int c = 0; c < 4; c++) {
         for (int r = 0; r < 4; r++) {
             if (std::abs(other.data[c][r] - data[c][r]) > FLT_EPSILON)
@@ -233,13 +233,13 @@ bool ColumnMatrix4x4::compareTo(const ColumnMatrix4x4 &other) const {
     return true;
 }
 
-ColumnMatrix4x4 ColumnMatrix4x4::wrap(mat4x4 other) {
-    ColumnMatrix4x4 newColumnMatrix4x4;
-    memcpy(newColumnMatrix4x4.data, other, sizeof(float) * 16);
-    return newColumnMatrix4x4;
+ColumnMatrix ColumnMatrix::wrap(mat4x4 other) {
+    ColumnMatrix newColumnMatrix;
+    memcpy(newColumnMatrix.data, other, sizeof(float) * 16);
+    return newColumnMatrix;
 }
 
-vector4 ColumnMatrix4x4::operator*(const vector4& other) const {
+vector4 ColumnMatrix::operator*(const vector4& other) const {
     vector4 result;
 
     result.x = data[0][0] * other.x + data[1][0] * other.y + data[2][0] * other.z + data[3][0] * other.w;
@@ -250,17 +250,17 @@ vector4 ColumnMatrix4x4::operator*(const vector4& other) const {
     return result;
 }
 
-vector2 ColumnMatrix4x4::operator*(const vector2 &other) const {
+vector2 ColumnMatrix::operator*(const vector2 &other) const {
     const vector4 result = operator*(vector4{other.x, other.y, 0, 1});
 
     return vector2{result.x, result.y};
 }
 
-float* ColumnMatrix4x4::operator[](const int index) {
+float* ColumnMatrix::operator[](const int index) {
     return &data[index][0];
 }
 
-ColumnMatrix4x4 ColumnMatrix4x4::inverse() const {
+ColumnMatrix ColumnMatrix::inverse() const {
     float s[6];
     float c[6];
 
@@ -281,7 +281,7 @@ ColumnMatrix4x4 ColumnMatrix4x4::inverse() const {
     /* Assumes it is invertible */
     const float idet = 1.0f / (s[0] * c[5] - s[1] * c[4] + s[2] * c[3] + s[3] * c[2] - s[4] * c[1] + s[5] * c[0]);
 
-    ColumnMatrix4x4 T;
+    ColumnMatrix T;
 
     T[0][0] = (data[1][1] * c[5] - data[1][2] * c[4] + data[1][3] * c[3]) * idet;
     T[0][1] = (-data[0][1] * c[5] + data[0][2] * c[4] - data[0][3] * c[3]) * idet;

@@ -93,9 +93,9 @@ Renderer::~Renderer() {
 void Renderer::Draw(const ColumnMatrix4x4& view, const ColumnMatrix4x4 &projection, const int mode) const {
     // create the model matrix from the transform
     ColumnMatrix4x4 model = ColumnMatrix4x4::identity();
-    model = model.translate(object->transform.position.x, object->transform.position.y, 0.0f);
-    model = model.rotate_z(object->transform.rotation);
-    model = model.scale_anisotropic(object->transform.scale.x, object->transform.scale.y, 1.0f);
+    model = model.translate(object->transform.localPosition.x, object->transform.localPosition.y, 0.0f);
+    model = model.rotate_z(object->transform.localRotation);
+    model = model.scale_anisotropic(object->transform.localScale.x, object->transform.localScale.y, 1.0f);
 
     // combine the matrices into a single MVP matrix
     ColumnMatrix4x4 mvp = projection * (view * model);

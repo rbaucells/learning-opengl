@@ -15,17 +15,16 @@ public:
     const std::string name;
     const int tag;
     bool activated = true;
-    std::vector<std::unique_ptr<Component> > components;
+    std::vector<std::unique_ptr<Component>> components;
+
+    // all objects have a transform
     Transform transform;
 
     Object(const std::string &name, int objectTag, const Transform &transform);
 
     void update(double deltaTime) const;
-
     void fixedUpdate(double fixedDeltaTime) const;
-
     void lateUpdate(double deltaTime) const;
-
     void destroy();
 
     template<IsComponent T, typename... Args>
@@ -126,7 +125,6 @@ public:
     }
 
     static Object *findObjectByName(const std::string &name);
-
     static Object *findObjectByTag(int tag);
 
 private:
@@ -136,6 +134,9 @@ private:
     unsigned int shaders = 0;
     unsigned int vertexArrayObject = 0;
     unsigned int texture = 0;
+
+    Object* parent;
+    std::vector<Object*> children {};
 };
 
 // inline std::vector<Object*> allObjects;
@@ -145,3 +146,4 @@ Buffers definePrimitive(std::vector<Vertex> vertices, std::vector<unsigned int> 
 void drawPrimitive(unsigned int indexBuffer, int indicesCount, unsigned int mode, unsigned int vao, unsigned int texture);
 
 inline std::vector<Object *> allObjects;
+

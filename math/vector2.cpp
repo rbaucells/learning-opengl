@@ -14,6 +14,11 @@ vector2 vector2::operator/(float scalar) const {
     return vector2{x / scalar, y / scalar};
 }
 
+bool vector2::operator==(const vector2& other) const {
+    return x == other.x && y == other.y;
+}
+
+
 
 vector2& vector2::operator+=(const vector2 &other) {
     x += other.x;
@@ -48,6 +53,10 @@ vector2 vector2::Normalized() const {
 
     return *this;
 }
+vector2 vector2::hadamard(const vector2 &other) const {
+    return {x * other.x, y * other.y};
+}
+
 float vector2::Dot(const vector2 &other) const {
     return (x * other.x + y * other.y);
 }
