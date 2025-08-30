@@ -1,10 +1,9 @@
-#include "mathematics.h"
-#include <cmath>
+#include "transform.h"
 
 struct Decomposed2D {
-    vector2 position;
-    float rotation; // degrees
-    vector2 scale;
+    vector2 position {};
+    float rotation {}; // degrees
+    vector2 scale {};
 };
 
 Decomposed2D decompose2D(const ColumnMatrix4x4& m) {
@@ -45,13 +44,13 @@ Decomposed2D decompose2D(const ColumnMatrix4x4& m) {
     return out;
 }
 
-Transform::Transform(const vector2 pos, const float rot, const vector2 scale) {
+Transform::Transform( const vector2 pos, const float rot, const vector2 scale) {
     setGlobalPosition(pos);
     setGlobalRotation(rot);
     setGlobalScale(scale);
 }
 
-Transform::Transform(vector2 pos, float rot, vector2 scale, const Transform *parent) {
+Transform::Transform(vector2 pos, float rot, vector2 scale, Transform *parent) {
     this->parent = parent;
     this->localPosition = pos;
     this->localRotation = rot;
@@ -167,4 +166,34 @@ ColumnMatrix4x4 Transform::worldToLocalMatrix() const {
     ColumnMatrix4x4 inverse = localToWorld.inverse();
     return inverse;
 }
+
+const Transform *Transform::getParent() const {
+    return parent;
+}
+void Transform::setParent(Transform *parent) {
+    this->parent = parent;
+}
+
+void Transform::addChild(Transform *child) {
+    child->setParent(this);
+    children.push_back(child);
+}
+
+std::vector<Transform *> Transform::getChildren() {
+    return children;
+}
+
+void Transform::removeChild(Transform *child) {
+    child->setParent(nullptr);
+    std::erase(children, child);
+}
+
+void Transform::removeAllChildren() {
+    for (Transform* child : children) {
+        child->setParent(nullptr);
+    }
+
+    children.clear();
+}
+
 

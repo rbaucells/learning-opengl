@@ -1,4 +1,6 @@
 #pragma once
+#include <vector>
+
 #include "linmath/linmath.h"
 
 struct vector2 {
@@ -191,76 +193,44 @@ struct ColumnMatrix4x4 {
 
     vector2 operator*(const vector2 &other) const;
 
-    ColumnMatrix4x4 operator+(const ColumnMatrix4x4 &other) const;
+    [[nodiscard]] ColumnMatrix4x4 operator+(const ColumnMatrix4x4 &other) const;
 
-    ColumnMatrix4x4 operator-(const ColumnMatrix4x4 &other) const;
+    [[nodiscard]] ColumnMatrix4x4 operator-(const ColumnMatrix4x4 &other) const;
 
-    ColumnMatrix4x4 multiply(const ColumnMatrix4x4 &other) const;
+    [[nodiscard]] ColumnMatrix4x4 multiply(const ColumnMatrix4x4 &other) const;
 
-    ColumnMatrix4x4 scale(float value) const;
+    [[nodiscard]] ColumnMatrix4x4 scale(float value) const;
 
-    ColumnMatrix4x4 scale_anisotropic(float x, float y, float z) const;
+    [[nodiscard]] ColumnMatrix4x4 scale_anisotropic(float x, float y, float z) const;
 
-    ColumnMatrix4x4 add(const ColumnMatrix4x4 &other) const;
+    [[nodiscard]] ColumnMatrix4x4 add(const ColumnMatrix4x4 &other) const;
 
-    ColumnMatrix4x4 subtract(const ColumnMatrix4x4 &other) const;
+    [[nodiscard]] ColumnMatrix4x4 subtract(const ColumnMatrix4x4 &other) const;
 
-    ColumnMatrix4x4 transpose() const;
+    [[nodiscard]] ColumnMatrix4x4 transpose() const;
 
-    ColumnMatrix4x4 translate(float x, float y, float z) const;
+    [[nodiscard]] ColumnMatrix4x4 translate(float x, float y, float z) const;
 
-    ColumnMatrix4x4 rotate_x(float angle) const;
+    [[nodiscard]] ColumnMatrix4x4 rotate_x(float angle) const;
 
-    ColumnMatrix4x4 rotate_y(float angle) const;
+    [[nodiscard]] ColumnMatrix4x4 rotate_y(float angle) const;
 
-    ColumnMatrix4x4 rotate_z(float angle) const;
+    [[nodiscard]] ColumnMatrix4x4 rotate_z(float angle) const;
 
-    ColumnMatrix4x4 ortho(float left, float right, float bottom, float top, float near, float far) const;
+    [[nodiscard]] ColumnMatrix4x4 ortho(float left, float right, float bottom, float top, float near, float far) const;
 
-    ColumnMatrix4x4 inverse() const;
+    [[nodiscard]] ColumnMatrix4x4 inverse() const;
 
     float *operator[](int index);
 
     explicit operator const float*() const;
     explicit operator float*();
 
-    bool compareTo(const ColumnMatrix4x4 &other) const;
+    [[nodiscard]] bool compareTo(const ColumnMatrix4x4 &other) const;
 
     static ColumnMatrix4x4 wrap(mat4x4 other);
 
     float data[4][4] = {{0}, {0}, {0}, {0}};
-};
-
-class Transform {
-private:
-    const Transform *parent = nullptr;
-
-public:
-    Transform(vector2 pos, float rot, vector2 scale, const Transform *parent);
-
-    Transform(vector2 pos, float rot, vector2 scale);
-
-    // ColumnMatrix4x4 localTransformationMatrix() const;
-    // ColumnMatrix4x4 globalTransformationMatrix() const;
-
-    ColumnMatrix4x4 localToWorldMatrix() const;
-    ColumnMatrix4x4 worldToLocalMatrix() const;
-
-    void setGlobalPosition(vector2 pos);
-
-    void setGlobalRotation(float rot);
-
-    void setGlobalScale(vector2 scale);
-
-    vector2 getGlobalPosition() const;
-
-    float getGlobalRotation() const;
-
-    vector2 getGlobalScale() const;
-
-    vector2 localPosition{};
-    float localRotation{};
-    vector2 localScale{};
 };
 
 struct Vertex {

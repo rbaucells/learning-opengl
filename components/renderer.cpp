@@ -67,7 +67,34 @@ Renderer::Renderer(Object *owner, const std::vector<Vertex>& vertices, const std
     glGenVertexArrays(1, &vao);
     glBindVertexArray(vao);
 
-    buffers = definePrimitive(vertices, indices, usage);
+    // buffer id
+    unsigned int vertexBuffer;
+    // generate 1 buffer and assign the id into uint buffer ^
+    glGenBuffers(1, &vertexBuffer);
+    // I am going to work with this buffer. select it
+    glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
+    // define all the data to use. Use STATIC for objects that are defined once and reused, use DYNAMIC for objects that are redefined multiple times and reused
+    glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(Vertex), vertices.data(), usage);
+    // define the position vertexAttribute
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (const void *) offsetof(Vertex, position));
+    // enable the position vertexAttribute
+    glEnableVertexAttribArray(0);
+    // define the texture attribute
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (const void *) offsetof(Vertex, uv));
+    // enable the texture attribute
+    glEnableVertexAttribArray(1);
+
+    unsigned int indexBuffer;
+    glGenBuffers(1, &indexBuffer);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned int), indices.data(), usage);
+
+    buffers = {vertexBuffer, indexBuffer};
+
+    // cache uniform locations to avoid lookups in draw
+    mvpLocation = glGetUniformLocation(shaderProgram, "mvp");
+    channelsLocation = glGetUniformLocation(shaderProgram, "channels");
+    alphaLocation = glGetUniformLocation(shaderProgram, "alpha");
 }
 
 Renderer::~Renderer() {
@@ -92,29 +119,25 @@ Renderer::~Renderer() {
 
 void Renderer::Draw(const ColumnMatrix4x4& view, const ColumnMatrix4x4 &projection, const int mode) const {
     // create the model matrix from the transform
-    ColumnMatrix4x4 model = ColumnMatrix4x4::identity();
-
-    vector2 globalPosition = object->transform.getGlobalPosition();
-    float globalRotation = object->transform.getGlobalRotation();
-    vector2 globalScale = object->transform.getGlobalScale();
-    model = model.translate(globalPosition.x, globalPosition.y, 0.0f);
-    model = model.rotate_z(globalRotation);
-    model = model.scale_anisotropic(globalScale.x, globalScale.y, 1.0f);
+    const ColumnMatrix4x4 model = object->transform.localToWorldMatrix();
 
     // combine the matrices into a single MVP matrix
     ColumnMatrix4x4 mvp = projection * (view * model);
 
+    // make sure were using the shader
     glUseProgram(shaderProgram);
 
-    GLint mvpLocation = glGetUniformLocation(shaderProgram, "mvp");
+    // pass the uniform data using the saved locations
     glUniformMatrix4fv(mvpLocation, 1, GL_FALSE, static_cast<const GLfloat*>(mvp));
-
-    GLint numberOfChannelsLocation = glGetUniformLocation(shaderProgram, "channels");
-    glUniform1i(numberOfChannelsLocation, numberOfChannels);
-
-    GLint alphaLocation = glGetUniformLocation(shaderProgram, "alpha");
+    glUniform1i(channelsLocation, numberOfChannels);
     glUniform1f(alphaLocation, alpha);
 
-    drawPrimitive(buffers.indexBuffer, indices.size(), mode, vao, texture);
+    // bind the texture
+    glBindTexture(GL_TEXTURE_2D, texture);
+    // bind the vertexArray
+    glBindVertexArray(vao);
+    // make sure were using the index buffer
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, buffers.indexBuffer);
+    // draw call
+    glDrawElements(mode, static_cast<int>(indices.size()), GL_UNSIGNED_INT, nullptr);
 }
-

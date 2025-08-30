@@ -4,7 +4,7 @@
 #include "math/mathematics.h"
 #include "camera.h"
 #include "object.h"
-#include "components/myComponent.h"
+#include "components/rotateComponent.h"
 #include "main.h"
 
 #include <complex>
@@ -94,47 +94,6 @@ unsigned int CreateShader(const std::string &vertexShader, const std::string &fr
     return program;
 }
 
-// primitive
-Buffers definePrimitive(std::vector<Vertex> vertices, std::vector<unsigned int> indices, unsigned int usage) {
-    // buffer id
-    unsigned int vertexBuffer;
-    // generate 1 buffer and assign the id into uint buffer ^
-    glGenBuffers(1, &vertexBuffer);
-    // I am going to work with this buffer. select it
-    glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
-    // define all the data to use. Use STATIC for objects that are defined once and reused, use DYNAMIC for objects that are redefined multiple times and reused
-    glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(Vertex), vertices.data(), usage);
-    // define the position vertexAttribute
-    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (const void *) offsetof(Vertex, position));
-    // enable the position vertexAttribute
-    glEnableVertexAttribArray(0);
-    // define the color attribute
-    // glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (const void*) offsetof(Vertex, color));
-    // // enable the color vertexAttribute
-    // glEnableVertexAttribArray(1);
-    // define the texture attribute
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (const void *) offsetof(Vertex, uv));
-    // enable the texture attribute
-    glEnableVertexAttribArray(1);
-
-    unsigned int indexBuffer;
-    glGenBuffers(1, &indexBuffer);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned int), indices.data(), usage);
-
-    return {vertexBuffer, indexBuffer};
-}
-
-void drawPrimitive(unsigned int indexBuffer, const int indicesCount, unsigned int mode, unsigned int vao, unsigned int texture) {
-    glBindTexture(GL_TEXTURE_2D, texture);
-    // bind the vertexArray
-    glBindVertexArray(vao);
-    // make sure were using the index buffer
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer);
-    // draw call
-    glDrawElements(mode, indicesCount, GL_UNSIGNED_INT, 0);
-}
-
 int main() {
     // when we get an error, lmk
     glfwSetErrorCallback(error_callback);
@@ -192,13 +151,17 @@ int main() {
         2, 3, 0
     };
 
-    Object square("square", 0, {{0, 0}, 45, {1, 1}});
-    square.AddComponent<Renderer>(vertices, indices, GL_STATIC_DRAW, "/Users/ricardito/CLionProjects/OpenGL/res/textures/super-mario-transparent-background-20.png", true, GL_CLAMP, shader, 2);
-    square.AddComponent<myComponent>(0.5);
+    Object origin1("origin1", 0, {{0, 0}, 0, {1, 1}});
+    origin1.addComponent<RotateComponent>(-45);
 
-    Object otherSquare("other square", 0, {{400, 0}, 0, {1, 1}, &square.transform});
-    otherSquare.AddComponent<Renderer>(vertices, indices, GL_STATIC_DRAW, "/Users/ricardito/CLionProjects/OpenGL/res/textures/dvdvd.jpg", true, GL_CLAMP, shader, 1);
-    otherSquare.AddComponent<myComponent>(0.5);
+    Object origin2("origin2", 0, {{0, 0}, 0, {1, 1}});
+    origin2.addComponent<RotateComponent>(45);
+
+    Object square("square", 0, {{200, 0}, 0, {1, 1}, &origin1.transform});
+    square.addComponent<Renderer>(vertices, indices, GL_STATIC_DRAW, "/Users/ricardito/CLionProjects/OpenGL/res/textures/super-mario-transparent-background-20.png", true, GL_CLAMP, shader, 2);
+
+    Object otherSquare("other square", 0, {{600, 0}, 0, {1, 1}, &origin2.transform});
+    otherSquare.addComponent<Renderer>(vertices, indices, GL_STATIC_DRAW, "/Users/ricardito/CLionProjects/OpenGL/res/textures/dvdvd.jpg", true, GL_CLAMP, shader, 1);
 
     // empty the buffers to make sure its drawing properly
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
@@ -221,8 +184,8 @@ int main() {
     while (!glfwWindowShouldClose(mainWindow)) {
         auto startOfLoopTime = std::chrono::high_resolution_clock::now();
         // calculate deltaTime
-        std::chrono::duration<double, std::milli> timeSinceLastUpdateInMilli = startOfLoopTime - lastLoopTime;
-        double deltaTime = timeSinceLastUpdateInMilli.count();
+        std::chrono::duration<double> timeSinceLastUpdate = startOfLoopTime - lastLoopTime;
+        double deltaTime = timeSinceLastUpdate.count();
         lastLoopTime = std::chrono::high_resolution_clock::now();
 
         // if there are some components left to be "started", start em and remove them from the queueueue
@@ -241,13 +204,13 @@ int main() {
 
         accumulator += deltaTime;
 
-        while (accumulator >= fixedUpdateIntervalInMilli) {
-            double fixedDeltaTime = std::chrono::duration<double, std::milli>(std::chrono::high_resolution_clock::now() - lastFixedUpdateTime).count();
+        while (accumulator >= fixedUpdateIntervalInSeconds) {
+            double fixedDeltaTime = std::chrono::duration<double>(std::chrono::high_resolution_clock::now() - lastFixedUpdateTime).count();
 
             fixedUpdateEvent.invoke(fixedDeltaTime);
 
             lastFixedUpdateTime = std::chrono::high_resolution_clock::now();
-            accumulator -= fixedUpdateIntervalInMilli;
+            accumulator -= fixedUpdateIntervalInSeconds;
         }
 
         glClear(GL_COLOR_BUFFER_BIT);
@@ -256,8 +219,8 @@ int main() {
         lateUpdateEvent.invoke(deltaTime);
 
         // iterate through all the renderers in reverse. AKA: from back to front
-        for (auto& renderersInLayer : std::ranges::reverse_view(allRenderers)) {
-            for (const auto& renderer: renderersInLayer.second) {
+        for (auto &renderersInLayer: std::ranges::reverse_view(allRenderers)) {
+            for (const auto &renderer: renderersInLayer.second) {
                 renderer->Draw(camera->viewMatrix, projection, GL_TRIANGLES);
             }
         }

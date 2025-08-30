@@ -5,6 +5,8 @@
 #include <iostream>
 #include <sstream>
 
+#include "../transform.h"
+
 std::string getStringFromMatrix(const ColumnMatrix4x4 &matrix) {
     std::stringstream result;
     result << std::fixed << std::setprecision(4);

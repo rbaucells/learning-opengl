@@ -12,17 +12,20 @@ public:
     float alpha = 1.f;
     unsigned int layer = 0;
 
-    ~Renderer();
+    ~Renderer() override;
 
 private:
     std::vector<Vertex> vertices{};
     std::vector<unsigned int> indices{};
     Buffers buffers{};
+    int numberOfChannels = 0;
     unsigned int shaderProgram = 0;
     unsigned int vao = 0;
     unsigned int texture = 0;
 
-    int numberOfChannels = 0;
+    int mvpLocation = -1;
+    int channelsLocation = -1;
+    int alphaLocation = -1;
 };
 
 inline std::map<unsigned int, std::vector<Renderer*>> allRenderers;

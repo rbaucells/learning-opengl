@@ -18,7 +18,8 @@ inline std::vector<Component*> callStartBeforeNextUpdate {};
 constexpr float fixedUpdatePerSecond = 60;
 constexpr int fps = 60;
 
-constexpr float fixedUpdateIntervalInMilli = 1000.0f / fixedUpdatePerSecond;
+// constexpr float fixedUpdateIntervalInMilli = 1000.0f / fixedUpdatePerSecond;
+constexpr float fixedUpdateIntervalInSeconds = 1.0f / fixedUpdatePerSecond;
 
 inline Event<double> updateEvent;
 inline Event<double> lateUpdateEvent;

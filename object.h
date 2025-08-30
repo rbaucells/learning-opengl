@@ -1,11 +1,11 @@
 #pragma once
 #include <map>
 #include <memory>
-#include "math/mathematics.h"
 #include <vector>
 
 #include "main.h"
 #include "components/component.h"
+#include "transform.h"
 
 template<typename T>
 concept IsComponent = std::is_base_of_v<Component, T>;
@@ -18,7 +18,7 @@ public:
 
     std::vector<std::unique_ptr<Component>> components;
 
-    // all objects have a transform
+    // all objects must have a transform
     Transform transform;
 
     Object(const std::string &name, int objectTag, const Transform &transform);
@@ -29,7 +29,7 @@ public:
     void destroy();
 
     template<IsComponent T, typename... Args>
-    T *AddComponent(Args &&... args) {
+    T *addComponent(Args &&... args) {
         auto newComponent = std::make_unique<T>(this, std::forward<Args>(args)...);
 
         T *componentPtr = newComponent.get();
@@ -41,7 +41,7 @@ public:
     }
 
     template<IsComponent T>
-    T *GetComponent() {
+    T *getComponent() {
         // loop until
         for (const auto &component: components) {
             // one of them is the correct type
@@ -54,7 +54,7 @@ public:
     }
 
     template<IsComponent T>
-    std::vector<T *> GetComponents() {
+    std::vector<T *> getComponents() {
         // same as GetComponent only it adds it to a vector then returns it
         std::vector<T *> foundComponents;
         for (const auto &component: components) {
@@ -66,7 +66,7 @@ public:
     }
 
     template<IsComponent T>
-    const T *GetComponent() const {
+    const T *getComponentConst() const {
         // loop until
         for (const auto &component: components) {
             // one of them is the correct type
@@ -79,7 +79,7 @@ public:
     }
 
     template<IsComponent T>
-    std::vector<const T *> GetComponents() const {
+    std::vector<const T *> getComponentsConst() const {
         // same as GetComponent only it adds it to a vector then returns it
         std::vector<const T *> foundComponents;
         for (const auto &component: components) {
@@ -91,7 +91,7 @@ public:
     }
 
     template<IsComponent T>
-    void RemoveComponent() {
+    void removeComponent() {
         for (int i = 0; i < components.size(); i++) {
             auto &component = components.at(i);
 
@@ -104,7 +104,7 @@ public:
     }
 
     template<IsComponent T>
-    void RemoveAllComponents() {
+    void removeAllComponents() {
         std::vector<int> componentsToRemove;
 
         for (int i = 0; i < components.size(); i++) {
@@ -127,24 +127,9 @@ public:
 
     static Object *findObjectByName(const std::string &name);
     static Object *findObjectByTag(int tag);
-
-private:
-    Buffers buffers = {};
-    std::vector<Vertex> vertices = {};
-    std::vector<unsigned int> indices = {};
-    unsigned int shaders = 0;
-    unsigned int vertexArrayObject = 0;
-    unsigned int texture = 0;
-
-    Object* parent;
-    std::vector<Object*> children {};
+    static std::vector<Object*> findObjectsByName(const std::string &name);
+    static std::vector<Object*> findObjectsByTag(int tag);
 };
-
-// inline std::vector<Object*> allObjects;
-
-Buffers definePrimitive(std::vector<Vertex> vertices, std::vector<unsigned int> indices, unsigned int usage);
-
-void drawPrimitive(unsigned int indexBuffer, int indicesCount, unsigned int mode, unsigned int vao, unsigned int texture);
 
 inline std::vector<Object *> allObjects;
 
