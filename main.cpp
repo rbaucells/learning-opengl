@@ -192,11 +192,11 @@ int main() {
         2, 3, 0
     };
 
-    Object square({{0, 0}, 0, {1, 1}});
+    Object square("square", 0, {{0, 0}, 45, {1, 1}});
     square.AddComponent<Renderer>(vertices, indices, GL_STATIC_DRAW, "/Users/ricardito/CLionProjects/OpenGL/res/textures/super-mario-transparent-background-20.png", true, GL_CLAMP, shader, 2);
     square.AddComponent<myComponent>(0.5);
 
-    Object otherSquare({{0, 0}, 0, {1, 1}});
+    Object otherSquare("other square", 0, {{400, 0}, 0, {1, 1}, &square.transform});
     otherSquare.AddComponent<Renderer>(vertices, indices, GL_STATIC_DRAW, "/Users/ricardito/CLionProjects/OpenGL/res/textures/dvdvd.jpg", true, GL_CLAMP, shader, 1);
     otherSquare.AddComponent<myComponent>(0.5);
 

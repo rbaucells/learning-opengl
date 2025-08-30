@@ -134,46 +134,46 @@ struct RowMatrix4x4 {
     float data[4][4] = {{0}, {0}, {0}, {0}};
 };
 
-template<int n, int m>
-class ColumnMatrix {
-private:
-    float data[n][m] {{}};
-public:
-    const int columns;
-    const int rows;
-
-    ColumnMatrix() = default;
-
-    ColumnMatrix(const ColumnMatrix &other);
-
-    template<int n1>
-    static ColumnMatrix<n1, n1> identity() {
-        /// 1, 0, 0, 0
-        /// 0, 1, 0, 0
-        /// 0, 0, 1, 0
-        /// 0, 0, 0, 1
-        ColumnMatrix result;
-        for (int c = 0; c < n1; c++) {
-            result.data[c][c] = 1;
-        }
-        return result;
-    }
-
-    template<int n1, int m1>
-    ColumnMatrix<n, m1> multiply(const ColumnMatrix<n1, m1> &other) const {
-        // allocate result
-        ColumnMatrix<n, other.columns> result;
-        // loop columns
-        for (int c = 0; c < other.columns; c++) {
-            for (int r = 0; r < rows; r++) {
-                for (int x = 0; x < columns; x++) {
-                    result.data[c][r] += data[x][r] * other.data[c][x];
-                }
-            }
-        }
-        return result;
-    }
-};
+// template<int n, int m>
+// class ColumnMatrix {
+// private:
+//     float data[n][m] {{}};
+// public:
+//     const int columns;
+//     const int rows;
+//
+//     ColumnMatrix() = default;
+//
+//     ColumnMatrix(const ColumnMatrix &other);
+//
+//     template<int n1>
+//     static ColumnMatrix<n1, n1> identity() {
+//         /// 1, 0, 0, 0
+//         /// 0, 1, 0, 0
+//         /// 0, 0, 1, 0
+//         /// 0, 0, 0, 1
+//         ColumnMatrix result;
+//         for (int c = 0; c < n1; c++) {
+//             result.data[c][c] = 1;
+//         }
+//         return result;
+//     }
+//
+//     template<int n1, int m1>
+//     ColumnMatrix<n, m1> multiply(const ColumnMatrix<n1, m1> &other) const {
+//         // allocate result
+//         ColumnMatrix<n, other.columns> result;
+//         // loop columns
+//         for (int c = 0; c < other.columns; c++) {
+//             for (int r = 0; r < rows; r++) {
+//                 for (int x = 0; x < columns; x++) {
+//                     result.data[c][r] += data[x][r] * other.data[c][x];
+//                 }
+//             }
+//         }
+//         return result;
+//     }
+// };
 
 struct ColumnMatrix4x4 {
 
@@ -221,6 +221,9 @@ struct ColumnMatrix4x4 {
 
     float *operator[](int index);
 
+    explicit operator const float*() const;
+    explicit operator float*();
+
     bool compareTo(const ColumnMatrix4x4 &other) const;
 
     static ColumnMatrix4x4 wrap(mat4x4 other);
@@ -237,8 +240,11 @@ public:
 
     Transform(vector2 pos, float rot, vector2 scale);
 
-    ColumnMatrix4x4 localTransformationMatrix() const;
-    ColumnMatrix4x4 globalTransformationMatrix() const;
+    // ColumnMatrix4x4 localTransformationMatrix() const;
+    // ColumnMatrix4x4 globalTransformationMatrix() const;
+
+    ColumnMatrix4x4 localToWorldMatrix() const;
+    ColumnMatrix4x4 worldToLocalMatrix() const;
 
     void setGlobalPosition(vector2 pos);
 

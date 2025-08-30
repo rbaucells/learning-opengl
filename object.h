@@ -15,6 +15,7 @@ public:
     const std::string name;
     const int tag;
     bool activated = true;
+
     std::vector<std::unique_ptr<Component>> components;
 
     // all objects have a transform

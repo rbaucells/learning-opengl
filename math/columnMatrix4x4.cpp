@@ -64,47 +64,6 @@ ColumnMatrix4x4 ColumnMatrix4x4::subtract(const ColumnMatrix4x4 &other) const {
 }
 
 ColumnMatrix4x4 ColumnMatrix4x4::multiply(const ColumnMatrix4x4 &other) const {
-    // ColumnMatrix4x4 result;
-
-    // for (int r = 0; r < 4; r++) {
-    //     float left[4];
-    //     for (int c = 0; c < 4; c++) {
-    //         left[c] = data[c][r];
-    //         const float *right = &other.data[c][0];
-    //         float value = 0.0;
-    //         // dot mult
-    //         for (int i = 0; i < 4; i++) {
-    //             value += left[i] * right[i];
-    //         }
-    //         result.data[c][r] = value;
-    //     }
-    // }
-    // return result;
-
-    // ColumnMatrix4x4 result;
-
-    // for (int r = 0; r < 4; r++) {
-    //     float row[4];
-    //     for (int c = 0; c < 4; c++) {
-    //         const float* column = other.data[0];
-    //         row[c] = data[c][r];
-    //         float value = 0;
-    //
-    //         for (int i = 0; i < 4; i++) {
-    //             value += row[i] * column[i];
-    //         }
-    //
-    //         result.data[c][r] = value;
-    //     }
-    // }
-
-    // return result;
-
-    /// 1, 0, 0, 0
-    /// 0, 1, 0, 0
-    /// 0, 0, 1, 0
-    /// 0, 0, 0, 1
-
     ColumnMatrix4x4 result;
 
     for (int c = 0; c < 4; c++) {
@@ -163,12 +122,12 @@ ColumnMatrix4x4 ColumnMatrix4x4::translate(const float x, const float y, const f
     translationMatrix.data[3][1] = y;
     translationMatrix.data[3][2] = z;
 
-    return translationMatrix;
+    return multiply(translationMatrix);
 }
 
 ColumnMatrix4x4 ColumnMatrix4x4::rotate_x(const float angle) const {
-    const float sin = std::sinf(angle);
-    const float cos = std::cosf(angle);
+    const float sin = std::sinf(angle * (static_cast<float>(M_PI) / 180.0f));
+    const float cos = std::cosf(angle * (static_cast<float>(M_PI) / 180.0f));
 
     ColumnMatrix4x4 rotationMatrix = ColumnMatrix4x4::identity();
 
@@ -181,8 +140,8 @@ ColumnMatrix4x4 ColumnMatrix4x4::rotate_x(const float angle) const {
 }
 
 ColumnMatrix4x4 ColumnMatrix4x4::rotate_y(const float angle) const {
-    const float sin = std::sinf(angle);
-    const float cos = std::cosf(angle);
+    const float sin = std::sinf(angle * (static_cast<float>(M_PI) / 180.0f));
+    const float cos = std::cosf(angle * (static_cast<float>(M_PI) / 180.0f));
 
     ColumnMatrix4x4 rotationMatrix = ColumnMatrix4x4::identity();
 
@@ -195,8 +154,8 @@ ColumnMatrix4x4 ColumnMatrix4x4::rotate_y(const float angle) const {
 }
 
 ColumnMatrix4x4 ColumnMatrix4x4::rotate_z(const float angle) const {
-    const float sin = std::sinf(angle);
-    const float cos = std::cosf(angle);
+    const float sin = std::sinf(angle * (static_cast<float>(M_PI) / 180.0f));
+    const float cos = std::cosf(angle * (static_cast<float>(M_PI) / 180.0f));
 
     ColumnMatrix4x4 rotationMatrix = ColumnMatrix4x4::identity();
 
@@ -259,6 +218,15 @@ vector2 ColumnMatrix4x4::operator*(const vector2 &other) const {
 float* ColumnMatrix4x4::operator[](const int index) {
     return &data[index][0];
 }
+
+ColumnMatrix4x4::operator const float *() const {
+    return &data[0][0];
+}
+
+ColumnMatrix4x4::operator float *() {
+    return &data[0][0];
+}
+
 
 ColumnMatrix4x4 ColumnMatrix4x4::inverse() const {
     float s[6];

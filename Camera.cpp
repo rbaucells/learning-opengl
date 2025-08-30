@@ -30,7 +30,7 @@ void Camera::RotateCamera(const float change) {
 }
 
 void Camera::UpdateViewMatrix() {
-    ColumnMatrix4x4 translationMatrix;
+    ColumnMatrix4x4 translationMatrix = ColumnMatrix4x4::identity();
     translationMatrix = translationMatrix.translate(-position.x, -position.y, -position.z);
 
     ColumnMatrix4x4 rotationMatrix = ColumnMatrix4x4::identity();

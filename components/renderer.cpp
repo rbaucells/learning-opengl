@@ -93,9 +93,13 @@ Renderer::~Renderer() {
 void Renderer::Draw(const ColumnMatrix4x4& view, const ColumnMatrix4x4 &projection, const int mode) const {
     // create the model matrix from the transform
     ColumnMatrix4x4 model = ColumnMatrix4x4::identity();
-    model = model.translate(object->transform.localPosition.x, object->transform.localPosition.y, 0.0f);
-    model = model.rotate_z(object->transform.localRotation);
-    model = model.scale_anisotropic(object->transform.localScale.x, object->transform.localScale.y, 1.0f);
+
+    vector2 globalPosition = object->transform.getGlobalPosition();
+    float globalRotation = object->transform.getGlobalRotation();
+    vector2 globalScale = object->transform.getGlobalScale();
+    model = model.translate(globalPosition.x, globalPosition.y, 0.0f);
+    model = model.rotate_z(globalRotation);
+    model = model.scale_anisotropic(globalScale.x, globalScale.y, 1.0f);
 
     // combine the matrices into a single MVP matrix
     ColumnMatrix4x4 mvp = projection * (view * model);
@@ -103,7 +107,7 @@ void Renderer::Draw(const ColumnMatrix4x4& view, const ColumnMatrix4x4 &projecti
     glUseProgram(shaderProgram);
 
     GLint mvpLocation = glGetUniformLocation(shaderProgram, "mvp");
-    glUniformMatrix4fv(mvpLocation, 1, GL_FALSE, (const GLfloat*) mvp);
+    glUniformMatrix4fv(mvpLocation, 1, GL_FALSE, static_cast<const GLfloat*>(mvp));
 
     GLint numberOfChannelsLocation = glGetUniformLocation(shaderProgram, "channels");
     glUniform1i(numberOfChannelsLocation, numberOfChannels);
