@@ -7,7 +7,7 @@
 
 #include "../transform.h"
 
-std::string getStringFromMatrix(const ColumnMatrix4x4 &matrix) {
+std::string getStringFromMatrix(const ColumnMatrix4X4 &matrix) {
     std::stringstream result;
     result << std::fixed << std::setprecision(4);
 
@@ -44,17 +44,17 @@ int main() {
     std::cout << "local to world matrix: \n" << getStringFromMatrix(child.localToWorldMatrix());
     std::cout << "world to local matrix: \n" << getStringFromMatrix(child.worldToLocalMatrix());
 
-    const vector2 newGlobalPosition = {15, 9.5};
+    const Vector2 newGlobalPosition = {15, 9.5};
     child.setGlobalPosition(newGlobalPosition);
-    const vector2 curGlobalPosition = child.getGlobalPosition();
+    const Vector2 curGlobalPosition = child.getGlobalPosition();
 
     std::printf("Child new global position {%f, %f} and Child cur global position {%f, %f} \n", newGlobalPosition.x, newGlobalPosition.y, curGlobalPosition.x, curGlobalPosition.y);
 
     assert(newGlobalPosition == curGlobalPosition);
 
-    const vector2 newGlobalScale = {2.54, 3.45};
+    const Vector2 newGlobalScale = {2.54, 3.45};
     child.setGlobalScale(newGlobalScale);
-    const vector2 curGlobalScale = child.getGlobalScale();
+    const Vector2 curGlobalScale = child.getGlobalScale();
 
     std::printf("Child new global scale {%f, %f} and Child cur global scale {%f, %f} \n", newGlobalScale.x, newGlobalScale.y, curGlobalScale.x, curGlobalScale.y);
 

@@ -11,6 +11,8 @@ add_executable(OpenGL components/RotateComponent.cpp components/RotateComponent.
         components/Renderer.h
         transform.cpp
         math/vector4.cpp
+        workQueue.cpp
+        workQueue.h
 )
 
 target_include_directories(OpenGL PRIVATE dependencies/include)
@@ -31,3 +33,9 @@ add_executable(transformTests tests/transformTests.cpp math/mathematics.h depend
 target_include_directories(transformTests PRIVATE dependencies/include)
 
 add_test(NAME transformTests COMMAND transformTests)
+
+
+add_executable(matrixTests tests/matrixTests.cpp math/mathematics.h dependencies/include/linmath/linmath.h)
+target_include_directories(matrixTests PRIVATE dependencies/include)
+
+add_test(NAME matrixTests COMMAND matrixTests)

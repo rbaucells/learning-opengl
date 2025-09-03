@@ -117,12 +117,12 @@ Renderer::~Renderer() {
 }
 
 
-void Renderer::Draw(const ColumnMatrix4x4& view, const ColumnMatrix4x4 &projection, const int mode) const {
+void Renderer::Draw(const ColumnMatrix4X4& view, const ColumnMatrix4X4 &projection, const int mode) const {
     // create the model matrix from the transform
-    const ColumnMatrix4x4 model = object->transform.localToWorldMatrix();
+    const ColumnMatrix4X4 model = object->transform.localToWorldMatrix();
 
     // combine the matrices into a single MVP matrix
-    ColumnMatrix4x4 mvp = projection * (view * model);
+    ColumnMatrix4X4 mvp = projection * (view * model);
 
     // make sure were using the shader
     glUseProgram(shaderProgram);

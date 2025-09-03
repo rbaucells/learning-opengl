@@ -30,7 +30,7 @@ struct InputContext {
         this -> action = action;
         this -> extraFloat = extraFloat;
     }
-    InputContext(const InputAction action, const vector2 extraVector2) {
+    InputContext(const InputAction action, const Vector2 extraVector2) {
         this -> action = action;
         this -> extraVector2 = extraVector2;
     }
@@ -41,7 +41,7 @@ struct InputContext {
 
     InputAction action;
 
-    vector2 extraVector2 = {};
+    Vector2 extraVector2 = {};
     float extraFloat = 0;
 
     bool state = false;
@@ -56,7 +56,7 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 
 void processGamepadEvents(const GLFWgamepadstate& current, const GLFWgamepadstate& last);
 
-vector2 mousePosToScreenPos(const vector2& mousePos);
+Vector2 mousePosToScreenPos(const Vector2& mousePos);
 
 inline Event<bool> esc_event, f1_event, f2_event, f3_event, f4_event, f5_event, f6_event, f7_event, f8_event, f9_event, f10_event, f11_event, f12_event,
                     backtick_event, one_event, two_event, three_event, four_event, five_event, six_event, seven_event, eight_event, nine_event, zero_event, hyphen_event, equals_event, backspace_event,
@@ -71,6 +71,6 @@ inline Event<bool> esc_event, f1_event, f2_event, f3_event, f4_event, f5_event, 
                     dpad_up_event, dpad_down_event, dpad_right_event, dpad_left_event,
                     gamepad_view_event, gamepad_menu_event, gamepad_guide_event;
 
-inline Event<vector2> mouse_moved_event, left_stick_moved_event, right_stick_moved_event;
+inline Event<Vector2> mouse_moved_event, left_stick_moved_event, right_stick_moved_event;
 
 inline Event<float> left_trigger_event, right_trigger_event, scroll_x_event, scroll_y_event;

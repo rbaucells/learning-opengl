@@ -4,6 +4,8 @@
 
 #include <vector>
 
+#include "workQueue.h"
+
 /**
  * @brief constructs a new Object.
  * @param objectName the name of the object.
@@ -17,6 +19,18 @@ Object::Object(const std::string &objectName, const int objectTag, const Transfo
     updateEvent.subscribe(this, &Object::update);
     lateUpdateEvent.subscribe(this, &Object::lateUpdate);
     fixedUpdateEvent.subscribe(this, &Object::fixedUpdate);
+}
+
+void Object::onEnable() const {
+    for (const auto &component : components) {
+        component->onEnable();
+    }
+}
+
+void Object::onDisable() const {
+    for (const auto &component : components) {
+        component->onDisable();
+    }
 }
 
 /**
@@ -62,15 +76,77 @@ void Object::lateUpdate(double deltaTime) const {
 }
 
 /**
- * @brief destroys the object, removing it from the scene and freeing its memory.
+ * @brief marks the object for destruction, at the end of the frame it will be destroyed
  *
- * this method clears all components, removes the object from the global list of objects,
- * and then deletes the object instance.
+ * it will clear all components, remove the object from the global list of objects,
+ * and then delete the object instance.
  */
-void Object::destroy() {
+void Object::markForDestroy() {
+    markedForDestruction = true;
+    markedForDestructionObjects.push_back(this);
+}
+
+/**
+ * @brief removes all attached components, of whatever type
+ */
+void Object::removeAllComponents() {
+    for (const auto component : components) {
+        delete component;
+    }
+
     components.clear();
+}
+
+bool Object::getActive() const {
+    return activated;
+}
+
+/**
+ * @brief sets the activated state of the object. calling the appropriate on### function on its components
+ * @param state the value to set activated to
+ */
+void Object::setActive(const bool state) {
+    // if we were activated but arent gonna be anymore
+    if (activated && !state) {
+        onDisable();
+    }
+    else if (!activated && state) {
+        onEnable();
+    }
+
+    activated = state;
+}
+
+/**
+ * @brief tells all the components its time to go bye bye and kills himself
+ *
+ * also removes any queue items owned by the components
+ */
+void Object::onDestroy() {
+    transform.removeAllChildren();
+    // only call on destroy if its activated
+    if (activated) {
+        setActive(false);
+        for (Component* component : components) {
+            component->onDestroy();
+        }
+    }
+    else {
+        setActive(false);
+    }
+
     std::erase(allObjects, this);
-    delete this;
+
+    for (const Component* component : components) {
+        // if something in the queue is owned by that compoennt in one of the queues remove it
+        WorkQueue::removeAllTimedQueue(component);
+        WorkQueue::removeAllConditionalQueue(component);
+        WorkQueue::removeAllNextFrameQueue(component);
+
+        delete component;
+    }
+
+    components.clear();
 }
 
 // static methods

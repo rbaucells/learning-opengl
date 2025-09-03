@@ -6,6 +6,7 @@
 #include "object.h"
 #include "components/rotateComponent.h"
 #include "main.h"
+#include "input.h"
 
 #include <complex>
 #include <fstream>
@@ -15,10 +16,11 @@
 #include <string>
 #include <thread>
 
+#include "workQueue.h"
 #include "components/renderer.h"
 
 // needed by framebuffer_size_callback() and by object.draw()
-ColumnMatrix4x4 projection;
+ColumnMatrix4X4 projection;
 
 // callbacks
 void error_callback(int error, const char *description) {
@@ -54,7 +56,6 @@ std::string GetShaderString(const std::string &filePath) {
 
     return ss.str();
 }
-
 unsigned int CompileShader(unsigned int type, const std::string &source) {
     const unsigned int id = glCreateShader(type);
     const char *src = source.c_str();
@@ -76,7 +77,6 @@ unsigned int CompileShader(unsigned int type, const std::string &source) {
 
     return id;
 }
-
 unsigned int CreateShader(const std::string &vertexShader, const std::string &fragmentShader) {
     unsigned int program = glCreateProgram();
     unsigned int vertexShaderId = CompileShader(GL_VERTEX_SHADER, vertexShader);
@@ -92,6 +92,37 @@ unsigned int CreateShader(const std::string &vertexShader, const std::string &fr
     glDeleteShader(fragmentShaderId);
 
     return program;
+}
+
+
+void handleQueue(double deltaTime) {
+    for (const WorkQueue::NextFrameQueueEntry& entry : WorkQueue::nextFrameQueue) {
+        entry.action();
+    }
+
+    WorkQueue::nextFrameQueue.clear();
+
+    for (auto it = WorkQueue::timedQueue.begin(); it != WorkQueue::timedQueue.end(); ) {
+        it->time -= deltaTime;
+
+        if (it->time < 0) {
+            it->action();
+            it = WorkQueue::timedQueue.erase(it);
+            continue;
+        }
+
+        ++it;
+    }
+
+    for (auto it = WorkQueue::conditionalQueue.begin(); it != WorkQueue::conditionalQueue.end(); ) {
+        if (it->condition()) {
+            it->action();
+            it = WorkQueue::conditionalQueue.erase(it);
+            continue;
+        }
+
+        ++it;
+    }
 }
 
 int main() {
@@ -154,14 +185,14 @@ int main() {
     Object origin1("origin1", 0, {{0, 0}, 0, {1, 1}});
     origin1.addComponent<RotateComponent>(-45);
 
-    Object origin2("origin2", 0, {{0, 0}, 0, {1, 1}});
-    origin2.addComponent<RotateComponent>(45);
+    // Object origin2("origin2", 0, {{0, 0}, 0, {1, 1}});
+    // origin2.addComponent<RotateComponent>(45);
 
     Object square("square", 0, {{200, 0}, 0, {1, 1}, &origin1.transform});
     square.addComponent<Renderer>(vertices, indices, GL_STATIC_DRAW, "/Users/ricardito/CLionProjects/OpenGL/res/textures/super-mario-transparent-background-20.png", true, GL_CLAMP, shader, 2);
 
-    Object otherSquare("other square", 0, {{600, 0}, 0, {1, 1}, &origin2.transform});
-    otherSquare.addComponent<Renderer>(vertices, indices, GL_STATIC_DRAW, "/Users/ricardito/CLionProjects/OpenGL/res/textures/dvdvd.jpg", true, GL_CLAMP, shader, 1);
+    // Object otherSquare("other square", 0, {{600, 0}, 0, {1, 1}, &origin2.transform});
+    // otherSquare.addComponent<Renderer>(vertices, indices, GL_STATIC_DRAW, "/Users/ricardito/CLionProjects/OpenGL/res/textures/dvdvd.jpg", true, GL_CLAMP, shader, 1);
 
     // empty the buffers to make sure its drawing properly
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
@@ -191,6 +222,14 @@ int main() {
         // if there are some components left to be "started", start em and remove them from the queueueue
         if (!callStartBeforeNextUpdate.empty()) {
             for (Component *component: callStartBeforeNextUpdate) {
+                component->awake();
+            }
+
+            for (Component *component: callStartBeforeNextUpdate) {
+                component->onEnable();
+            }
+
+            for (Component *component: callStartBeforeNextUpdate) {
                 component->start();
             }
 
@@ -218,6 +257,8 @@ int main() {
         updateEvent.invoke(deltaTime);
         lateUpdateEvent.invoke(deltaTime);
 
+        handleQueue(deltaTime);
+
         // iterate through all the renderers in reverse. AKA: from back to front
         for (auto &renderersInLayer: std::ranges::reverse_view(allRenderers)) {
             for (const auto &renderer: renderersInLayer.second) {
@@ -227,6 +268,11 @@ int main() {
 
         glfwSwapBuffers(mainWindow);
         glfwPollEvents();
+
+        // destroy the things that need to be destroyed right before the end of the frame
+        for (Object* object : markedForDestructionObjects) {
+            object->onDestroy();
+        }
 
         // framerate capping
         auto endOfLoopTime = std::chrono::high_resolution_clock::now();

@@ -1,8 +1,8 @@
 #pragma once
 #include "camera.h"
-#include <vector>
-
 #include "event.h"
+// forward declaration
+struct GLFWwindow;
 
 class Component;
 
@@ -13,12 +13,9 @@ inline int SCREEN_HEIGHT = 1080;
 inline GLFWwindow *mainWindow;
 inline Camera *camera;
 
-inline std::vector<Component*> callStartBeforeNextUpdate {};
-
 constexpr float fixedUpdatePerSecond = 60;
 constexpr int fps = 60;
 
-// constexpr float fixedUpdateIntervalInMilli = 1000.0f / fixedUpdatePerSecond;
 constexpr float fixedUpdateIntervalInSeconds = 1.0f / fixedUpdatePerSecond;
 
 inline Event<double> updateEvent;
