@@ -4,10 +4,13 @@
 template<typename... Args>
 class Event {
 private:
-    using Handler = std::function<void(Args...)>;
-    std::vector<Handler> handlers;
+    using handler = std::function<void(Args...)>;
+    std::vector<handler> handlers;
 
 public:
+    void subscribe(const handler& functionHandler) {
+        handlers.push_back(functionHandler);
+    }
     template<class T>
     void subscribe(T *instance, void (T::*method)(Args...) const) {
         // push back the function signature from a class instance
@@ -39,7 +42,6 @@ public:
             (instance->*method)(args...);
         });
     }
-
 
     void invoke(Args... args) {
         if (handlers.empty())

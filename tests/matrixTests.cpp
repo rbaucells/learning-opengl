@@ -3,42 +3,57 @@
 #include "../math/mathematics.h"
 
 int main() {
-    // test with an identity matrix, determinant should be 1
+    Matrix<2, 2> matrixA;
+    matrixA[0][0] = 4;
+    matrixA[0][1] = 7;
+    matrixA[1][0] = 2;
+    matrixA[1][1] = 6;
+
+    auto inverseA = matrixA.inverse();
+    std::cout << "Inverse of Matrix A: \n" << inverseA.toString();
+
+    Matrix<3, 3> matrixB;
+    matrixB[0][0] = 1; matrixB[0][1] = 2; matrixB[0][2] = 1;
+    matrixB[1][0] = 5; matrixB[1][1] = 9; matrixB[1][2] = 1;
+    matrixB[2][0] = 2; matrixB[2][1] = 1; matrixB[2][2] = 0;
+
+    auto inverseB = matrixB.inverse();
+    std::cout << "Inverse of Matrix B: \n" << inverseB.toString();
+
     Matrix<3, 3> identityMatrix;
-    identityMatrix.data[0][0] = 1;
-    identityMatrix.data[1][1] = 1;
-    identityMatrix.data[2][2] = 1;
-    std::cout << "Determinant of identity matrix: " << identityMatrix.determinant() << " (expected 1)\n";
+    identityMatrix[0][0] = 1; identityMatrix[0][1] = 0; identityMatrix[0][2] = 0;
+    identityMatrix[1][0] = 0; identityMatrix[1][1] = 1; identityMatrix[1][2] = 0;
+    identityMatrix[2][0] = 0; identityMatrix[2][1] = 0; identityMatrix[2][2] = 1;
 
-    // test with a matrix whose determinant is known to be 0
+    auto inverseIdentity = identityMatrix.inverse();
+    std::cout << "Inverse of an Identity Matrix: \n" << inverseIdentity.toString();
+
     Matrix<3, 3> singularMatrix;
-    singularMatrix.data[0][0] = 1; singularMatrix.data[1][0] = 6; singularMatrix.data[2][0] = 4;
-    singularMatrix.data[0][1] = 2; singularMatrix.data[1][1] = 7; singularMatrix.data[2][1] = 3;
-    singularMatrix.data[0][2] = 8; singularMatrix.data[1][2] = 9; singularMatrix.data[2][2] = 5;
-    std::cout << "Determinant of singular matrix: " << singularMatrix.determinant() << " (expected -60)\n";
+    singularMatrix[0][0] = 1; singularMatrix[0][1] = 2; singularMatrix[0][2] = 3;
+    singularMatrix[1][0] = 4; singularMatrix[1][1] = 5; singularMatrix[1][2] = 6;
+    singularMatrix[2][0] = 7; singularMatrix[2][1] = 8; singularMatrix[2][2] = 9;
 
-    // Matrix<2, 2> inversableMatrix;
-    //
-    // inversableMatrix[0][0] = 3;
-    // inversableMatrix[1][0] = 4;
-    // inversableMatrix[0][1] = 1;
-    // inversableMatrix[1][1] = 2;
+    try {
+        const auto inverseSingular = singularMatrix.inverse();
+        std::cout << "Inverse of a Singular Matrix (should not be reached): \n" << inverseSingular.toString();
+    }
+    catch (const std::exception& e) {
+        std::cerr << "Caught expected exception for singular matrix: \n" << e.what() << std::endl;
+    }
 
-    Matrix<3, 3> inversableMatrix;
+    Matrix<2, 2> coefficients;
 
-    inversableMatrix[0][0] = 1;
-    inversableMatrix[0][1] = 2;
-    inversableMatrix[0][2] = 1;
+    coefficients[0][0] = 2;
+    coefficients[0][1] = 3;
+    coefficients[1][0] = -5;
+    coefficients[1][1] = 1;
 
-    inversableMatrix[1][0] = 5;
-    inversableMatrix[1][1] = 9;
-    inversableMatrix[1][2] = 1;
+    Matrix<2, 1> result;
 
-    inversableMatrix[2][0] = 2;
-    inversableMatrix[2][1] = 1;
-    inversableMatrix[2][2] = 0;
+    result[0][0] = 15;
+    result[0][1] = 31;
 
-    auto inverse = inversableMatrix.inverse();
+    Matrix solution = Matrix<2, 1>::solveSystemOfEquations(coefficients, result);
 
-    std::cout << "Inverse of inversableMatrix matrix: \n" << inverse.toString();
+    std::cout << "Solution to system of equations: x = " << solution[0][0] << " y = " << solution[0][1] << std::endl;
 }

@@ -6,6 +6,12 @@
 ColumnMatrix4X4::ColumnMatrix4X4(const ColumnMatrix4X4 &other) {
     // mem copy
     memcpy(data, other.data, sizeof(float) * 16);
+
+    // for (int c = 0; c < 4; c++) {
+    //     for (int r = 0; r < 4; r++) {
+    //         data[c][r] = other.data[c][r];
+    //     }
+    // }
 }
 
 ColumnMatrix4X4 ColumnMatrix4X4::identity() {
@@ -112,16 +118,17 @@ ColumnMatrix4X4 ColumnMatrix4X4::transpose() const {
 }
 
 ColumnMatrix4X4 ColumnMatrix4X4::translate(const float x, const float y, const float z) const {
-    /// 1, 0, 0, x
-    /// 0, 1, 0, y
-    /// 0, 0, 1, z
-    /// 0, 0, 0, 1
-    ColumnMatrix4X4 translationMatrix = ColumnMatrix4X4::identity();
+    std::cout << "Getting identity for translationMatrix \n";
+    ColumnMatrix4X4 translationMatrix = identity();
 
+    std::cout << "putting x \n";
     translationMatrix.data[3][0] = x;
+    std::cout << "putting y \n";
     translationMatrix.data[3][1] = y;
+    std::cout << "putting z \n";
     translationMatrix.data[3][2] = z;
 
+    std::cout << "multiplying by translationMatrix \n";
     return multiply(translationMatrix);
 }
 
@@ -198,7 +205,7 @@ ColumnMatrix4X4 ColumnMatrix4X4::wrap(mat4x4 other) {
     return newColumnMatrix4x4;
 }
 
-Vector4 ColumnMatrix4X4::operator*(const Vector4& other) const {
+Vector4 ColumnMatrix4X4::operator*(const Vector4 &other) const {
     Vector4 result;
 
     result.x = data[0][0] * other.x + data[1][0] * other.y + data[2][0] * other.z + data[3][0] * other.w;
@@ -215,7 +222,7 @@ Vector2 ColumnMatrix4X4::operator*(const Vector2 &other) const {
     return Vector2{result.x, result.y};
 }
 
-float* ColumnMatrix4X4::operator[](const int index) {
+float *ColumnMatrix4X4::operator[](const int index) {
     return &data[index][0];
 }
 

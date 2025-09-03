@@ -192,6 +192,35 @@ struct ColumnMatrix4X4 {
     static ColumnMatrix4X4 wrap(mat4x4 other);
 
     float data[4][4] = {{0}, {0}, {0}, {0}};
+
+    /**
+ *
+ * @return The column-major matrix as a string for printing
+ */
+    [[nodiscard]] std::string toString() const {
+        std::stringstream ss;
+        ss.precision(2);
+
+        for (int r = 0; r < 4; r++) {
+            ss << " [";
+
+            for (int c = 0; c < 4; c++) {
+                ss << data[c][r];
+
+                if (c < 4 - 1)
+                    ss << ", ";
+            }
+
+            ss << "]";
+
+            if (r < 4 - 1)
+                ss << ",\n";
+        }
+
+        ss << "\n]";
+        ss << "\n";
+        return ss.str();
+    }
 };
 
 struct Vertex {
@@ -214,18 +243,115 @@ public:
 
     float data[COLUMNS][ROWS] = {};
 
-    #if ROWS == COLUMNS
-    template<int r>
-    static Matrix<r, r> identity() {
-        Matrix<r, r> result;
+    [[nodiscard]] Matrix<ROWS, COLUMNS> add(const Matrix<ROWS, COLUMNS> &other) const {
+        static_assert(other.rows == ROWS || other.columns == COLUMNS);
 
-        for (int i = 0; i < r; i++) {
-            result[i][i] = 1;
+        Matrix result;
+
+        for (int c = 0; c < COLUMNS; c++) {
+            for (int r = 0; r < ROWS; r++) {
+                result[c][r] = data[c][r] + other.data[c][r];
+            }
         }
 
         return result;
     }
 
+    [[nodiscard]] Matrix<ROWS, COLUMNS> subtract(const Matrix<ROWS, COLUMNS> &other) const {
+        static_assert(other.rows == ROWS || other.columns == COLUMNS);
+
+        Matrix result;
+
+        for (int c = 0; c < COLUMNS; c++) {
+            for (int r = 0; r < ROWS; r++) {
+                result[c][r] = data[c][r] - other.data[c][r];
+            }
+        }
+
+        return result;
+    }
+
+    Matrix<ROWS, COLUMNS> operator+(const Matrix<ROWS, COLUMNS> &other) const {
+        return add(other);
+    }
+
+    Matrix<ROWS, COLUMNS> operator-(const Matrix<ROWS, COLUMNS> &other) const {
+        return subtract(other);
+    }
+
+    /**
+   * @brief Multiplies this matrix by other. returning a matrix of size this rows, and other columns
+   * @param other Matrix to multiply this * other
+   * @return The product of the two matrix. Having Number of rows as this, and number of columns as other
+   */
+    template<int OTHER_ROWS, int OTHER_COLUMNS>
+    [[nodiscard]] Matrix<ROWS, OTHER_COLUMNS> multiply(const Matrix<OTHER_ROWS, OTHER_COLUMNS> &other) const {
+        assert(COLUMNS == other.rows);
+
+        Matrix<ROWS, OTHER_COLUMNS> result;
+
+        for (int c = 0; c < COLUMNS; c++) {
+            for (int r = 0; r < ROWS; r++) {
+                for (int x = 0; x < COLUMNS; x++) {
+                    result[c][r] += data[x][r] * other.data[c][x];
+                }
+            }
+        }
+
+        return result;
+    }
+
+    bool operator==(const Matrix &other) const {
+        return compare(other);
+    }
+
+    bool compare(const Matrix &other) {
+        static_assert(other.rows == ROWS || other.columns == COLUMNS);
+
+        for (int c = 0; c < COLUMNS; c++) {
+            for (int r = 0; r < ROWS; r++) {
+                if (std::abs(other.data[c][r] - data[c][r]) > FLT_EPSILON)
+                    return false;
+            }
+        }
+
+        return true;
+    }
+
+    float *operator[](const int index) {
+        return &data[index][0];
+    }
+
+    const float *operator[](const int index) const {
+        return &data[index][0];
+    }
+
+    [[nodiscard]] Matrix<ROWS - 1, COLUMNS - 1> getSubMatrix(const int rowToRemove, const int columnToRemove) const {
+        Matrix<ROWS - 1, COLUMNS - 1> subMatrix;
+        int subMatrixR = 0;
+        for (int r = 0; r < ROWS; r++) {
+            if (r == rowToRemove)
+                continue;
+
+            int subMatrixC = 0;
+            for (int c = 0; c < COLUMNS; c++) {
+                if (c == columnToRemove)
+                    continue;
+
+                subMatrix.data[subMatrixC][subMatrixR] = data[c][r];
+                subMatrixC++;
+            }
+            subMatrixR++;
+        }
+
+        return subMatrix;
+    }
+
+#if ROWS == COLUMNS // if its a square matrix
+    /**
+     * @brief Swaps elements on row r and column c to row c and column r (Reflection across main diagonal)
+     * @return Matrix with columns and rows swapped
+     */
     [[nodiscard]] Matrix<ROWS, COLUMNS> transpose() const {
         Matrix<ROWS, ROWS> result;
 
@@ -239,38 +365,17 @@ public:
     }
 
     /**
-     *
-     * @tparam R_SIZE How many rows
-     * @tparam C_SIZE How many columns
-     * @param matrix Where the data will be written
-     * @param rowA Index of row a
-     * @param rowB
+     * @brief Creates augmented matrix with this matrix and identity matrix and turns this into identity with simple row operations
+     * @return The left side of the augmented matrix. Think 1 / this matrix
      */
-    template<int R_SIZE, int C_SIZE>
-    static void swapRows(Matrix<R_SIZE, C_SIZE>& matrix, const int rowA, const int rowB) {
-        // int temp = a;
-        // a = b;
-        // b = temp;
-
-        float temp[C_SIZE];
-
-        for (int c = 0; c < C_SIZE; c++) {
-            temp[c] = matrix[c][rowA];
-        }
-
-        for (int c = 0; c < C_SIZE; c++) {
-            matrix[c][rowA] = matrix[c][rowB];
-        }
-
-        for (int c = 0; c < C_SIZE; c++) {
-            matrix[c][rowB] = temp[c];
-        }
-    }
-
     [[nodiscard]] Matrix<ROWS, COLUMNS> inverse() const {
         // its a one by one, we can just return 1 / value
         if constexpr (ROWS == 1) {
+            if (data[0][0] == 0) {
+                std::__throw_runtime_error("Determinant cannot be zero");
+            }
             Matrix<1, 1> result;
+
             result[0][0] = 1 / data[0][0];
             return result;
         }
@@ -312,14 +417,14 @@ public:
                 // if the pivot is zero
                 if (temp[c][c] == 0) {
                     int biggestRow = 0;
-
-                    for (int r = 0; r < ROWS; r++) {
+                    int r;
+                    for (r = 0; r < ROWS; r++) {
                         if (temp[c][r] != 0 && std::abs(temp[c][r]) > std::abs(temp[c][biggestRow])) {
                             biggestRow = r;
                         }
                     }
 
-                    if (temp[c][biggestRow] == 0) {
+                    if (temp[c][biggestRow] == 0 || r == ROWS) {
                         std::__throw_runtime_error("Cannot get inverse of Matrix, determinant is zero");
                     }
 
@@ -360,6 +465,10 @@ public:
         }
     }
 
+    /**
+     * @warning if zero do not attempt to find inverse
+     * @return The determinant of this matrix
+     */
     [[nodiscard]] float determinant() const {
         if constexpr (ROWS == 1) {
             return data[0][0];
@@ -382,142 +491,7 @@ public:
         }
     }
 
-    Matrix<ROWS - 1, COLUMNS - 1> getSubMatrix(const int rowToRemove, const int columnToRemove) const {
-        Matrix<ROWS - 1, COLUMNS - 1> subMatrix;
-        int subMatrixR = 0;
-        for (int r = 0; r < ROWS; r++) {
-            if (r == rowToRemove)
-                continue;
-
-            int subMatrixC = 0;
-            for (int c = 0; c < COLUMNS; c++) {
-                if (c == columnToRemove)
-                    continue;
-
-                subMatrix.data[subMatrixC][subMatrixR] = data[c][r];
-                subMatrixC++;
-            }
-            subMatrixR++;
-        }
-
-        return subMatrix;
-    }
-    #endif
-
-    Matrix multiply(const Matrix &other) const {
-        assert(COLUMNS == other.rows);
-
-        Matrix<ROWS, other.columns> result;
-
-        for (int c = 0; c < COLUMNS; c++) {
-            for (int r = 0; r < ROWS; r++) {
-                for (int x = 0; x < COLUMNS; x++) {
-                    result[c][r] += data[x][r] * other.data[c][x];
-                }
-            }
-        }
-
-        return result;
-    }
-
-    float *operator[](const int index) {
-        return &data[index][0];
-    }
-
-    const float *operator[](const int index) const {
-        return &data[index][0];
-    }
-
-    Matrix<ROWS, COLUMNS> add(const Matrix &other) const {
-        assert(other.rows == ROWS || other.columns == COLUMNS);
-
-        Matrix result;
-
-        for (int c = 0; c < COLUMNS; c++) {
-            for (int r = 0; r < ROWS; r++) {
-                result[c][r] = data[c][r] + other.data[c][r];
-            }
-        }
-
-        return result;
-    }
-
-    Matrix<ROWS, COLUMNS> subtract(const Matrix &other) const {
-        assert(other.rows == ROWS || other.columns == COLUMNS);
-
-        Matrix result;
-
-        for (int c = 0; c < COLUMNS; c++) {
-            for (int r = 0; r < ROWS; r++) {
-                result[c][r] = data[c][r] - other.data[c][r];
-            }
-        }
-
-        return result;
-    }
-
-    Matrix<ROWS, COLUMNS> operator+(const Matrix &other) {
-        return add(other);
-    }
-
-    Matrix<ROWS, COLUMNS> operator-(const Matrix &other) {
-        return subtract(other);
-    }
-
-    Matrix operator*(const Matrix &other) {
-        return multiply(other);
-    }
-
-    bool compare(const Matrix &other) {
-        assert(other.rows == ROWS || other.columns == COLUMNS);
-
-        for (int c = 0; c < COLUMNS; c++) {
-            for (int r = 0; r < ROWS; r++) {
-                if (std::abs(other.data[c][r] - data[c][r]) > FLT_EPSILON)
-                    return false;
-            }
-        }
-
-        return true;
-    }
-
-    #if COLUMNS >= 2
-    Matrix multiply(const Vector2 &other) {
-        Matrix<2, 1> vectorAsAMatrix;
-
-        vectorAsAMatrix[0][0] = other.x;
-        vectorAsAMatrix[0][1] = other.y;
-
-        return multiply(vectorAsAMatrix);
-    }
-    #endif
-
-    #if COLUMNS >= 3
-    Matrix multiply(const Vector3 &other) {
-        Matrix<3, 1> vectorAsAMatrix;
-
-        vectorAsAMatrix[0][0] = other.x;
-        vectorAsAMatrix[0][1] = other.y;
-        vectorAsAMatrix[0][2] = other.z;
-
-        return multiply(vectorAsAMatrix);
-    }
-    #endif
-
-    #if COLUMNS >= 4
-    Matrix multiply(const Vector4 &other) {
-        Matrix<4, 1> vectorAsAMatrix;
-
-        vectorAsAMatrix[0][0] = other.x;
-        vectorAsAMatrix[0][1] = other.y;
-        vectorAsAMatrix[0][2] = other.z;
-        vectorAsAMatrix[0][3] = other.w;
-
-        return multiply(vectorAsAMatrix);
-    }
-    #endif
-
-    #if COLUMNS == 4 && ROWS == 4
+    #if COLUMNS == 4 // if its a 4x4
     Matrix<ROWS, COLUMNS> scale(const float value) const {
         Matrix<ROWS, COLUMNS> result;
 
@@ -606,10 +580,16 @@ public:
         return transformation;
     }
     #endif
+#endif
 
+    /**
+     *
+     * @return The column-major matrix as a string for printing
+     */
     [[nodiscard]] std::string toString() const {
         std::stringstream ss;
         ss.precision(2);
+
         for (int r = 0; r < ROWS; r++) {
             ss << " [";
 
@@ -627,13 +607,60 @@ public:
         }
 
         ss << "\n]";
+        ss << "\n";
         return ss.str();
     }
 
-    static Matrix solveSystemOfEquations(const Matrix<2, 2> &coefficients, const Matrix<2, 2> &result) {
+    // static methods
+    /**
+     *
+     * @tparam SIZE How many rows/columns should the produced identity have
+     * @return Matrix with 1s on main diagonal and 0s elsewhere of SIZExSIZE
+     */
+    template<int SIZE>
+    static Matrix<SIZE, SIZE> identity() {
+        Matrix<SIZE, SIZE> result;
+
+        for (int i = 0; i < SIZE; i++) {
+            result[i][i] = 1;
+        }
+
+        return result;
+    }
+
+    /**
+ *
+ * @tparam R_SIZE How many rows
+ * @tparam C_SIZE How many columns
+ * @param matrix Where the data will be written
+ * @param rowA Index of row a
+ * @param rowB
+ */
+    template<int R_SIZE, int C_SIZE>
+    static void swapRows(Matrix<R_SIZE, C_SIZE> &matrix, const int rowA, const int rowB) {
+        // int temp = a;
+        // a = b;
+        // b = temp;
+
+        float temp[C_SIZE];
+
+        for (int c = 0; c < C_SIZE; c++) {
+            temp[c] = matrix[c][rowA];
+        }
+
+        for (int c = 0; c < C_SIZE; c++) {
+            matrix[c][rowA] = matrix[c][rowB];
+        }
+
+        for (int c = 0; c < C_SIZE; c++) {
+            matrix[c][rowB] = temp[c];
+        }
+    }
+
+    static Matrix solveSystemOfEquations(const Matrix<2, 2> &coefficients, const Matrix<2, 1> &result) {
         // TODO: we need to return coefficients inverse times result and that will give variables
-        Matrix coefficientsInverse = coefficients.inverse();
-        Matrix values = coefficientsInverse * result;
+        const Matrix<2, 2> coefficientsInverse = coefficients.inverse();
+        Matrix<2, 1> values = coefficientsInverse.multiply(result);
 
         return values;
     }

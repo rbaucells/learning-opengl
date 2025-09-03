@@ -39,7 +39,7 @@ public:
 
     void markForDestroy();
 
-    void setActive(bool state);
+    void setActive(bool newActivated);
     [[nodiscard]] bool getActive() const;
 
     template<IsComponent T, typename... Args>

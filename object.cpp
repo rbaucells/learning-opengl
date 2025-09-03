@@ -4,6 +4,7 @@
 
 #include <vector>
 
+#include "logging.h"
 #include "workQueue.h"
 
 /**
@@ -42,6 +43,7 @@ void Object::onDisable() const {
 void Object::update(double deltaTime) const {
     if (!activated)
         return;
+
     for (const auto &component: components) {
         component->update(deltaTime);
     }
@@ -56,6 +58,7 @@ void Object::update(double deltaTime) const {
 void Object::fixedUpdate(double fixedDeltaTime) const {
     if (!activated)
         return;
+
     for (const auto &component: components) {
         component->fixedUpdate(fixedDeltaTime);
     }
@@ -70,6 +73,7 @@ void Object::fixedUpdate(double fixedDeltaTime) const {
 void Object::lateUpdate(double deltaTime) const {
     if (!activated)
         return;
+
     for (const auto &component: components) {
         component->lateUpdate(deltaTime);
     }
@@ -103,18 +107,19 @@ bool Object::getActive() const {
 
 /**
  * @brief sets the activated state of the object. calling the appropriate on### function on its components
- * @param state the value to set activated to
+ * @param newActivated the value to set activated to
  */
-void Object::setActive(const bool state) {
+void Object::setActive(const bool newActivated) {
+    Logging l("setActive");
     // if we were activated but arent gonna be anymore
-    if (activated && !state) {
+    if (activated && !newActivated) {
         onDisable();
     }
-    else if (!activated && state) {
+    else if (!activated && newActivated) {
         onEnable();
     }
 
-    activated = state;
+    activated = newActivated;
 }
 
 /**
@@ -123,21 +128,25 @@ void Object::setActive(const bool state) {
  * also removes any queue items owned by the components
  */
 void Object::onDestroy() {
+    Logging l("onDestroy");
     transform.removeAllChildren();
     // only call on destroy if its activated
     if (activated) {
-        setActive(false);
+        setActive(false); // this will call onDisable as well
         for (Component* component : components) {
             component->onDestroy();
         }
     }
     else {
-        setActive(false);
+        setActive(false); // will not call onDisable since not activated
     }
 
-    std::erase(allObjects, this);
+    std::cout << "Erasing object from collections \n";
+    std::erase(allObjects, this); // we dont want to be in there anymore
+    std::erase(markedForDestructionObjects, this);
 
     for (const Component* component : components) {
+        std::cout << "Erasing component from queues \n";
         // if something in the queue is owned by that compoennt in one of the queues remove it
         WorkQueue::removeAllTimedQueue(component);
         WorkQueue::removeAllConditionalQueue(component);
