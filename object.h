@@ -4,7 +4,7 @@
 #include <vector>
 
 #include "main.h"
-#include "components/component.h"
+#include "systems/component.h"
 #include "transform.h"
 
 template<typename T>

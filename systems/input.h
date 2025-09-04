@@ -1,5 +1,5 @@
 #pragma once
-#include "math/mathematics.h"
+#include "../math/mathematics.h"
 #include "event.h"
 
 // forward declaration of GLFW things

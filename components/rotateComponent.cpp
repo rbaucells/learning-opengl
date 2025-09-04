@@ -1,6 +1,4 @@
 #include "rotateComponent.h"
-#include "../workQueue.h"
-#include <iostream>
 
 #include "renderer.h"
 #include "../object.h"

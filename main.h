@@ -2,7 +2,7 @@
 #include "camera.h"
 #include <vector>
 
-#include "event.h"
+#include "systems/event.h"
 
 struct GLFWwindow;
 class Component;

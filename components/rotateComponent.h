@@ -1,6 +1,6 @@
 #pragma once
-#include "component.h"
-#include "../event.h"
+#include "../systems/component.h"
+#include "../systems/event.h"
 
 class Renderer;
 

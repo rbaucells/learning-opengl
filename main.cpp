@@ -15,8 +15,8 @@
 #include <string>
 #include <thread>
 
-#include "input.h"
-#include "workQueue.h"
+#include "systems/input.h"
+#include "systems/workQueue.h"
 #include "components/renderer.h"
 
 // needed by framebuffer_size_callback() and by object.draw()
@@ -97,7 +97,7 @@ unsigned int CreateShader(const std::string &vertexShader, const std::string &fr
 }
 
 void handleQueue(const float deltaTime) {
-    for (auto [action] : nextFrameQueue) {
+    for (auto [action, owner] : nextFrameQueue) {
         action();
     }
 

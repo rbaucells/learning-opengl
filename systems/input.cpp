@@ -1,7 +1,7 @@
 #include "input.h"
 
-#include "main.h"
-#include "object.h"
+#include "../main.h"
+#include "../object.h"
 
 #include "GLFW/glfw3.h"
 

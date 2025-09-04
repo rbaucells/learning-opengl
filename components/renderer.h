@@ -1,7 +1,7 @@
 #pragma once
 #include <map>
 #include "../math/mathematics.h"
-#include "component.h"
+#include "../systems/component.h"
 
 class Renderer : public Component {
 public:

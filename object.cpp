@@ -1,8 +1,10 @@
-#include "components/component.h"
+#include "systems/component.h"
 #include "object.h"
 #include "main.h"
 
 #include <vector>
+
+#include "systems/workQueue.h"
 
 /**
  * @brief constructs a new Object.
@@ -70,7 +72,7 @@ void Object::lateUpdate(double deltaTime) const {
 void Object::destroy() {
     components.clear();
     std::erase(allObjects, this);
-    delete this;
+    removeAllQueueEntries(this);
 }
 
 // static methods

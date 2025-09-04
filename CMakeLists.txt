@@ -3,16 +3,16 @@ project(OpenGL)
 
 set(CMAKE_CXX_STANDARD 20)
 
-add_executable(OpenGL components/RotateComponent.cpp components/RotateComponent.h components/component.h math/columnMatrix4x4.cpp math/mathematics.h math/rowMatrix4x4.cpp math/vector2.cpp math/vector3.cpp Camera.cpp main.cpp main.h object.cpp object.h camera.h dependencies/stb_image.cpp
-        input.h
-        input.cpp
-        Event.h
+add_executable(OpenGL components/RotateComponent.cpp components/RotateComponent.h systems/component.h math/columnMatrix4x4.cpp math/mathematics.h math/rowMatrix4x4.cpp math/vector2.cpp math/vector3.cpp Camera.cpp main.cpp main.h object.cpp object.h camera.h dependencies/stb_image.cpp
+        systems/input.h
+        systems/input.cpp
+        systems/event.h
         components/Renderer.cpp
         components/Renderer.h
         transform.cpp
         math/vector4.cpp
-        workQueue.h
-        workQueue.cpp
+        systems/workQueue.h
+        systems/workQueue.cpp
 )
 
 target_include_directories(OpenGL PRIVATE dependencies/include)
@@ -22,14 +22,20 @@ target_link_libraries(OpenGL PRIVATE ${CMAKE_SOURCE_DIR}/dependencies/lib/glad/l
 
 enable_testing()
 
-#add_executable(MathTests math/columnMatrix4x4.cpp math/mathematics.h tests/MathTests.cpp dependencies/include/linmath/linmath.h)
-#
-#target_include_directories(MathTests PRIVATE dependencies/include)
-#
-#add_test(NAME MathTests COMMAND MathTests)
+add_executable(matrixTests math/columnMatrix4x4.cpp math/mathematics.h tests/matrixTests.cpp dependencies/include/linmath/linmath.h)
+
+target_include_directories(matrixTests PRIVATE dependencies/include)
+
+add_test(NAME matrixTests COMMAND matrixTests)
 
 add_executable(transformTests tests/transformTests.cpp math/mathematics.h dependencies/include/linmath/linmath.h transform.cpp math/columnMatrix4x4.cpp math/vector2.cpp)
 
 target_include_directories(transformTests PRIVATE dependencies/include)
 
 add_test(NAME transformTests COMMAND transformTests)
+
+add_executable(listTests tests/listTests.cpp list.h)
+
+target_include_directories(listTests PRIVATE dependencies/include)
+
+add_test(NAME listTests COMMAND listTests)
