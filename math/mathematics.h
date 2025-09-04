@@ -241,8 +241,30 @@ public:
 
     float data[COLUMNS][ROWS] = {};
 
+    Matrix() {}
+
+    Matrix(const Matrix &other) {
+        assert(ROWS == other.rows && COLUMNS == other.columns);
+
+        for (int c = 0; c < COLUMNS; c++) {
+            for (int r = 0; r < ROWS; r++) {
+                data[c][r] = other.data[c][r];
+            }
+        }
+    }
+
+    Matrix<ROWS, COLUMNS> operator=(const Matrix &other) {
+        return Matrix(other);
+    }
+
+    /**
+     * @brief Adds this matrix plus other (this + other)
+     * @note this rows MUST equal other rows and this columns MUST equal other columns
+     * @param other The matrix to add to this one
+     * @return Matrix with each element in this one added to the corresponding element in the other one
+     */
     [[nodiscard]] Matrix<ROWS, COLUMNS> add(const Matrix<ROWS, COLUMNS> &other) const {
-        static_assert(other.rows == ROWS || other.columns == COLUMNS);
+        assert(other.rows == ROWS || other.columns == COLUMNS);
 
         Matrix result;
 
@@ -255,8 +277,18 @@ public:
         return result;
     }
 
+    Matrix<ROWS, COLUMNS> operator+(const Matrix<ROWS, COLUMNS> &other) const {
+        return add(other);
+    }
+
+    /**
+     *@brief Subtracts other from this (this - other)
+     * @note this rows MUST equal other rows and this columns MUST equal other columns
+     * @param other The matrix to subtract from this one
+     * @return Matrix with each element in other one subtracted from the corresponding element in the this one
+     */
     [[nodiscard]] Matrix<ROWS, COLUMNS> subtract(const Matrix<ROWS, COLUMNS> &other) const {
-        static_assert(other.rows == ROWS || other.columns == COLUMNS);
+        assert(other.rows == ROWS || other.columns == COLUMNS);
 
         Matrix result;
 
@@ -269,16 +301,12 @@ public:
         return result;
     }
 
-    Matrix<ROWS, COLUMNS> operator+(const Matrix<ROWS, COLUMNS> &other) const {
-        return add(other);
-    }
-
     Matrix<ROWS, COLUMNS> operator-(const Matrix<ROWS, COLUMNS> &other) const {
         return subtract(other);
     }
 
     /**
-   * @brief Multiplies this matrix by other. returning a matrix of size this rows, and other columns
+   * @brief Multiplies this matrix by other. (this x other)
    * @param other Matrix to multiply this * other
    * @return The product of the two matrix. Having Number of rows as this, and number of columns as other
    */
@@ -299,12 +327,19 @@ public:
         return result;
     }
 
-    bool operator==(const Matrix &other) const {
-        return compare(other);
+    template<int OTHER_ROWS, int OTHER_COLUMNS>
+    Matrix<ROWS, OTHER_COLUMNS> operator*(const Matrix<OTHER_ROWS, OTHER_COLUMNS> &other) const {
+        return multiply(other);
     }
 
-    bool compare(const Matrix &other) {
-        static_assert(other.rows == ROWS || other.columns == COLUMNS);
+    /**
+     * @brief Compares this matrix with the other (this == other)
+     * @param other The Matrix to compare against
+     * @return Weather or not the two matrices have the same data
+     */
+    bool compare(const Matrix &other) const {
+        if (other.rows != ROWS || other.columns != COLUMNS)
+            return false;
 
         for (int c = 0; c < COLUMNS; c++) {
             for (int r = 0; r < ROWS; r++) {
@@ -316,6 +351,10 @@ public:
         return true;
     }
 
+    bool operator==(const Matrix &other) const {
+        return compare(other);
+    }
+
     float *operator[](const int index) {
         return &data[index][0];
     }
@@ -324,33 +363,12 @@ public:
         return &data[index][0];
     }
 
-    [[nodiscard]] Matrix<ROWS - 1, COLUMNS - 1> getSubMatrix(const int rowToRemove, const int columnToRemove) const {
-        Matrix<ROWS - 1, COLUMNS - 1> subMatrix;
-        int subMatrixR = 0;
-        for (int r = 0; r < ROWS; r++) {
-            if (r == rowToRemove)
-                continue;
-
-            int subMatrixC = 0;
-            for (int c = 0; c < COLUMNS; c++) {
-                if (c == columnToRemove)
-                    continue;
-
-                subMatrix.data[subMatrixC][subMatrixR] = data[c][r];
-                subMatrixC++;
-            }
-            subMatrixR++;
-        }
-
-        return subMatrix;
-    }
-
-#if ROWS == COLUMNS // if its a square matrix
     /**
-     * @brief Swaps elements on row r and column c to row c and column r (Reflection across main diagonal)
+     * @brief Swaps elements on row r and column c to row c and column r (Reflection across main diagonal; data[c][r] = data[r][c])
+     * @note Matrix must be a square matrix (n x n)
      * @return Matrix with columns and rows swapped
      */
-    [[nodiscard]] Matrix<ROWS, COLUMNS> transpose() const {
+    [[nodiscard]] Matrix<ROWS, COLUMNS> transpose() const requires (ROWS == COLUMNS) {
         Matrix<ROWS, ROWS> result;
 
         for (int c = 0; c < COLUMNS; c++) {
@@ -363,10 +381,11 @@ public:
     }
 
     /**
-     * @brief Creates augmented matrix with this matrix and identity matrix and turns this into identity with simple row operations
-     * @return The left side of the augmented matrix. Think 1 / this matrix
+     * @brief Finds the inverse of the matrix if invertible (1 / matrix)
+     * @throws Runtime errors if matrix is singular (not invertible)
+     * @return The inverse of the matrix
      */
-    [[nodiscard]] Matrix<ROWS, COLUMNS> inverse() const {
+    [[nodiscard]] Matrix<ROWS, COLUMNS> inverse() const requires (ROWS == COLUMNS) {
         // its a one by one, we can just return 1 / value
         if constexpr (ROWS == 1) {
             if (data[0][0] == 0) {
@@ -464,10 +483,10 @@ public:
     }
 
     /**
-     * @warning if zero do not attempt to find inverse
+     * @warning if zero do not attempt to find inverse of this matrix
      * @return The determinant of this matrix
      */
-    [[nodiscard]] float determinant() const {
+    [[nodiscard]] float determinant() const requires (ROWS == COLUMNS) {
         if constexpr (ROWS == 1) {
             return data[0][0];
         }
@@ -489,12 +508,16 @@ public:
         }
     }
 
-    #if COLUMNS == 4 // if its a 4x4
-    Matrix<ROWS, COLUMNS> scale(const float value) const {
-        Matrix<ROWS, COLUMNS> result;
+    /**
+     * @brief Uniformly scales the matrix along all dimensions (this * scaleMatrix)
+     * @param value The scalar to multiply with each element
+     * @return The matrix scaled uniformly
+     */
+    Matrix<4, 4> scale(const float value) const requires (ROWS == COLUMNS && COLUMNS == 4) {
+        Matrix<4, 4> result;
 
-        for (int c = 0; c < COLUMNS; c++) {
-            for (int r = 0; r < ROWS; r++) {
+        for (int c = 0; c < 4; c++) {
+            for (int r = 0; r < 4; r++) {
                 result.data[c][r] = data[c][r] * value;
             }
         }
@@ -502,8 +525,15 @@ public:
         return result;
     }
 
-    Matrix<ROWS, COLUMNS> scale_anisotropic(const float x, const float y, const float z) const {
-        Matrix<ROWS, COLUMNS> scaleMatrix = identity();
+    /**
+     * @brief Scales matrix non-uniformly along the x, y, and z axis (this * scaleMatrix)
+     * @param x The scale factor for the x-axis.
+     * @param y The scale factor for the y-axis.
+     * @param z The scale factor for the z-axis.
+     * @return The matrix scaled along {x, y, z}
+     */
+    Matrix<4, 4> scaleAnisotropic(const float x, const float y, const float z) const requires (ROWS == COLUMNS && COLUMNS == 4) {
+        Matrix<4, 4> scaleMatrix = identity();
 
         scaleMatrix.data[0][0] = x;
         scaleMatrix.data[1][1] = y;
@@ -512,8 +542,15 @@ public:
         return multiply(scaleMatrix);
     }
 
-    Matrix<ROWS, COLUMNS> translate(const float x, const float y, const float z) const {
-        Matrix<ROWS, COLUMNS> translationMatrix = identity();
+    /**
+     * @brief Translates matrix by x, y, and z (this * translationMatrix)
+     * @param x How much to translate along the x
+     * @param y How much to translate along the y
+     * @param z How much to translate along the z
+     * @return The matrix translated by x, y, and z
+     */
+    Matrix<4, 4> translate(const float x, const float y, const float z) const requires (ROWS == COLUMNS && COLUMNS == 4) {
+        Matrix<4, 4> translationMatrix = identity();
 
         translationMatrix.data[3][0] = x;
         translationMatrix.data[3][1] = y;
@@ -522,11 +559,16 @@ public:
         return multiply(translationMatrix);
     }
 
-    Matrix<ROWS, COLUMNS> rotate_x(const float angle) const {
+    /**
+     * @brief Rotates the matrix by angle along the x (this * rotationMatrix)
+     * @param angle How many DEGREES to rotate along the x
+     * @return Matrix rotated by angle
+     */
+    Matrix<4, 4> rotateX(const float angle) const requires (ROWS == COLUMNS && COLUMNS == 4) {
         const float sin = std::sinf(angle * (static_cast<float>(M_PI) / 180.0f));
         const float cos = std::cosf(angle * (static_cast<float>(M_PI) / 180.0f));
 
-        Matrix<ROWS, COLUMNS> rotationMatrix = Matrix::identity<ROWS>();
+        Matrix<4, 4> rotationMatrix = Matrix::identity<4>();
 
         rotationMatrix.data[1][1] = cos;
         rotationMatrix.data[1][2] = sin;
@@ -536,11 +578,16 @@ public:
         return multiply(rotationMatrix);
     }
 
-    Matrix<ROWS, COLUMNS> rotate_y(const float angle) const {
+    /**
+     * @brief Rotates the matrix by angle along the y (this * rotationMatrix)
+     * @param angle How many DEGREES to rotate along the y
+     * @return Matrix rotated by angle
+     */
+    Matrix<4, 4> rotateY(const float angle) const requires (ROWS == COLUMNS && COLUMNS == 4) {
         const float sin = std::sinf(angle * (static_cast<float>(M_PI) / 180.0f));
         const float cos = std::cosf(angle * (static_cast<float>(M_PI) / 180.0f));
 
-        Matrix<ROWS, COLUMNS> rotationMatrix = Matrix::identity<ROWS>();
+        Matrix<4, 4> rotationMatrix = Matrix::identity<4>();
 
         rotationMatrix.data[0][0] = cos;
         rotationMatrix.data[0][2] = -sin;
@@ -550,11 +597,16 @@ public:
         return multiply(rotationMatrix);
     }
 
-    Matrix<ROWS, COLUMNS> rotate_z(const float angle) const {
+    /**
+     * @brief Rotates the matrix by angle along the y (this * rotationMatrix)
+     * @param angle How many DEGREES to rotate along the y
+     * @return Matrix rotated by angle
+     */
+    Matrix<4, 4> rotateZ(const float angle) const requires (ROWS == COLUMNS && COLUMNS == 4) {
         const float sin = std::sinf(angle * (static_cast<float>(M_PI) / 180.0f));
         const float cos = std::cosf(angle * (static_cast<float>(M_PI) / 180.0f));
 
-        Matrix<ROWS, COLUMNS> rotationMatrix = Matrix::identity<ROWS>();
+        Matrix<4, 4> rotationMatrix = Matrix::identity<4>();
 
         rotationMatrix.data[0][0] = cos;
         rotationMatrix.data[0][1] = sin;
@@ -564,24 +616,7 @@ public:
         return multiply(rotationMatrix);
     }
 
-    Matrix<ROWS, COLUMNS> ortho(const float left, const float right, const float bottom, const float top, const float near, const float far) const {
-        // identity
-        Matrix<ROWS, COLUMNS> transformation = Matrix::identity<ROWS>();
-        // transformation
-        transformation.data[0][0] = 2.0f / (right - left);
-        transformation.data[1][1] = 2.0f / (top - bottom);
-        transformation.data[2][2] = -2.0f / (far - near);
-        transformation.data[3][0] = -(right + left) / (right - left);
-        transformation.data[3][1] = -(top + bottom) / (top - bottom);
-        transformation.data[3][2] = -(far + near) / (far - near);
-        // return
-        return transformation;
-    }
-    #endif
-#endif
-
     /**
-     *
      * @return The column-major matrix as a string for printing
      */
     [[nodiscard]] std::string toString() const {
@@ -609,7 +644,58 @@ public:
         return ss.str();
     }
 
+    /**
+     * @brief Makes a matrix made up of this matrix without rowToRemove and without columnToRemove
+     * @param rowToRemove What row shouldnt be included
+     * @param columnToRemove What column shouldnt be included
+     * @return A matrix of <ROWS - 1, COLUMNS - 1> without the rowToRemove and columnToRemove
+     */
+    [[nodiscard]] Matrix<ROWS - 1, COLUMNS - 1> getSubMatrix(const int rowToRemove, const int columnToRemove) const {
+        Matrix<ROWS - 1, COLUMNS - 1> subMatrix;
+        int subMatrixR = 0;
+        for (int r = 0; r < ROWS; r++) {
+            if (r == rowToRemove)
+                continue;
+
+            int subMatrixC = 0;
+            for (int c = 0; c < COLUMNS; c++) {
+                if (c == columnToRemove)
+                    continue;
+
+                subMatrix.data[subMatrixC][subMatrixR] = data[c][r];
+                subMatrixC++;
+            }
+            subMatrixR++;
+        }
+
+        return subMatrix;
+    }
+
     // static methods
+    /**
+     * @brief Creates an orthographic projection matrix.
+     * @param left The coordinate of the left vertical clipping plane
+     * @param right The coordinate of the right vertical clipping plane
+     * @param bottom The coordinate of the bottom horizontal clipping plane
+     * @param top The coordinate of the top horizontal clipping plane
+     * @param near The coordinate of the near depth clipping plane
+     * @param far The coordinate of the far depth clipping plane
+     * @return A 4x4 orthographic projection matrix
+     */
+    static Matrix<4, 4> ortho(const float left, const float right, const float bottom, const float top, const float near, const float far) {
+        // identity
+        Matrix<4, 4> transformation = identity<4>();
+        // transformation
+        transformation.data[0][0] = 2.0f / (right - left);
+        transformation.data[1][1] = 2.0f / (top - bottom);
+        transformation.data[2][2] = -2.0f / (far - near);
+        transformation.data[3][0] = -(right + left) / (right - left);
+        transformation.data[3][1] = -(top + bottom) / (top - bottom);
+        transformation.data[3][2] = -(far + near) / (far - near);
+        // return
+        return transformation;
+    }
+
     /**
      *
      * @tparam SIZE How many rows/columns should the produced identity have
@@ -627,13 +713,12 @@ public:
     }
 
     /**
- *
- * @tparam R_SIZE How many rows
- * @tparam C_SIZE How many columns
- * @param matrix Where the data will be written
- * @param rowA Index of row a
- * @param rowB
- */
+     * @tparam R_SIZE How many rows
+     * @tparam C_SIZE How many columns
+     * @param matrix Where the data will be written
+     * @param rowA Index of row a
+     * @param rowB Index of row b
+     */
     template<int R_SIZE, int C_SIZE>
     static void swapRows(Matrix<R_SIZE, C_SIZE> &matrix, const int rowA, const int rowB) {
         // int temp = a;
@@ -655,4 +740,3 @@ public:
         }
     }
 };
-

@@ -12,7 +12,7 @@ int main() {
     std::cout << "Before delete \n";
     list.printState();
 
-    list.remove(0);
+    list.remove(2);
 
     std::cout << "After delete \n";
     list.printState();

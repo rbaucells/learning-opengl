@@ -43,11 +43,11 @@ public:
         for (int i = 0; i < elementCount; i++) {
             T element = data[i];
             if (element == object) {
-                // TODO: 'erase' the element from data
-                T* temp = new T[arraySize - 1];
+                arraySize--;
+                T *temp = new T[arraySize];
 
                 memcpy(temp, data, sizeof(T) * i);
-                memcpy(temp + i, data + (i + 1), ((arraySize - 1) - i) * sizeof(T));
+                memcpy(temp + i, data + (i + 1), (arraySize - i) * sizeof(T));
 
                 delete[] data;
                 data = temp;
@@ -59,7 +59,7 @@ public:
 
     void reserve(const int size) {
         assert(size >= arraySize);
-        T* temp = new T[size];
+        T *temp = new T[size];
         memcpy(temp, data, sizeof(T) * arraySize);
         delete[] data;
         data = temp;
@@ -101,9 +101,55 @@ public:
     T at(int index) {
         return data[index];
     }
-
     T operator[](const int index) {
         return at(index);
+    }
+
+    T at(int index) const {
+        return data[index];
+    }
+    T operator[](const int index) const {
+        return at(index);
+    }
+
+    /**
+     * @return How many elements are in the list
+     */
+    int count() const {
+        return elementCount;
+    }
+
+    /**
+     * @return how many 'slots' are in the array; size of the array
+     */
+    int size() const {
+        return arraySize;
+    }
+
+    void operator+=(const T& object) {
+        add(object);
+    }
+
+    void operator<<(const T& object) {
+        add(object);
+    }
+
+    void operator-=(const T& object) {
+        remove(object);
+    }
+
+    /**
+     * @param object What are you trying to find
+     * @return The index of that object in the array
+     * @note Returns -1 if not found
+     */
+    int find(const T& object) const {
+        for (int i = 0; i < elementCount; i++) {
+            if (data[i] == object)
+                return i;
+        }
+
+        return -1;
     }
 
     ~List() {
