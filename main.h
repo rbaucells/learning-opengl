@@ -4,6 +4,7 @@
 
 #include "event.h"
 
+struct GLFWwindow;
 class Component;
 
 // variables

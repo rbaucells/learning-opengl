@@ -16,7 +16,7 @@ public:
     const int tag;
     bool activated = true;
 
-    std::vector<std::unique_ptr<Component>> components;
+    std::vector<std::unique_ptr<Component> > components;
 
     // all objects must have a transform
     Transform transform;
@@ -127,9 +127,8 @@ public:
 
     static Object *findObjectByName(const std::string &name);
     static Object *findObjectByTag(int tag);
-    static std::vector<Object*> findObjectsByName(const std::string &name);
-    static std::vector<Object*> findObjectsByTag(int tag);
+    static std::vector<Object *> findObjectsByName(const std::string &name);
+    static std::vector<Object *> findObjectsByTag(int tag);
 };
 
 inline std::vector<Object *> allObjects;
-

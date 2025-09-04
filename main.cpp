@@ -15,10 +15,11 @@
 #include <string>
 #include <thread>
 
+#include "input.h"
 #include "components/renderer.h"
 
 // needed by framebuffer_size_callback() and by object.draw()
-ColumnMatrix4x4 projection;
+ColumnMatrix4X4 projection;
 
 // callbacks
 void error_callback(int error, const char *description) {
@@ -95,7 +96,7 @@ unsigned int CreateShader(const std::string &vertexShader, const std::string &fr
 }
 
 int main() {
-    // when we get an error, lmk
+    // when we get an glfwError, lmk
     glfwSetErrorCallback(error_callback);
 
     if (!glfwInit()) {

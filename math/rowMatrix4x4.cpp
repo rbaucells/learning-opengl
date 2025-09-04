@@ -1,7 +1,7 @@
 #include "mathematics.h"
 #include <cmath>
 
-RowMatrix4x4::RowMatrix4x4(const RowMatrix4x4 &other) {
+RowMatrix4X4::RowMatrix4X4(const RowMatrix4X4 &other) {
     for (int r = 0; r < 4; r++) {
         for (int c = 0; c < 4; c++) {
             data[r][c] = other.data[r][c];
@@ -10,13 +10,13 @@ RowMatrix4x4::RowMatrix4x4(const RowMatrix4x4 &other) {
 }
 
 
-RowMatrix4x4 RowMatrix4x4::identity() {
+RowMatrix4X4 RowMatrix4X4::identity() {
     /// 1, 0, 0, 0
     /// 0, 1, 0, 0
     /// 0, 0, 1, 0
     /// 0, 0, 0, 1
 
-    RowMatrix4x4 result;
+    RowMatrix4X4 result;
 
     for (int r = 0; r < 4; r++) {
         result.data[r][r] = 1;
@@ -24,21 +24,21 @@ RowMatrix4x4 RowMatrix4x4::identity() {
 
     return result;
 }
-RowMatrix4x4 RowMatrix4x4::operator*(const RowMatrix4x4 &other) const {
+RowMatrix4X4 RowMatrix4X4::operator*(const RowMatrix4X4 &other) const {
     return multiply(other);
 }
-RowMatrix4x4 RowMatrix4x4::operator*(const float value) const {
+RowMatrix4X4 RowMatrix4X4::operator*(const float value) const {
     return scale(value);
 }
-RowMatrix4x4 RowMatrix4x4::operator+(const RowMatrix4x4 &other) const {
+RowMatrix4X4 RowMatrix4X4::operator+(const RowMatrix4X4 &other) const {
     return add(other);
 }
-RowMatrix4x4 RowMatrix4x4::operator-(const RowMatrix4x4 &other) const {
+RowMatrix4X4 RowMatrix4X4::operator-(const RowMatrix4X4 &other) const {
     return subtract(other);
 }
 
-RowMatrix4x4 RowMatrix4x4::add(const RowMatrix4x4 &other) const {
-    RowMatrix4x4 result;
+RowMatrix4X4 RowMatrix4X4::add(const RowMatrix4X4 &other) const {
+    RowMatrix4X4 result;
 
     for (int r = 0; r < 4; r++) {
         for (int c = 0; c < 4; c++) {
@@ -48,8 +48,8 @@ RowMatrix4x4 RowMatrix4x4::add(const RowMatrix4x4 &other) const {
 
     return result;
 }
-RowMatrix4x4 RowMatrix4x4::subtract(const RowMatrix4x4 &other) const {
-    RowMatrix4x4 result;
+RowMatrix4X4 RowMatrix4X4::subtract(const RowMatrix4X4 &other) const {
+    RowMatrix4X4 result;
 
     for (int r = 0; r < 4; r++) {
         for (int c = 0; c < 4; c++) {
@@ -60,13 +60,13 @@ RowMatrix4x4 RowMatrix4x4::subtract(const RowMatrix4x4 &other) const {
     return result;
 }
 
-RowMatrix4x4 RowMatrix4x4::multiply(const RowMatrix4x4 &other) const {
+RowMatrix4X4 RowMatrix4X4::multiply(const RowMatrix4X4 &other) const {
     /// 1, 0, 0, 0
     /// 0, 1, 0, 0
     /// 0, 0, 1, 0
     /// 0, 0, 0, 1
 
-    RowMatrix4x4 result;
+    RowMatrix4X4 result;
 
     for (int r = 0; r < 4; r++) {
         for (int c = 0; c < 4; c++) {
@@ -78,8 +78,8 @@ RowMatrix4x4 RowMatrix4x4::multiply(const RowMatrix4x4 &other) const {
 
     return result;
 }
-RowMatrix4x4 RowMatrix4x4::scale(const float value) const {
-    RowMatrix4x4 result;
+RowMatrix4X4 RowMatrix4X4::scale(const float value) const {
+    RowMatrix4X4 result;
 
     for (int r = 0; r < 4; r++) {
         for (int c = 0; c < 4; c++) {
@@ -89,8 +89,8 @@ RowMatrix4x4 RowMatrix4x4::scale(const float value) const {
 
     return result;
 }
-RowMatrix4x4 RowMatrix4x4::scale_anisotropic(const float x, const float y, const float z) const {
-    RowMatrix4x4 scaleMatrix = RowMatrix4x4::identity();
+RowMatrix4X4 RowMatrix4X4::scale_anisotropic(const float x, const float y, const float z) const {
+    RowMatrix4X4 scaleMatrix = RowMatrix4X4::identity();
 
     scaleMatrix.data[0][0] = x;
     scaleMatrix.data[1][1] = y;
@@ -99,8 +99,8 @@ RowMatrix4x4 RowMatrix4x4::scale_anisotropic(const float x, const float y, const
     return multiply(scaleMatrix);
 }
 
-RowMatrix4x4 RowMatrix4x4::transpose() const {
-    RowMatrix4x4 result;
+RowMatrix4X4 RowMatrix4X4::transpose() const {
+    RowMatrix4X4 result;
 
     for (int r = 0; r < 4; r++) {
         for (int c = 0; c < 4; c++) {
@@ -110,12 +110,12 @@ RowMatrix4x4 RowMatrix4x4::transpose() const {
 
     return result;
 }
-RowMatrix4x4 RowMatrix4x4::translate(const float x, const float y, const float z) const {
+RowMatrix4X4 RowMatrix4X4::translate(const float x, const float y, const float z) const {
     /// 1, 0, 0, 0
     /// 0, 1, 0, 0
     /// 0, 0, 1, 0
     /// x, y, z, 1
-    RowMatrix4x4 translationMatrix = RowMatrix4x4::identity();
+    RowMatrix4X4 translationMatrix = RowMatrix4X4::identity();
 
     translationMatrix.data[3][0] = x;
     translationMatrix.data[3][1] = y;
@@ -124,11 +124,11 @@ RowMatrix4x4 RowMatrix4x4::translate(const float x, const float y, const float z
     return multiply(translationMatrix);
 }
 
-RowMatrix4x4 RowMatrix4x4::rotate_x(const float angle) const {
+RowMatrix4X4 RowMatrix4X4::rotate_x(const float angle) const {
     const float sin = std::sin(angle);
     const float cos = std::cos(angle);
 
-    RowMatrix4x4 rotationMatrix = RowMatrix4x4::identity();
+    RowMatrix4X4 rotationMatrix = RowMatrix4X4::identity();
 
     rotationMatrix.data[1][1] = cos;
     rotationMatrix.data[1][2] = -sin;
@@ -137,11 +137,11 @@ RowMatrix4x4 RowMatrix4x4::rotate_x(const float angle) const {
 
     return multiply(rotationMatrix);
 }
-RowMatrix4x4 RowMatrix4x4::rotate_y(const float angle) const {
+RowMatrix4X4 RowMatrix4X4::rotate_y(const float angle) const {
     const float sin = std::sin(angle);
     const float cos = std::cos(angle);
 
-    RowMatrix4x4 rotationMatrix = RowMatrix4x4::identity();
+    RowMatrix4X4 rotationMatrix = RowMatrix4X4::identity();
 
     rotationMatrix.data[0][0] = cos;
     rotationMatrix.data[0][2] = sin;
@@ -150,11 +150,11 @@ RowMatrix4x4 RowMatrix4x4::rotate_y(const float angle) const {
 
     return multiply(rotationMatrix);
 }
-RowMatrix4x4 RowMatrix4x4::rotate_z(const float angle) const {
+RowMatrix4X4 RowMatrix4X4::rotate_z(const float angle) const {
     const float sin = std::sin(angle);
     const float cos = std::cos(angle);
 
-    RowMatrix4x4 rotationMatrix = RowMatrix4x4::identity();
+    RowMatrix4X4 rotationMatrix = RowMatrix4X4::identity();
 
     rotationMatrix.data[0][0] = cos;
     rotationMatrix.data[0][1] = -sin;
@@ -164,8 +164,8 @@ RowMatrix4x4 RowMatrix4x4::rotate_z(const float angle) const {
     return multiply(rotationMatrix);
 }
 
-RowMatrix4x4 RowMatrix4x4::ortho(const float left, const float right, const float bottom, const float top, const float near, const float far) {
-    RowMatrix4x4 orthoMatrix = RowMatrix4x4::identity();
+RowMatrix4X4 RowMatrix4X4::ortho(const float left, const float right, const float bottom, const float top, const float near, const float far) {
+    RowMatrix4X4 orthoMatrix = RowMatrix4X4::identity();
 
     orthoMatrix.data[0][0] = (2.0f / right - left);
     orthoMatrix.data[1][1] = (2.0f / top - bottom);

@@ -1,15 +1,12 @@
 #pragma once
-#include <vector>
-#include "../input.h"
-#include "../event.h"
-
 // forward declaration
 class Object;
+
 class Component {
 protected:
     Object* object = nullptr;
 public:
-    Component(Object* owner) {
+    explicit Component(Object* owner) {
         object = owner;
     };
 

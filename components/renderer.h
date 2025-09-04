@@ -1,13 +1,13 @@
 #pragma once
 #include <map>
-
+#include "../math/mathematics.h"
 #include "component.h"
 
 class Renderer : public Component {
 public:
     Renderer(Object *owner, const std::vector<Vertex> &vertices, const std::vector<unsigned int> &indices, unsigned int usage, const std::string &texturePath, bool flipTexture, int textureParam, unsigned int shaderProgram, int layer);
 
-    void Draw(const ColumnMatrix4x4 &view, const ColumnMatrix4x4 &projection, int mode) const;
+    void Draw(const ColumnMatrix4X4 &view, const ColumnMatrix4X4 &projection, int mode) const;
 
     float alpha = 1.f;
     unsigned int layer = 0;

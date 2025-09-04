@@ -1,29 +1,31 @@
 #include "transform.h"
 
 struct Decomposed2D {
-    vector2 position {};
-    float rotation {}; // degrees
-    vector2 scale {};
+    Vector2 position{};
+    float rotation{}; // degrees
+    Vector2 scale{};
 };
 
-Decomposed2D decompose2D(const ColumnMatrix4x4& m) {
+Decomposed2D decompose2D(const ColumnMatrix4X4 &m) {
     // TODO: what did chatgpt do in here?
     Decomposed2D out;
 
     // Translation
-    out.position = { m.data[3][0], m.data[3][1] };
+    out.position = {m.data[3][0], m.data[3][1]};
 
     // Raw basis vectors
-    vector2 col0 = { m.data[0][0], m.data[0][1] };
-    vector2 col1 = { m.data[1][0], m.data[1][1] };
+    Vector2 col0 = {m.data[0][0], m.data[0][1]};
+    Vector2 col1 = {m.data[1][0], m.data[1][1]};
 
     // Scale from raw lengths
     float scaleX = col0.Magnitude();
     float scaleY = col1.Magnitude();
 
     // Normalize basis vectors
-    if (scaleX != 0) col0 /= scaleX;
-    if (scaleY != 0) col1 /= scaleY;
+    if (scaleX != 0)
+        col0 /= scaleX;
+    if (scaleY != 0)
+        col1 /= scaleY;
 
     // Remove shear: make col1 perpendicular to col0
     float shear = col0.Dot(col1);
@@ -31,33 +33,35 @@ Decomposed2D decompose2D(const ColumnMatrix4x4& m) {
 
     // Recompute scaleY after removing shear
     scaleY = col1.Magnitude();
-    if (scaleY != 0) col1 /= scaleY;
+    if (scaleY != 0)
+        col1 /= scaleY;
 
-    out.scale = { scaleX, scaleY };
+    out.scale = {scaleX, scaleY};
 
     // Rotation from orthonormalized X axis
     float radians = std::atan2(col0.y, col0.x);
     float degrees = radians * (180.f / static_cast<float>(M_PI));
-    if (degrees < 0) degrees += 360.f;
+    if (degrees < 0)
+        degrees += 360.f;
     out.rotation = degrees;
 
     return out;
 }
 
-Transform::Transform( const vector2 pos, const float rot, const vector2 scale) {
+Transform::Transform(const Vector2 pos, const float rot, const Vector2 scale) {
     setGlobalPosition(pos);
     setGlobalRotation(rot);
     setGlobalScale(scale);
 }
 
-Transform::Transform(vector2 pos, float rot, vector2 scale, Transform *parent) {
-    this->parent = parent;
+Transform::Transform(Vector2 pos, float rot, Vector2 scale, Transform *parent) {
+    setParent(parent);
     this->localPosition = pos;
     this->localRotation = rot;
     this->localScale = scale;
 }
 
-vector2 Transform::getGlobalPosition() const {
+Vector2 Transform::getGlobalPosition() const {
     return decompose2D(localToWorldMatrix()).position;
 }
 
@@ -68,8 +72,8 @@ float Transform::getGlobalRotation() const {
     return fmod(localRotation + 360.0f, 360.0f);
 }
 
-vector2 Transform::getGlobalScale() const {
-    const ColumnMatrix4x4 m = localToWorldMatrix();
+Vector2 Transform::getGlobalScale() const {
+    const ColumnMatrix4X4 m = localToWorldMatrix();
 
     // get global rotation and then turn it into radians
     const float rotationRadians = getGlobalRotation() * (static_cast<float>(M_PI) / 180.0f);
@@ -77,15 +81,15 @@ vector2 Transform::getGlobalScale() const {
     const float sinR = std::sin(rotationRadians);
 
     // undo rotation of columns to extract scale
-    const float sx =  m.data[0][0] * cosR + m.data[0][1] * sinR;
+    const float sx = m.data[0][0] * cosR + m.data[0][1] * sinR;
     const float sy = -m.data[1][0] * sinR + m.data[1][1] * cosR;
 
-    return { sx, sy };
+    return {sx, sy};
 }
 
-void Transform::setGlobalPosition(const vector2 pos) {
+void Transform::setGlobalPosition(const Vector2 pos) {
     if (parent != nullptr) {
-        const vector2 localPos = parent->worldToLocalMatrix() * pos;
+        const Vector2 localPos = parent->worldToLocalMatrix() * pos;
         localPosition = localPos;
     }
     else {
@@ -103,18 +107,19 @@ void Transform::setGlobalRotation(const float rot) {
         localRotation = rot;
     }
 }
-void Transform::setGlobalScale(const vector2 desiredGlobalScale) {
+
+void Transform::setGlobalScale(const Vector2 desiredGlobalScale) {
     // TODO: Figure out wth chatgpt did in this function because i cant understand any of it
     if (!parent) {
         // Always store positive magnitudes (no mirroring)
-        localScale = { std::abs(desiredGlobalScale.x), std::abs(desiredGlobalScale.y) };
+        localScale = {std::abs(desiredGlobalScale.x), std::abs(desiredGlobalScale.y)};
         return;
     }
 
     // 1) Parent linear (2x2) columns in column-major storage
-    const ColumnMatrix4x4 pm = parent->localToWorldMatrix();
-    const vector2 pCol0 { pm.data[0][0], pm.data[0][1] }; // first column
-    const vector2 pCol1 { pm.data[1][0], pm.data[1][1] }; // second column
+    const ColumnMatrix4X4 pm = parent->localToWorldMatrix();
+    const Vector2 pCol0{pm.data[0][0], pm.data[0][1]}; // first column
+    const Vector2 pCol1{pm.data[1][0], pm.data[1][1]}; // second column
 
     // 2) Child local rotation matrix components
     const float deg2rad = static_cast<float>(M_PI) / 180.0f;
@@ -123,8 +128,8 @@ void Transform::setGlobalScale(const vector2 desiredGlobalScale) {
 
     // Columns of Lp * Rc:
     // u = Lp * [c, s], v = Lp * [-s, c]  (linear combo of columns)
-    const vector2 u = pCol0 * c + pCol1 * s;
-    const vector2 v = pCol0 * (-s) + pCol1 * c;
+    const Vector2 u = pCol0 * c + pCol1 * s;
+    const Vector2 v = pCol0 * (-s) + pCol1 * c;
 
     // 3) Child global rotation (independent of scale magnitude)
     const float Rg = getGlobalRotation() * deg2rad;
@@ -132,23 +137,25 @@ void Transform::setGlobalScale(const vector2 desiredGlobalScale) {
     const float sg = std::sin(Rg);
 
     // 4) Denominators that your getter uses implicitly
-    float denomX = u.x * cg + u.y * sg;          // = dot(u, x̂_global)
-    float denomY = -v.x * sg + v.y * cg;         // = dot(v, ŷ_global)
+    float denomX = u.x * cg + u.y * sg; // = dot(u, x̂_global)
+    float denomY = -v.x * sg + v.y * cg; // = dot(v, ŷ_global)
 
     // 5) Avoid division blow-ups
     const float eps = 1e-8f;
-    if (std::fabs(denomX) < eps) denomX = (denomX < 0 ? -eps : eps);
-    if (std::fabs(denomY) < eps) denomY = (denomY < 0 ? -eps : eps);
+    if (std::fabs(denomX) < eps)
+        denomX = (denomX < 0 ? -eps : eps);
+    if (std::fabs(denomY) < eps)
+        denomY = (denomY < 0 ? -eps : eps);
 
     // 6) Solve for local scale, store as positive magnitudes (no negative scale)
     float lx = desiredGlobalScale.x / denomX;
     float ly = desiredGlobalScale.y / denomY;
 
-    localScale = { std::fabs(lx), std::fabs(ly) };
+    localScale = {std::fabs(lx), std::fabs(ly)};
 }
 
-ColumnMatrix4x4 Transform::localToWorldMatrix() const {
-    ColumnMatrix4x4 transformationMatrix = ColumnMatrix4x4::identity();
+ColumnMatrix4X4 Transform::localToWorldMatrix() const {
+    ColumnMatrix4X4 transformationMatrix = ColumnMatrix4X4::identity();
 
     transformationMatrix = transformationMatrix.translate(localPosition.x, localPosition.y, 0);
     transformationMatrix = transformationMatrix.rotate_z(localRotation);
@@ -161,39 +168,62 @@ ColumnMatrix4x4 Transform::localToWorldMatrix() const {
     return transformationMatrix;
 }
 
-ColumnMatrix4x4 Transform::worldToLocalMatrix() const {
-    ColumnMatrix4x4 localToWorld = localToWorldMatrix();
-    ColumnMatrix4x4 inverse = localToWorld.inverse();
+ColumnMatrix4X4 Transform::worldToLocalMatrix() const {
+    const ColumnMatrix4X4 localToWorld = localToWorldMatrix();
+    ColumnMatrix4X4 inverse = localToWorld.inverse();
     return inverse;
 }
 
-const Transform *Transform::getParent() const {
-    return parent;
-}
-void Transform::setParent(Transform *parent) {
-    this->parent = parent;
-}
-
+/**
+ * @brief Simply adds child to list of children
+ * @note Will not set childs parent, you must do that yourself
+ * @param child Child* to add to children list
+ */
 void Transform::addChild(Transform *child) {
-    child->setParent(this);
     children.push_back(child);
 }
 
-std::vector<Transform *> Transform::getChildren() {
-    return children;
-}
-
+/**
+ * @brief Simply removes child from list of children
+ * @note Will not set childs parent to nothing, you must do that yourself
+ * @param child Child* to remove from children list
+ */
 void Transform::removeChild(Transform *child) {
-    child->setParent(nullptr);
     std::erase(children, child);
 }
 
+/**
+ * @brief Clears list of children and sets their parents to nothing
+ * @note Will set child's parent to nothing
+ */
 void Transform::removeAllChildren() {
-    for (Transform* child : children) {
+    for (Transform *child: children) {
         child->setParent(nullptr);
     }
 
     children.clear();
 }
 
+/**
+ *
+ * @return std::vector of Transform pointers. All children
+ */
+std::vector<Transform *> Transform::getChildren() {
+    return children;
+}
 
+/**
+ * @brief Sets parent, will keep global position/rotation/scale
+ * @param parent The new parent
+ */
+void Transform::setParent(Transform *parent) {
+    const Vector2 globalPos = getGlobalPosition();
+    const float globalRot = getGlobalRotation();
+    const Vector2 globalScale = getGlobalScale();
+
+    this->parent = parent;
+
+    setGlobalPosition(globalPos);
+    setGlobalRotation(globalRot);
+    setGlobalScale(globalScale);
+}
