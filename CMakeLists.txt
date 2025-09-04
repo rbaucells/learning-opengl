@@ -13,6 +13,7 @@ add_executable(OpenGL components/RotateComponent.cpp components/RotateComponent.
         math/vector4.cpp
         systems/workQueue.h
         systems/workQueue.cpp
+        camera.cpp
 )
 
 target_include_directories(OpenGL PRIVATE dependencies/include)
