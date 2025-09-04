@@ -16,6 +16,7 @@
 #include <thread>
 
 #include "input.h"
+#include "workQueue.h"
 #include "components/renderer.h"
 
 // needed by framebuffer_size_callback() and by object.draw()
@@ -93,6 +94,36 @@ unsigned int CreateShader(const std::string &vertexShader, const std::string &fr
     glDeleteShader(fragmentShaderId);
 
     return program;
+}
+
+void handleQueue(const float deltaTime) {
+    for (auto [action] : nextFrameQueue) {
+        action();
+    }
+
+    nextFrameQueue.clear();
+
+    for (auto it = timedQueue.begin(); it != timedQueue.end(); ) {
+        it->time -= deltaTime;
+
+        if (it->time <= 0) {
+            it->action();
+            it = timedQueue.erase(it);
+            continue;
+        }
+
+        ++it;
+    }
+
+    for (auto it = conditionalQueue.begin(); it != conditionalQueue.end(); ) {
+        if (it->condition()) {
+            it->action();
+            it = conditionalQueue.erase(it);
+            continue;
+        }
+
+        ++it;
+    }
 }
 
 int main() {
@@ -225,6 +256,8 @@ int main() {
                 renderer->Draw(camera->viewMatrix, projection, GL_TRIANGLES);
             }
         }
+
+        handleQueue(deltaTime);
 
         glfwSwapBuffers(mainWindow);
         glfwPollEvents();

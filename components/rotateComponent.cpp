@@ -1,5 +1,5 @@
 #include "rotateComponent.h"
-
+#include "../workQueue.h"
 #include <iostream>
 
 #include "renderer.h"
@@ -20,5 +20,5 @@ void RotateComponent::update(const double deltaTime) {
         speed = -speed;
     }
 
-    std::cout << object->name << " rotation in degrees: " << object->transform.localRotation << "\n";
+    // std::cout << object->name << " rotation in degrees: " << object->transform.localRotation << "\n";
 }

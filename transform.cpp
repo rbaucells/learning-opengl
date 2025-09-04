@@ -64,14 +64,12 @@ Transform::Transform(Vector2 pos, float rot, Vector2 scale, Transform *parent) {
 Vector2 Transform::getGlobalPosition() const {
     return decompose2D(localToWorldMatrix()).position;
 }
-
 float Transform::getGlobalRotation() const {
     if (parent != nullptr) {
         return fmod(parent->getGlobalRotation() + localRotation + 360.0f, 360.0f);
     }
     return fmod(localRotation + 360.0f, 360.0f);
 }
-
 Vector2 Transform::getGlobalScale() const {
     const ColumnMatrix4X4 m = localToWorldMatrix();
 
@@ -96,7 +94,6 @@ void Transform::setGlobalPosition(const Vector2 pos) {
         localPosition = pos;
     }
 }
-
 void Transform::setGlobalRotation(const float rot) {
     if (parent != nullptr) {
         const float parentGlobalRotation = parent->getGlobalRotation();
@@ -107,12 +104,11 @@ void Transform::setGlobalRotation(const float rot) {
         localRotation = rot;
     }
 }
-
-void Transform::setGlobalScale(const Vector2 desiredGlobalScale) {
+void Transform::setGlobalScale(const Vector2 scale) {
     // TODO: Figure out wth chatgpt did in this function because i cant understand any of it
     if (!parent) {
         // Always store positive magnitudes (no mirroring)
-        localScale = {std::abs(desiredGlobalScale.x), std::abs(desiredGlobalScale.y)};
+        localScale = {std::abs(scale.x), std::abs(scale.y)};
         return;
     }
 
@@ -148,8 +144,8 @@ void Transform::setGlobalScale(const Vector2 desiredGlobalScale) {
         denomY = (denomY < 0 ? -eps : eps);
 
     // 6) Solve for local scale, store as positive magnitudes (no negative scale)
-    float lx = desiredGlobalScale.x / denomX;
-    float ly = desiredGlobalScale.y / denomY;
+    float lx = scale.x / denomX;
+    float ly = scale.y / denomY;
 
     localScale = {std::fabs(lx), std::fabs(ly)};
 }
