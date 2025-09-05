@@ -22,7 +22,7 @@ Matrix<4, 4> Camera::getViewMatrix() {
 
 Camera* Camera::mainCamera = nullptr;
 Matrix<4, 4> Camera::calculateCameraLocalToWorld() const {
-    auto localToWorldMatrix = Matrix<4,4>::identity<4>();
+    auto localToWorldMatrix = Matrix<4,4>::identity();
 
     localToWorldMatrix = localToWorldMatrix.translate(-object->transform->localPosition.x, -object->transform->localPosition.y, -1);
     localToWorldMatrix = localToWorldMatrix.rotateZ(object->transform->localRotation);

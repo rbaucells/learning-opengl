@@ -12,7 +12,7 @@ int main() {
     std::cout << "Before delete \n";
     list.printState();
 
-    list.remove(3);
+    list.removeAt(3);
 
     std::cout << "After delete \n";
     list.printState();
@@ -25,13 +25,18 @@ int main() {
     secondList.add(4);
     secondList.add(5);
 
-    std::cout << "Before delete \n";
+    std::cout << "Before add \n";
     secondList.printState();
 
-    secondList.removeNoAlloc(5);
-    secondList.shrinkToFit();
+    // [1, 2, 3, 4, 5] -> [1, 5, 2, 3, 4, 5]
 
-    std::cout << "After delete \n";
+    secondList.addAt(5, 1);
+
+    std::cout << "After add \n";
     secondList.printState();
+
+    List thirdList = {1, 2, 3};
+    thirdList.printState();
+
     return 0;
 }

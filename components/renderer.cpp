@@ -10,7 +10,7 @@ Renderer::Renderer(Object *owner, const std::vector<Vertex>& vertices, const std
     this->shaderProgram = shaderProgram;
     this->layer = layer;
 
-    if (auto it = allRenderers.find(layer); it != allRenderers.end()) {
+    if (const auto it = allRenderers.find(layer); it != allRenderers.end()) {
         // the layer already exists
         it->second.push_back(this);
     }

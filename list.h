@@ -6,7 +6,7 @@
 template<typename T>
 class List {
 private:
-    T *data;
+    T *dataArray;
 
     // how many elements
     int elementCount = 0;
@@ -16,13 +16,21 @@ private:
 
 public:
     List() {
-        data = new T[1];
+        dataArray = new T[1];
     }
 
     explicit List(const int startSize) {
-        data = new T[startSize];
+        dataArray = new T[startSize];
         arraySize = startSize;
     }
+
+    List(std::initializer_list<T> elements) {
+        dataArray = new T[elements.size()];
+
+        std::copy(elements.begin(), elements.end(), dataArray);
+        elementCount = elements.size();
+        arraySize = elements.size();
+    };
 
     void add(const T &object) {
         // we need to copy and things
@@ -30,7 +38,19 @@ public:
             reserve(arraySize * 2);
         }
 
-        data[elementCount] = object;
+        dataArray[elementCount] = object;
+        elementCount++;
+    }
+
+    void addAt(const T &object, const int index) {
+        if (elementCount + 1 >= arraySize)
+            reserve(arraySize * 2);
+
+        for (int i = elementCount + 1; i > index; i--) {
+            dataArray[i] = dataArray[i - 1];
+        }
+
+        dataArray[index] = object;
         elementCount++;
     }
 
@@ -41,20 +61,38 @@ public:
         // objIndex = 2
 
         for (int i = 0; i < elementCount; i++) {
-            T element = data[i];
+            T element = dataArray[i];
             if (element == object) {
                 arraySize--;
                 T *temp = new T[arraySize];
 
-                memcpy(temp, data, sizeof(T) * i);
-                memcpy(temp + i, data + (i + 1), (arraySize - i) * sizeof(T));
+                memcpy(temp, dataArray, sizeof(T) * i);
+                memcpy(temp + i, dataArray + (i + 1), (arraySize - i) * sizeof(T));
 
-                delete[] data;
-                data = temp;
+                delete[] dataArray;
+                dataArray = temp;
                 elementCount--;
                 break;
             }
         }
+    }
+
+    void removeAt(const int index) {
+        assert(arraySize > 0);
+        // [1, 2, 3, 4, 5] -> [1, 2, 4, 5]
+        // object = 3
+        // objIndex = 2
+
+        T element = dataArray[index];
+        arraySize--;
+        T *temp = new T[arraySize];
+
+        memcpy(temp, dataArray, sizeof(T) * index);
+        memcpy(temp + index, dataArray + (index + 1), (arraySize - index) * sizeof(T));
+
+        delete[] dataArray;
+        dataArray = temp;
+        elementCount--;
     }
 
     void removeNoAlloc(const T &object) {
@@ -65,10 +103,10 @@ public:
 
         for (int i = 0; i < elementCount; i++) {
             if (shifting) {
-                data[i - 1] = data[i];
+                dataArray[i - 1] = dataArray[i];
             }
             else {
-                if (data[i] == object) {
+                if (dataArray[i] == object) {
                     shifting = true;
                 }
             }
@@ -79,12 +117,24 @@ public:
             elementCount--;
     }
 
+    void removeNoAllocAt(const int index) {
+        // [1, 2, 3, 4, 5] -> [1, 2, 4, 5]
+        // object = 3
+        // objIndex = 2
+
+        for (int i = index + 1; i < elementCount; i++) {
+            dataArray[i - 1] = dataArray[i];
+        }
+
+        elementCount--;
+    }
+
     void reserve(const int size) {
         assert(size >= arraySize);
         T *temp = new T[size];
-        memcpy(temp, data, sizeof(T) * arraySize);
-        delete[] data;
-        data = temp;
+        memcpy(temp, dataArray, sizeof(T) * arraySize);
+        delete[] dataArray;
+        dataArray = temp;
         arraySize = size;
     }
 
@@ -93,8 +143,8 @@ public:
     }
 
     void clear() {
-        delete[] data;
-        data = new T[1];
+        delete[] dataArray;
+        dataArray = new T[1];
         elementCount = 0;
         arraySize = 1;
     }
@@ -108,7 +158,7 @@ public:
         std::string dataString = "[ ";
 
         for (int i = 0; i < elementCount; i++) {
-            dataString.append(std::to_string(data[i]));
+            dataString.append(std::to_string(dataArray[i]));
             if (i + 1 != elementCount)
                 dataString.append(", ");
             else
@@ -121,7 +171,7 @@ public:
     }
 
     T at(int index) {
-        return data[index];
+        return dataArray[index];
     }
 
     T operator[](const int index) {
@@ -129,7 +179,7 @@ public:
     }
 
     T at(int index) const {
-        return data[index];
+        return dataArray[index];
     }
 
     T operator[](const int index) const {
@@ -148,6 +198,10 @@ public:
      */
     [[nodiscard]] int size() const {
         return arraySize;
+    }
+
+    [[nodiscard]] bool empty() const {
+        return count() > 0;
     }
 
     void operator+=(const T &object) {
@@ -169,14 +223,18 @@ public:
      */
     int find(const T &object) const {
         for (int i = 0; i < elementCount; i++) {
-            if (data[i] == object)
+            if (dataArray[i] == object)
                 return i;
         }
 
         return -1;
     }
 
+    T *data() {
+        return dataArray;
+    }
+
     ~List() {
-        delete[] data;
+        delete[] dataArray;
     }
 };

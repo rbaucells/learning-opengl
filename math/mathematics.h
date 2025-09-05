@@ -115,7 +115,7 @@ public:
 
     float data[COLUMNS][ROWS] = {};
 
-    Matrix() {}
+    Matrix() = default;
 
     Matrix(const Matrix<ROWS, COLUMNS> &other) {
         assert(ROWS == other.rows && COLUMNS == other.columns);
@@ -297,7 +297,7 @@ public:
             return result;
         }
         else {
-            const Matrix identityMatrix = Matrix::identity<ROWS>();
+            const Matrix identityMatrix = Matrix::identity();
             Matrix<ROWS, COLUMNS * 2> temp;
 
             for (int c = 0; c < COLUMNS; c++) {
@@ -415,7 +415,7 @@ public:
      * @return The matrix scaled along {x, y, z}
      */
     Matrix<4, 4> scaleAnisotropic(const float x, const float y, const float z) const requires (ROWS == COLUMNS && COLUMNS == 4) {
-        Matrix<4, 4> scaleMatrix = identity<4>();
+        Matrix<4, 4> scaleMatrix = identity();
 
         scaleMatrix.data[0][0] = x;
         scaleMatrix.data[1][1] = y;
@@ -432,7 +432,7 @@ public:
      * @return The matrix translated by x, y, and z
      */
     Matrix<4, 4> translate(const float x, const float y, const float z) const requires (ROWS == COLUMNS && COLUMNS == 4) {
-        Matrix<4, 4> translationMatrix = identity<4>();
+        Matrix<4, 4> translationMatrix = identity();
 
         translationMatrix.data[3][0] = x;
         translationMatrix.data[3][1] = y;
@@ -450,7 +450,7 @@ public:
         const float sin = std::sinf(angle * (static_cast<float>(M_PI) / 180.0f));
         const float cos = std::cosf(angle * (static_cast<float>(M_PI) / 180.0f));
 
-        Matrix<4, 4> rotationMatrix = Matrix::identity<4>();
+        Matrix<4, 4> rotationMatrix = identity();
 
         rotationMatrix.data[1][1] = cos;
         rotationMatrix.data[1][2] = sin;
@@ -469,7 +469,7 @@ public:
         const float sin = std::sinf(angle * (static_cast<float>(M_PI) / 180.0f));
         const float cos = std::cosf(angle * (static_cast<float>(M_PI) / 180.0f));
 
-        Matrix<4, 4> rotationMatrix = Matrix::identity<4>();
+        Matrix<4, 4> rotationMatrix = identity();
 
         rotationMatrix.data[0][0] = cos;
         rotationMatrix.data[0][2] = -sin;
@@ -484,11 +484,11 @@ public:
      * @param angle How many DEGREES to rotate along the y
      * @return Matrix rotated by angle
      */
-    Matrix<4, 4> rotateZ(const float angle) const requires (ROWS == COLUMNS && COLUMNS == 4) {
+    Matrix<4,4> rotateZ(const float angle) const requires (ROWS == COLUMNS && COLUMNS == 4) {
         const float sin = std::sinf(angle * (static_cast<float>(M_PI) / 180.0f));
         const float cos = std::cosf(angle * (static_cast<float>(M_PI) / 180.0f));
 
-        Matrix<4, 4> rotationMatrix = Matrix::identity<4>();
+        Matrix<4, 4> rotationMatrix = identity();
 
         rotationMatrix.data[0][0] = cos;
         rotationMatrix.data[0][1] = sin;
@@ -566,7 +566,7 @@ public:
      */
     static Matrix<4, 4> ortho(const float left, const float right, const float bottom, const float top, const float near, const float far) {
         // identity
-        Matrix<4, 4> transformation = identity<4>();
+        Matrix<4, 4> transformation = identity();
         // transformation
         transformation.data[0][0] = 2.0f / (right - left);
         transformation.data[1][1] = 2.0f / (top - bottom);
@@ -579,15 +579,13 @@ public:
     }
 
     /**
-     *
-     * @tparam SIZE How many rows/columns should the produced identity have
-     * @return Matrix with 1s on main diagonal and 0s elsewhere of SIZExSIZE
+     * @brief Generates the identity matrix of size this Rows x this Rows
+     * @return Matrix with 1s on main diagonal, 0s everywhere else
      */
-    template<int SIZE>
-    static Matrix<SIZE, SIZE> identity() {
-        Matrix<SIZE, SIZE> result;
+    static Matrix<ROWS, ROWS> identity() {
+        Matrix<ROWS, ROWS> result;
 
-        for (int i = 0; i < SIZE; i++) {
+        for (int i = 0; i < ROWS; i++) {
             result[i][i] = 1;
         }
 

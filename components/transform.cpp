@@ -156,7 +156,7 @@ void Transform::setGlobalScale(const Vector2 scale) {
 }
 
 Matrix<4, 4> Transform::localToWorldMatrix() const {
-    Matrix<4, 4> transformationMatrix = Matrix<4, 4>::identity<4>();
+    Matrix<4, 4> transformationMatrix = Matrix<4, 4>::identity();
 
     transformationMatrix = transformationMatrix.translate(localPosition.x, localPosition.y, 0);
     transformationMatrix = transformationMatrix.rotateZ(localRotation);
