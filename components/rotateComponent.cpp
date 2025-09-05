@@ -10,7 +10,7 @@ RotateComponent::RotateComponent(Object* owner, const float speed) : Component(o
 void RotateComponent::start() {
     std::printf("Start \n");
 
-    object->destroy();
+    // object->destroy();
 }
 
 void RotateComponent::update(const double deltaTime) {

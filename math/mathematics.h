@@ -99,130 +99,6 @@ struct Vector4 {
     float dot(const Vector4 &other) const;
 };
 
-struct RowMatrix4X4 {
-    RowMatrix4X4() = default;
-
-    RowMatrix4X4(const RowMatrix4X4 &other);
-
-    static RowMatrix4X4 identity();
-
-    RowMatrix4X4 operator*(const RowMatrix4X4 &other) const;
-
-    RowMatrix4X4 operator*(float value) const;
-
-    RowMatrix4X4 operator+(const RowMatrix4X4 &other) const;
-
-    RowMatrix4X4 operator-(const RowMatrix4X4 &other) const;
-
-    RowMatrix4X4 multiply(const RowMatrix4X4 &other) const;
-
-    RowMatrix4X4 scale(float value) const;
-
-    RowMatrix4X4 scale_anisotropic(float x, float y, float z) const;
-
-    RowMatrix4X4 add(const RowMatrix4X4 &other) const;
-
-    RowMatrix4X4 subtract(const RowMatrix4X4 &other) const;
-
-    RowMatrix4X4 transpose() const;
-
-    RowMatrix4X4 translate(float x, float y, float z) const;
-
-    RowMatrix4X4 rotate_x(float angle) const;
-
-    RowMatrix4X4 rotate_y(float angle) const;
-
-    RowMatrix4X4 rotate_z(float angle) const;
-
-    static RowMatrix4X4 ortho(float left, float right, float bottom, float top, float near, float far);
-
-    float data[4][4] = {{0}, {0}, {0}, {0}};
-};
-
-struct ColumnMatrix4X4 {
-    ColumnMatrix4X4() = default;
-
-    ColumnMatrix4X4(const ColumnMatrix4X4 &other);
-
-    static ColumnMatrix4X4 identity();
-
-    ColumnMatrix4X4 operator*(const ColumnMatrix4X4 &other) const;
-
-    ColumnMatrix4X4 operator*(float value) const;
-
-    Vector4 operator*(const Vector4 &other) const;
-
-    Vector2 operator*(const Vector2 &other) const;
-
-    [[nodiscard]] ColumnMatrix4X4 operator+(const ColumnMatrix4X4 &other) const;
-
-    [[nodiscard]] ColumnMatrix4X4 operator-(const ColumnMatrix4X4 &other) const;
-
-    [[nodiscard]] ColumnMatrix4X4 multiply(const ColumnMatrix4X4 &other) const;
-
-    [[nodiscard]] ColumnMatrix4X4 scale(float value) const;
-
-    [[nodiscard]] ColumnMatrix4X4 scale_anisotropic(float x, float y, float z) const;
-
-    [[nodiscard]] ColumnMatrix4X4 add(const ColumnMatrix4X4 &other) const;
-
-    [[nodiscard]] ColumnMatrix4X4 subtract(const ColumnMatrix4X4 &other) const;
-
-    [[nodiscard]] ColumnMatrix4X4 transpose() const;
-
-    [[nodiscard]] ColumnMatrix4X4 translate(float x, float y, float z) const;
-
-    [[nodiscard]] ColumnMatrix4X4 rotate_x(float angle) const;
-
-    [[nodiscard]] ColumnMatrix4X4 rotate_y(float angle) const;
-
-    [[nodiscard]] ColumnMatrix4X4 rotate_z(float angle) const;
-
-    [[nodiscard]] ColumnMatrix4X4 ortho(float left, float right, float bottom, float top, float near, float far) const;
-
-    [[nodiscard]] ColumnMatrix4X4 inverse() const;
-
-    float *operator[](int index);
-
-    explicit operator const float *() const;
-    explicit operator float *();
-
-    [[nodiscard]] bool compareTo(const ColumnMatrix4X4 &other) const;
-
-    static ColumnMatrix4X4 wrap(mat4x4 other);
-
-    float data[4][4] = {{0}, {0}, {0}, {0}};
-
-    /**
- *
- * @return The column-major matrix as a string for printing
- */
-    [[nodiscard]] std::string toString() const {
-        std::stringstream ss;
-        ss.precision(2);
-
-        for (int r = 0; r < 4; r++) {
-            ss << " [";
-
-            for (int c = 0; c < 4; c++) {
-                ss << data[c][r];
-
-                if (c < 4 - 1)
-                    ss << ", ";
-            }
-
-            ss << "]";
-
-            if (r < 4 - 1)
-                ss << ",\n";
-        }
-
-        ss << "\n]";
-        ss << "\n";
-        return ss.str();
-    }
-};
-
 struct Vertex {
     Vector2 position;
     Vector2 uv;
@@ -533,7 +409,7 @@ public:
      * @return The matrix scaled along {x, y, z}
      */
     Matrix<4, 4> scaleAnisotropic(const float x, const float y, const float z) const requires (ROWS == COLUMNS && COLUMNS == 4) {
-        Matrix<4, 4> scaleMatrix = identity();
+        Matrix<4, 4> scaleMatrix = identity<4>();
 
         scaleMatrix.data[0][0] = x;
         scaleMatrix.data[1][1] = y;
@@ -550,7 +426,7 @@ public:
      * @return The matrix translated by x, y, and z
      */
     Matrix<4, 4> translate(const float x, const float y, const float z) const requires (ROWS == COLUMNS && COLUMNS == 4) {
-        Matrix<4, 4> translationMatrix = identity();
+        Matrix<4, 4> translationMatrix = identity<4>();
 
         translationMatrix.data[3][0] = x;
         translationMatrix.data[3][1] = y;
@@ -738,5 +614,71 @@ public:
         for (int c = 0; c < C_SIZE; c++) {
             matrix[c][rowB] = temp[c];
         }
+    }
+
+    operator const float *() const {
+        return &data[0][0];
+    }
+
+    operator float *() {
+        return &data[0][0];
+    }
+
+    [[nodiscard]] Vector4 operator*(const Vector4& other) const requires (ROWS == 4 && COLUMNS == 4) {
+        return multiply(other);
+    }
+
+    [[nodiscard]] Vector3 operator*(const Vector3& other) const requires (ROWS == 4 && COLUMNS == 4) {
+        return multiply(other);
+    }
+
+    [[nodiscard]] Vector2 operator*(const Vector2& other) const requires (ROWS == 4 && COLUMNS == 4) {
+        return multiply(other);
+    }
+
+    /**
+     * @brief Multiplies the 4x4 matrix by a 4D vector.
+     * @param other The 4D vector to multiply by.
+     * @return A new 4D vector that is the result of the multiplication.
+     */
+    [[nodiscard]] Vector4 multiply(const Vector4& other) const requires (ROWS == 4 && COLUMNS == 4) {
+        Vector4 result;
+
+        result.x = data[0][0] * other.x + data[1][0] * other.y + data[2][0] * other.z + data[3][0] * other.w;
+        result.y = data[0][1] * other.x + data[1][1] * other.y + data[2][1] * other.z + data[3][1] * other.w;
+        result.z = data[0][2] * other.x + data[1][2] * other.y + data[2][2] * other.z + data[3][2] * other.w;
+        result.w = data[0][3] * other.x + data[1][3] * other.y + data[2][3] * other.z + data[3][3] * other.w;
+
+        return result;
+    }
+
+    /**
+     * @brief Multiplies the 4x4 matrix by a 3D vector.
+     * @param other The 3D vector to multiply by.
+     * @return A new 3D vector that is the result of the multiplication.
+     */
+    [[nodiscard]] Vector3 multiply(const Vector3& other) const requires (ROWS == 4 && COLUMNS == 4) {
+        // Promote the 3D vector to a 4D vector with w=1 for a point
+        Vector4 tempVector4{other.x, other.y, other.z, 1.0f};
+
+        // Perform the core 4x4 matrix-vector multiplication
+        Vector4 result = multiply(tempVector4);
+
+        // Return the first three components as a 3D vector
+        return Vector3{result.x, result.y, result.z};
+    }
+
+    /**
+     * @brief Multiplies the 4x4 matrix by a 2D vector.
+     * @param other The 2D vector to multiply by.
+     * @return A new 2D vector that is the result of the multiply.
+     */
+    [[nodiscard]] Vector2 multiply(const Vector2& other) const requires (ROWS == 4 && COLUMNS == 4) {
+        // Promote the 2D vector to a 4D vector with z=0 and w=1 for a point in 2D space
+        Vector4 tempVector4{other.x, other.y, 0.0f, 1.0f};
+
+        Vector4 result = multiply(tempVector4);
+
+        return Vector2{result.x, result.y};
     }
 };

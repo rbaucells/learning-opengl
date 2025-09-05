@@ -3,7 +3,7 @@
 
 class Camera {
 public:
-    ColumnMatrix4X4 viewMatrix;
+    Matrix<4, 4> viewMatrix;
     Camera(const Vector2 &startPos, float startRot);
     void setCameraPosition(const Vector2 &newPos);
     void setCameraRotation(float newRot);

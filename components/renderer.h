@@ -3,11 +3,11 @@
 #include "../math/mathematics.h"
 #include "../systems/component.h"
 
-class Renderer : public Component {
+class Renderer final : public Component {
 public:
     Renderer(Object *owner, const std::vector<Vertex> &vertices, const std::vector<unsigned int> &indices, unsigned int usage, const std::string &texturePath, bool flipTexture, int textureParam, unsigned int shaderProgram, int layer);
 
-    void Draw(const ColumnMatrix4X4 &view, const ColumnMatrix4X4 &projection, int mode) const;
+    void draw(const Matrix<4, 4>& view, const Matrix<4, 4> &projection, int mode) const;
 
     float alpha = 1.f;
     unsigned int layer = 0;

@@ -1,6 +1,5 @@
 #include "transform.h"
-
-#include "object.h"
+#include "../object.h"
 
 struct Decomposed2D {
     Vector2 position{};
@@ -8,7 +7,7 @@ struct Decomposed2D {
     Vector2 scale{};
 };
 
-Decomposed2D decompose2D(const ColumnMatrix4X4 &m) {
+Decomposed2D decompose2D(const Matrix<4, 4> &m) {
     // TODO: what did chatgpt do in here?
     Decomposed2D out;
 
@@ -50,13 +49,13 @@ Decomposed2D decompose2D(const ColumnMatrix4X4 &m) {
     return out;
 }
 
-Transform::Transform(Object* owner, const Vector2 pos, const float rot, const Vector2 scale) : Component(owner) {
+Transform::Transform(Object *owner, const Vector2 pos, const float rot, const Vector2 scale) : Component(owner) {
     setGlobalPosition(pos);
     setGlobalRotation(rot);
     setGlobalScale(scale);
 }
 
-Transform::Transform(Object* owner, const Vector2 pos, const float rot, const Vector2 scale, Transform *parent) : Component(owner) {
+Transform::Transform(Object *owner, const Vector2 pos, const float rot, const Vector2 scale, Transform *parent) : Component(owner) {
     setParent(parent);
     this->localPosition = pos;
     this->localRotation = rot;
@@ -66,14 +65,16 @@ Transform::Transform(Object* owner, const Vector2 pos, const float rot, const Ve
 Vector2 Transform::getGlobalPosition() const {
     return decompose2D(localToWorldMatrix()).position;
 }
+
 float Transform::getGlobalRotation() const {
     if (parent != nullptr) {
         return fmod(parent->getGlobalRotation() + localRotation + 360.0f, 360.0f);
     }
     return fmod(localRotation + 360.0f, 360.0f);
 }
+
 Vector2 Transform::getGlobalScale() const {
-    const ColumnMatrix4X4 m = localToWorldMatrix();
+    const Matrix<4, 4> m = localToWorldMatrix();
 
     // get global rotation and then turn it into radians
     const float rotationRadians = getGlobalRotation() * (static_cast<float>(M_PI) / 180.0f);
@@ -96,6 +97,7 @@ void Transform::setGlobalPosition(const Vector2 pos) {
         localPosition = pos;
     }
 }
+
 void Transform::setGlobalRotation(const float rot) {
     if (parent != nullptr) {
         const float parentGlobalRotation = parent->getGlobalRotation();
@@ -106,6 +108,7 @@ void Transform::setGlobalRotation(const float rot) {
         localRotation = rot;
     }
 }
+
 void Transform::setGlobalScale(const Vector2 scale) {
     // TODO: Figure out wth chatgpt did in this function because i cant understand any of it
     if (!parent) {
@@ -115,7 +118,7 @@ void Transform::setGlobalScale(const Vector2 scale) {
     }
 
     // 1) Parent linear (2x2) columns in column-major storage
-    const ColumnMatrix4X4 pm = parent->localToWorldMatrix();
+    const Matrix<4, 4> pm = parent->localToWorldMatrix();
     const Vector2 pCol0{pm.data[0][0], pm.data[0][1]}; // first column
     const Vector2 pCol1{pm.data[1][0], pm.data[1][1]}; // second column
 
@@ -152,12 +155,12 @@ void Transform::setGlobalScale(const Vector2 scale) {
     localScale = {std::fabs(lx), std::fabs(ly)};
 }
 
-ColumnMatrix4X4 Transform::localToWorldMatrix() const {
-    ColumnMatrix4X4 transformationMatrix = ColumnMatrix4X4::identity();
+Matrix<4, 4> Transform::localToWorldMatrix() const {
+    Matrix<4, 4> transformationMatrix = Matrix<4, 4>::identity<4>();
 
     transformationMatrix = transformationMatrix.translate(localPosition.x, localPosition.y, 0);
-    transformationMatrix = transformationMatrix.rotate_z(localRotation);
-    transformationMatrix = transformationMatrix.scale_anisotropic(localScale.x, localScale.y, 1);
+    transformationMatrix = transformationMatrix.rotateZ(localRotation);
+    transformationMatrix = transformationMatrix.scaleAnisotropic(localScale.x, localScale.y, 1);
 
     if (parent != nullptr) {
         return parent->localToWorldMatrix().multiply(transformationMatrix);
@@ -166,9 +169,9 @@ ColumnMatrix4X4 Transform::localToWorldMatrix() const {
     return transformationMatrix;
 }
 
-ColumnMatrix4X4 Transform::worldToLocalMatrix() const {
-    const ColumnMatrix4X4 localToWorld = localToWorldMatrix();
-    ColumnMatrix4X4 inverse = localToWorld.inverse();
+Matrix<4, 4> Transform::worldToLocalMatrix() const {
+    const Matrix<4, 4> localToWorld = localToWorldMatrix();
+    Matrix<4, 4> inverse = localToWorld.inverse();
     return inverse;
 }
 
@@ -211,7 +214,7 @@ std::vector<Transform *> Transform::getChildren() {
 }
 
 void Transform::deleteAllChildren() {
-    for (const Transform* child : children) {
+    for (const Transform *child: children) {
         child->owner->destroy();
     }
 

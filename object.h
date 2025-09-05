@@ -5,7 +5,7 @@
 
 #include "main.h"
 #include "systems/component.h"
-#include "transform.h"
+#include "components/transform.h"
 
 template<typename T>
 concept IsComponent = std::is_base_of_v<Component, T>;

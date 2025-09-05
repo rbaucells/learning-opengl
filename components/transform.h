@@ -1,8 +1,8 @@
 #pragma once
-#include "math/mathematics.h"
+#include "../math/mathematics.h"
 #include <vector>
 
-#include "systems/component.h"
+#include "../systems/component.h"
 
 class Object;
 
@@ -17,8 +17,8 @@ public:
 
     ~Transform();
 
-    [[nodiscard]] ColumnMatrix4X4 localToWorldMatrix() const;
-    [[nodiscard]] ColumnMatrix4X4 worldToLocalMatrix() const;
+    [[nodiscard]] Matrix<4,4> localToWorldMatrix() const;
+    [[nodiscard]] Matrix<4,4> worldToLocalMatrix() const;
 
     void setGlobalPosition(Vector2 pos);
     void setGlobalRotation(float rot);

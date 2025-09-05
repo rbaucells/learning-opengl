@@ -3,13 +3,13 @@ project(OpenGL)
 
 set(CMAKE_CXX_STANDARD 20)
 
-add_executable(OpenGL components/RotateComponent.cpp components/RotateComponent.h systems/component.h math/columnMatrix4x4.cpp math/mathematics.h math/rowMatrix4x4.cpp math/vector2.cpp math/vector3.cpp Camera.cpp main.cpp main.h object.cpp object.h camera.h dependencies/stb_image.cpp
+add_executable(OpenGL components/rotateComponent.cpp components/rotateComponent.h systems/component.h math/mathematics.h math/vector2.cpp math/vector3.cpp Camera.cpp main.cpp main.h object.cpp object.h camera.h dependencies/stb_image.cpp
         systems/input.h
         systems/input.cpp
         systems/event.h
-        components/Renderer.cpp
-        components/Renderer.h
-        transform.cpp
+        components/renderer.cpp
+        components/renderer.h
+        components/transform.cpp
         math/vector4.cpp
         systems/workQueue.h
         systems/workQueue.cpp
@@ -23,13 +23,13 @@ target_link_libraries(OpenGL PRIVATE ${CMAKE_SOURCE_DIR}/dependencies/lib/glad/l
 
 enable_testing()
 
-add_executable(matrixTests math/columnMatrix4x4.cpp math/mathematics.h tests/matrixTests.cpp dependencies/include/linmath/linmath.h)
+add_executable(matrixTests math/mathematics.h tests/matrixTests.cpp dependencies/include/linmath/linmath.h)
 
 target_include_directories(matrixTests PRIVATE dependencies/include)
 
 add_test(NAME matrixTests COMMAND matrixTests)
 
-add_executable(transformTests tests/transformTests.cpp math/mathematics.h dependencies/include/linmath/linmath.h transform.cpp math/columnMatrix4x4.cpp math/vector2.cpp)
+add_executable(transformTests tests/transformTests.cpp math/mathematics.h dependencies/include/linmath/linmath.h components/transform.cpp math/vector2.cpp)
 
 target_include_directories(transformTests PRIVATE dependencies/include)
 

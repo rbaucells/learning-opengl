@@ -20,7 +20,7 @@
 #include "components/renderer.h"
 
 // needed by framebuffer_size_callback() and by object.draw()
-ColumnMatrix4X4 projection;
+Matrix<4,4> projection;
 
 // callbacks
 void error_callback(int error, const char *description) {
@@ -266,7 +266,7 @@ int main() {
         // iterate through all the renderers in reverse. AKA: from back to front
         for (auto &renderersInLayer: std::ranges::reverse_view(allRenderers)) {
             for (const auto &renderer: renderersInLayer.second) {
-                renderer->Draw(camera->viewMatrix, projection, GL_TRIANGLES);
+                renderer->draw(camera->viewMatrix, projection, GL_TRIANGLES);
             }
         }
 

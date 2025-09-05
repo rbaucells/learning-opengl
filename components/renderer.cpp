@@ -1,10 +1,8 @@
 #include "renderer.h"
-
-#include <iostream>
-
 #include "../object.h"
 #include "stb_image.h"
 #include "glad/gl.h"
+#include <iostream>
 
 Renderer::Renderer(Object *owner, const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices, const unsigned int usage, const std::string& texturePath, const bool flipTexture, const int textureParam, unsigned int shaderProgram, int layer) : Component(owner) {
     this->vertices = vertices;
@@ -117,18 +115,20 @@ Renderer::~Renderer() {
 }
 
 
-void Renderer::Draw(const ColumnMatrix4X4& view, const ColumnMatrix4X4 &projection, const int mode) const {
+void Renderer::draw(const Matrix<4, 4>& view, const Matrix<4, 4> &projection, const int mode) const {
     // create the model matrix from the transform
-    const ColumnMatrix4X4 model = object->transform->localToWorldMatrix();
+    const Matrix<4, 4> model = object->transform->localToWorldMatrix();
 
     // combine the matrices into a single MVP matrix
-    ColumnMatrix4X4 mvp = projection * (view * model);
+    Matrix<4, 4> mvp = projection * (view * model);
+
+    const GLfloat* floatPointer = static_cast<const GLfloat*>(mvp);
 
     // make sure were using the shader
     glUseProgram(shaderProgram);
 
     // pass the uniform data using the saved locations
-    glUniformMatrix4fv(mvpLocation, 1, GL_FALSE, static_cast<const GLfloat*>(mvp));
+    glUniformMatrix4fv(mvpLocation, 1, GL_FALSE, floatPointer);
     glUniform1i(channelsLocation, numberOfChannels);
     glUniform1f(alphaLocation, alpha);
 
