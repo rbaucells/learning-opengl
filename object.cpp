@@ -19,6 +19,8 @@ Object::Object(const std::string &objectName, const int objectTag, const Transfo
     updateEvent.subscribe(this, &Object::update);
     lateUpdateEvent.subscribe(this, &Object::lateUpdate);
     fixedUpdateEvent.subscribe(this, &Object::fixedUpdate);
+
+    transform.owner = this;
 }
 
 /**
@@ -64,16 +66,55 @@ void Object::lateUpdate(double deltaTime) const {
 }
 
 /**
- * @brief destroys the object, removing it from the scene and freeing its memory.
- *
- * this method clears all components, removes the object from the global list of objects,
- * and then deletes the object instance.
+ * @brief Puts this object into the waiting line to be destroyed at the end of the frame
  */
 void Object::destroy() {
+    markedForDeath = true;
+    waitingLineOfDeath.push_back(this);
+}
+
+/**
+ * @brief Immediately destroys the object, no waiting for end of frame
+ * @warning Can be dangerous if ran in update loop and then something else tries to access this
+ */
+void Object::destroyImmediately() {
+    // we need to deactivate before destroying
+    if (getActive()) {
+        for (Component* component : components) {
+            component->onDisable();
+        }
+    }
+
+    for (Component* component : components) {
+        component->onDestroy();
+    }
+
     components.clear();
     std::erase(allObjects, this);
-    removeAllQueueEntries(this);
+    // don't worry about transform, destructor will clean up for us
 }
+
+bool Object::getActive() const {
+    return activated;
+}
+
+void Object::setActive(const bool state) {
+    // if activated but not anymore
+    if (activated && !state) {
+        for (Component* component : components) {
+            component->onDisable();
+        }
+    }
+    // if not activated but are now
+    else if (!activated && state) {
+        for (Component* component : components) {
+            component->onEnable();
+        }
+    }
+
+    activated = state;
+}
+
 
 // static methods
 

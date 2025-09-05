@@ -221,12 +221,25 @@ int main() {
         lastLoopTime = std::chrono::high_resolution_clock::now();
 
         // if there are some components left to be "started", start em and remove them from the queueueue
-        if (!callStartBeforeNextUpdate.empty()) {
-            for (Component *component: callStartBeforeNextUpdate) {
+        if (!componentsToInitialize.empty()) {
+            // awaken
+            for (Component *component: componentsToInitialize) {
+                component->awake();
+            }
+
+            // if the object is supposed to be active, call the onEnable
+            for (Component *component: componentsToInitialize) {
+                if (component->object->getActive()) {
+                    component->onEnable();
+                }
+            }
+
+            // start
+            for (Component *component: componentsToInitialize) {
                 component->start();
             }
 
-            callStartBeforeNextUpdate.clear();
+            componentsToInitialize.clear();
         }
 
         GLFWgamepadstate currentGamepadState;
@@ -258,6 +271,13 @@ int main() {
         }
 
         handleQueue(deltaTime);
+
+        for (Object* object : waitingLineOfDeath) {
+            object->destroyImmediately();
+            // delete object;
+        }
+
+        waitingLineOfDeath.clear();
 
         glfwSwapBuffers(mainWindow);
         glfwPollEvents();

@@ -1,5 +1,7 @@
 #include "transform.h"
 
+#include "object.h"
+
 struct Decomposed2D {
     Vector2 position{};
     float rotation{}; // degrees
@@ -54,7 +56,7 @@ Transform::Transform(const Vector2 pos, const float rot, const Vector2 scale) {
     setGlobalScale(scale);
 }
 
-Transform::Transform(Vector2 pos, float rot, Vector2 scale, Transform *parent) {
+Transform::Transform(const Vector2 pos, const float rot, const Vector2 scale, Transform *parent) {
     setParent(parent);
     this->localPosition = pos;
     this->localRotation = rot;
@@ -208,11 +210,24 @@ std::vector<Transform *> Transform::getChildren() {
     return children;
 }
 
+void Transform::deleteAllChildren() {
+    for (const Transform* child : children) {
+        child->owner->destroy();
+    }
+
+    children.clear();
+}
+
+
 /**
  * @brief Sets parent, will keep global position/rotation/scale
  * @param parent The new parent
  */
 void Transform::setParent(Transform *parent) {
+    // tell the parents good bye
+    if (parent != nullptr)
+        parent->removeChild(this);
+
     const Vector2 globalPos = getGlobalPosition();
     const float globalRot = getGlobalRotation();
     const Vector2 globalScale = getGlobalScale();
@@ -222,4 +237,9 @@ void Transform::setParent(Transform *parent) {
     setGlobalPosition(globalPos);
     setGlobalRotation(globalRot);
     setGlobalScale(globalScale);
+}
+
+Transform::~Transform() {
+    deleteAllChildren();
+    setParent(nullptr);
 }
