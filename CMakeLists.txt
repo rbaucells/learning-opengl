@@ -3,7 +3,7 @@ project(OpenGL)
 
 set(CMAKE_CXX_STANDARD 20)
 
-add_executable(OpenGL components/rotateComponent.cpp components/rotateComponent.h systems/component.h math/mathematics.h math/vector2.cpp math/vector3.cpp Camera.cpp main.cpp main.h object.cpp object.h camera.h dependencies/stb_image.cpp
+add_executable(OpenGL components/rotateComponent.cpp components/rotateComponent.h systems/component.h math/mathematics.h math/vector2.cpp math/vector3.cpp camera.cpp main.cpp main.h object.cpp object.h camera.h dependencies/stb_image.cpp
         systems/input.h
         systems/input.cpp
         systems/event.h
@@ -13,7 +13,6 @@ add_executable(OpenGL components/rotateComponent.cpp components/rotateComponent.
         math/vector4.cpp
         systems/workQueue.h
         systems/workQueue.cpp
-        camera.cpp
 )
 
 target_include_directories(OpenGL PRIVATE dependencies/include)

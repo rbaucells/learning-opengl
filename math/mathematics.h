@@ -119,18 +119,26 @@ public:
 
     Matrix() {}
 
-    Matrix(const Matrix &other) {
+    Matrix(const Matrix<ROWS, COLUMNS> &other) {
         assert(ROWS == other.rows && COLUMNS == other.columns);
 
-        for (int c = 0; c < COLUMNS; c++) {
-            for (int r = 0; r < ROWS; r++) {
+        for (int c = 0; c < columns; c++) {
+            for (int r = 0; r < rows; r++) {
                 data[c][r] = other.data[c][r];
             }
         }
     }
 
-    Matrix<ROWS, COLUMNS> operator=(const Matrix &other) {
-        return Matrix(other);
+    Matrix<ROWS, COLUMNS>& operator=(const Matrix &other) {
+        if (this != &other) {
+            for (int c = 0; c < COLUMNS; c++) {
+                for (int r = 0; r < ROWS; r++) {
+                    data[c][r] = other.data[c][r];
+                }
+            }
+        }
+
+        return *this;
     }
 
     /**
