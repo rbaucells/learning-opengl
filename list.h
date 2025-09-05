@@ -57,6 +57,28 @@ public:
         }
     }
 
+    void removeNoAlloc(const T &object) {
+        // [1, 2, 3, 4, 5] -> [1, 2, 4, 5]
+        // object = 3
+        // objIndex = 2
+        bool shifting = false;
+
+        for (int i = 0; i < elementCount; i++) {
+            if (shifting) {
+                data[i - 1] = data[i];
+            }
+            else {
+                if (data[i] == object) {
+                    shifting = true;
+                }
+            }
+        }
+
+        // if we were shifting, we found something
+        if (shifting)
+            elementCount--;
+    }
+
     void reserve(const int size) {
         assert(size >= arraySize);
         T *temp = new T[size];
@@ -67,7 +89,7 @@ public:
     }
 
     void shrinkToFit() {
-        reserve(arraySize);
+        reserve(elementCount);
     }
 
     void clear() {
@@ -101,6 +123,7 @@ public:
     T at(int index) {
         return data[index];
     }
+
     T operator[](const int index) {
         return at(index);
     }
@@ -108,6 +131,7 @@ public:
     T at(int index) const {
         return data[index];
     }
+
     T operator[](const int index) const {
         return at(index);
     }
@@ -115,26 +139,26 @@ public:
     /**
      * @return How many elements are in the list
      */
-    int count() const {
+    [[nodiscard]] int count() const {
         return elementCount;
     }
 
     /**
      * @return how many 'slots' are in the array; size of the array
      */
-    int size() const {
+    [[nodiscard]] int size() const {
         return arraySize;
     }
 
-    void operator+=(const T& object) {
+    void operator+=(const T &object) {
         add(object);
     }
 
-    void operator<<(const T& object) {
+    void operator<<(const T &object) {
         add(object);
     }
 
-    void operator-=(const T& object) {
+    void operator-=(const T &object) {
         remove(object);
     }
 
@@ -143,7 +167,7 @@ public:
      * @return The index of that object in the array
      * @note Returns -1 if not found
      */
-    int find(const T& object) const {
+    int find(const T &object) const {
         for (int i = 0; i < elementCount; i++) {
             if (data[i] == object)
                 return i;

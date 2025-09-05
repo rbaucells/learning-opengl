@@ -183,8 +183,12 @@ int main() {
         2, 3, 0
     };
 
+    Object camera("mainCamera", 69, {0, 0}, 0, {1,1});
+    auto cameraComponent = camera.addComponent<Camera>();
+    cameraComponent->setMain();
+
     Object origin1("origin1", 0, {0, 0}, 0, {1, 1});
-    origin1.addComponent<RotateComponent>(-45);
+    // origin1.addComponent<RotateComponent>(-45);
 
     Object origin2("origin2", 0, {0, 0}, 0, {1, 1});
     origin2.addComponent<RotateComponent>(45);
@@ -201,8 +205,7 @@ int main() {
     glBindTexture(GL_TEXTURE0, 0);
     glBindVertexArray(0);
 
-    auto mainCamera = Camera({0, 0}, 0);
-    camera = &mainCamera; // doesnt matter because scope lives for entirity of app
+
     // update the window size initialiy
     framebuffer_size_callback(mainWindow, SCREEN_WIDTH, SCREEN_HEIGHT);
 
@@ -263,10 +266,11 @@ int main() {
         updateEvent.invoke(deltaTime);
         lateUpdateEvent.invoke(deltaTime);
 
+        Matrix<4, 4> cameraViewMatrix = Camera::mainCamera->getViewMatrix();
         // iterate through all the renderers in reverse. AKA: from back to front
         for (auto &renderersInLayer: std::ranges::reverse_view(allRenderers)) {
             for (const auto &renderer: renderersInLayer.second) {
-                renderer->draw(camera->viewMatrix, projection, GL_TRIANGLES);
+                renderer->draw(cameraViewMatrix, projection, GL_TRIANGLES);
             }
         }
 

@@ -6,7 +6,7 @@
 
 class Object;
 
-class Transform : public Component{
+class Transform final : public Component{
 private:
     Transform *parent = nullptr;
     std::vector<Transform *> children;
@@ -15,7 +15,7 @@ public:
     Transform(Object* owner, Vector2 pos, float rot, Vector2 scale, Transform *parent);
     Transform(Object* owner, Vector2 pos, float rot, Vector2 scale);
 
-    ~Transform();
+    ~Transform() override;
 
     [[nodiscard]] Matrix<4,4> localToWorldMatrix() const;
     [[nodiscard]] Matrix<4,4> worldToLocalMatrix() const;
@@ -35,10 +35,9 @@ public:
     void deleteAllChildren();
 
     void setParent(Transform* parent);
+    Transform* getParent();
 
     Vector2 localPosition = {0, 0};
     float localRotation = 0;
     Vector2 localScale = {0, 0};
-
-    mutable Object* owner = nullptr;
 };

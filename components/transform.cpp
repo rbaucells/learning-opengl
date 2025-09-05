@@ -215,7 +215,7 @@ std::vector<Transform *> Transform::getChildren() {
 
 void Transform::deleteAllChildren() {
     for (const Transform *child: children) {
-        child->owner->destroy();
+        child->object->destroy();
     }
 
     children.clear();
@@ -240,6 +240,10 @@ void Transform::setParent(Transform *parent) {
     setGlobalPosition(globalPos);
     setGlobalRotation(globalRot);
     setGlobalScale(globalScale);
+}
+
+Transform* Transform::getParent() {
+    return parent;
 }
 
 Transform::~Transform() {

@@ -12,7 +12,6 @@ inline int SCREEN_WIDTH = 1920;
 inline int SCREEN_HEIGHT = 1080;
 
 inline GLFWwindow *mainWindow;
-inline Camera *camera;
 
 inline std::vector<Component*> componentsToInitialize {};
 

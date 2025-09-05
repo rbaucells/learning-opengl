@@ -1,55 +1,36 @@
 #include "camera.h"
+#include "object.h"
 
-Camera::Camera(const Vector2 &startPos, const float startRot) {
-    viewMatrix = Matrix<4, 4>::identity<4>();
-    position = Vector3(startPos.x, startPos.y, 1);
-    rotation = startRot;
-    updateViewMatrix();
+void Camera::awake() {
+    getViewMatrix();
 }
 
-void Camera::setCameraPosition(const Vector2 &newPos) {
-    position = Vector3(newPos.x, newPos.y, position.z);
-    updateViewMatrix();
+void Camera::setMain() {
+    mainCamera = this;
 }
 
-void Camera::setCameraRotation(const float newRot) {
-    rotation = newRot;
-    updateViewMatrix();
-}
+Matrix<4, 4> Camera::getViewMatrix() {
+    auto localToWorldMatrix = calculateCameraLocalToWorld();
 
-void Camera::moveCamera(const Vector2 &change) {
-    position += Vector3(change.x, change.y, 0);
-    updateViewMatrix();
-}
-
-void Camera::rotateCamera(const float change) {
-    rotation += change;
-    updateViewMatrix();
-}
-
-void Camera::updateViewMatrix() {
-    Matrix<4, 4> transformationMatrix = Matrix<4, 4>::identity<4>();
-
-    transformationMatrix = transformationMatrix.translate(-position.x, -position.y, -position.z);
-    transformationMatrix = transformationMatrix.rotateZ(rotation);
-    transformationMatrix = transformationMatrix.scaleAnisotropic(zooooom, zooooom, 1.0f);
-
-    viewMatrix = transformationMatrix;
-}
-
-void Camera::setZoom(const float value) {
-    if (value > 0) {
-        zooooom = value;
-        std::printf("new camera zoom %f", value);
-        updateViewMatrix();
+    if (lastLocalToWorldMatrix != localToWorldMatrix) {
+        lastLocalToWorldMatrix = localToWorldMatrix;
+        viewMatrix = localToWorldMatrix;
     }
-    else {
-        zooooom = 0;
-        std::printf("new camera zoom %d", 0);
-        updateViewMatrix();
-    }
+
+    return viewMatrix;
 }
 
-void Camera::zoom(const float change) {
-    setZoom(zooooom + change);
+Camera* Camera::mainCamera = nullptr;
+Matrix<4, 4> Camera::calculateCameraLocalToWorld() const {
+    auto localToWorldMatrix = Matrix<4,4>::identity<4>();
+
+    localToWorldMatrix = localToWorldMatrix.translate(-object->transform->localPosition.x, -object->transform->localPosition.y, -1);
+    localToWorldMatrix = localToWorldMatrix.rotateZ(object->transform->localRotation);
+    localToWorldMatrix = localToWorldMatrix.scaleAnisotropic(object->transform->localScale.x, object->transform->localScale.y, 1);
+
+    if (object->transform->getParent() != nullptr) {
+        return object->transform->getParent()->localToWorldMatrix().multiply(localToWorldMatrix);
+    }
+
+    return localToWorldMatrix;
 }

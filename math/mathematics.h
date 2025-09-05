@@ -4,8 +4,6 @@
 #include <iostream>
 #include <sstream>
 
-#include "linmath/linmath.h"
-
 struct Vector2 {
     float x = {};
     float y = {};

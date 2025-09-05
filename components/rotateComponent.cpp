@@ -20,6 +20,8 @@ void RotateComponent::update(const double deltaTime) {
     // if (object->transform.localRotation < -180 || object->transform.localRotation > 90) {
     //     speed = -speed;
     // }
+
+    Camera::mainCamera->object->transform->localPosition.x += 100 * deltaTime;
 }
 
 void RotateComponent::awake() {

@@ -1,21 +1,20 @@
 #pragma once
 #include "math/mathematics.h"
+#include "systems/component.h"
 
-class Camera {
+class Camera : public Component {
 public:
-    Matrix<4, 4> viewMatrix;
-    Camera(const Vector2 &startPos, float startRot);
-    void setCameraPosition(const Vector2 &newPos);
-    void setCameraRotation(float newRot);
-    void moveCamera(const Vector2 &change);
-    void rotateCamera(float change);
+    using Component::Component;
+    void awake() override;
+    void setMain();
+    Matrix<4, 4> getViewMatrix();
 
-    void setZoom(float value);
-    void zoom(float change);
+    static Camera* mainCamera;
 
 private:
-    Vector3 position;
-    float rotation;
-    float zooooom = 1.0f;
-    void updateViewMatrix();
+    Matrix<4, 4> lastLocalToWorldMatrix;
+
+    Matrix<4, 4> viewMatrix;
+
+    Matrix<4, 4> calculateCameraLocalToWorld() const;
 };
