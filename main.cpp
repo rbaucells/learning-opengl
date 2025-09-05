@@ -2,7 +2,7 @@
 #include "GLFW/glfw3.h"
 
 #include "math/mathematics.h"
-#include "camera.h"
+#include "components/camera.h"
 #include "object.h"
 #include "components/rotateComponent.h"
 #include "main.h"
@@ -23,28 +23,28 @@
 Matrix<4,4> projection;
 
 // callbacks
-void error_callback(int error, const char *description) {
+void errorCallback(const int error, const char *description) {
     std::printf("Error with code'%d': %s\n", error, description);
 }
 
-void debugErrorCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar *message, const void *userParam) {
+void debugErrorCallback(GLenum source, GLenum type, GLuint id, const GLenum severity, const GLsizei length, const GLchar *message, const void *userParam) {
     std::string messageString(message, length);
     std::cout << severity << ": OpenGL error: %s\n" << messageString.c_str() << std::endl;
 };
 
-void close_callback(GLFWwindow *window) {
+void closeCallback(GLFWwindow *window) {
     std::printf("user closing window");
 }
 
-void framebuffer_size_callback(GLFWwindow *window, int width, int height) {
-    SCREEN_WIDTH = width;
-    SCREEN_HEIGHT = height;
+void framebufferSizeCallback(GLFWwindow *window, const int width, const int height) {
+    screenWidth = width;
+    screenHeight = height;
     glViewport(0, 0, width, height);
-    projection = projection.ortho(-static_cast<float>(width) / 2.0f, static_cast<float>(width) / 2.0f, -static_cast<float>(height) / 2.0f, static_cast<float>(height) / 2.0f, 0, 1);
+    projection = Matrix<4, 4>::ortho(-static_cast<float>(width) / 2.0f, static_cast<float>(width) / 2.0f, -static_cast<float>(height) / 2.0f, static_cast<float>(height) / 2.0f, 0, 1);
 }
 
 // shading
-std::string GetShaderString(const std::string &filePath) {
+std::string getShaderString(const std::string &filePath) {
     std::fstream fileStream(filePath);
 
     std::string line;
@@ -57,7 +57,7 @@ std::string GetShaderString(const std::string &filePath) {
     return ss.str();
 }
 
-unsigned int CompileShader(unsigned int type, const std::string &source) {
+unsigned int compileShader(unsigned int type, const std::string &source) {
     const unsigned int id = glCreateShader(type);
     const char *src = source.c_str();
     glShaderSource(id, 1, &src, nullptr);
@@ -79,10 +79,10 @@ unsigned int CompileShader(unsigned int type, const std::string &source) {
     return id;
 }
 
-unsigned int CreateShader(const std::string &vertexShader, const std::string &fragmentShader) {
+unsigned int createShader(const std::string &vertexShader, const std::string &fragmentShader) {
     unsigned int program = glCreateProgram();
-    unsigned int vertexShaderId = CompileShader(GL_VERTEX_SHADER, vertexShader);
-    unsigned int fragmentShaderId = CompileShader(GL_FRAGMENT_SHADER, fragmentShader);
+    unsigned int vertexShaderId = compileShader(GL_VERTEX_SHADER, vertexShader);
+    unsigned int fragmentShaderId = compileShader(GL_FRAGMENT_SHADER, fragmentShader);
 
     glAttachShader(program, vertexShaderId);
     glAttachShader(program, fragmentShaderId);
@@ -96,15 +96,15 @@ unsigned int CreateShader(const std::string &vertexShader, const std::string &fr
     return program;
 }
 
-void handleQueue(const float deltaTime) {
-    for (auto [action, owner] : nextFrameQueue) {
+void handleQueue(const double deltaTime) {
+    for (const auto& [action, owner] : nextFrameQueue) {
         action();
     }
 
     nextFrameQueue.clear();
 
     for (auto it = timedQueue.begin(); it != timedQueue.end(); ) {
-        it->time -= deltaTime;
+        it->time -= static_cast<float>(deltaTime);
 
         if (it->time <= 0) {
             it->action();
@@ -128,7 +128,7 @@ void handleQueue(const float deltaTime) {
 
 int main() {
     // when we get an glfwError, lmk
-    glfwSetErrorCallback(error_callback);
+    glfwSetErrorCallback(errorCallback);
 
     if (!glfwInit()) {
         std::printf("glfw initialization failed");
@@ -140,18 +140,18 @@ int main() {
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-    mainWindow = glfwCreateWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "learn-opengl", nullptr, nullptr);
+    mainWindow = glfwCreateWindow(screenWidth, screenHeight, "learn-opengl", nullptr, nullptr);
     if (!mainWindow) {
         std::printf("window creation failed");
         exit(0);
     }
     // lmk when something changes
-    glfwSetWindowCloseCallback(mainWindow, close_callback);
+    glfwSetWindowCloseCallback(mainWindow, closeCallback);
     glfwSetKeyCallback(mainWindow, key_callback);
     glfwSetCursorPosCallback(mainWindow, cursor_move_callback);
     glfwSetMouseButtonCallback(mainWindow, mouse_button_callback);
     glfwSetScrollCallback(mainWindow, scroll_callback);
-    glfwSetFramebufferSizeCallback(mainWindow, framebuffer_size_callback);
+    glfwSetFramebufferSizeCallback(mainWindow, framebufferSizeCallback);
 
     // were gonna use this window rn
     glfwMakeContextCurrent(mainWindow);
@@ -161,13 +161,13 @@ int main() {
         exit(0);
     }
 
-    glViewport(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
+    glViewport(0, 0, screenWidth, screenHeight);
 
     // get the strings from the shader files
-    auto const vertexShader = GetShaderString("/Users/ricardito/CLionProjects/OpenGL/res/shaders/vertex.shader");
-    auto const fragmentShader = GetShaderString("/Users/ricardito/CLionProjects/OpenGL/res/shaders/fragment.shader");
+    auto const vertexShader = getShaderString("/Users/ricardito/CLionProjects/OpenGL/res/shaders/vertex.shader");
+    auto const fragmentShader = getShaderString("/Users/ricardito/CLionProjects/OpenGL/res/shaders/fragment.shader");
     // compile the shaders
-    unsigned int shader = CreateShader(vertexShader, fragmentShader);
+    unsigned int shader = createShader(vertexShader, fragmentShader);
     // yes im gonna use them
     glUseProgram(shader);
 
@@ -193,10 +193,10 @@ int main() {
     Object origin2("origin2", 0, {0, 0}, 0, {1, 1});
     origin2.addComponent<RotateComponent>(45);
 
-    Object square("square", 0, {200, 0}, 0, {1, 1}, origin1.transform);
+    Object square("square", 0, {200, 0}, 0, {1, 1}, &origin1.transform);
     square.addComponent<Renderer>(vertices, indices, GL_STATIC_DRAW, "/Users/ricardito/CLionProjects/OpenGL/res/textures/super-mario-transparent-background-20.png", true, GL_CLAMP, shader, 2);
 
-    Object otherSquare("other square", 0, {600, 0}, 0, {1, 1}, origin2.transform);
+    Object otherSquare("other square", 0, {600, 0}, 0, {1, 1}, &origin2.transform);
     otherSquare.addComponent<Renderer>(vertices, indices, GL_STATIC_DRAW, "/Users/ricardito/CLionProjects/OpenGL/res/textures/dvdvd.jpg", true, GL_CLAMP, shader, 1);
 
     // empty the buffers to make sure its drawing properly
@@ -207,7 +207,7 @@ int main() {
 
 
     // update the window size initialiy
-    framebuffer_size_callback(mainWindow, SCREEN_WIDTH, SCREEN_HEIGHT);
+    framebufferSizeCallback(mainWindow, screenWidth, screenHeight);
 
     // variables for inside main loop to last between loops
     auto lastLoopTime = std::chrono::high_resolution_clock::now();
@@ -252,13 +252,13 @@ int main() {
 
         accumulator += deltaTime;
 
-        while (accumulator >= fixedUpdateIntervalInSeconds) {
+        while (accumulator >= FIXED_UPDATE_INTERVAL_IN_SECONDS) {
             double fixedDeltaTime = std::chrono::duration<double>(std::chrono::high_resolution_clock::now() - lastFixedUpdateTime).count();
 
             fixedUpdateEvent.invoke(fixedDeltaTime);
 
             lastFixedUpdateTime = std::chrono::high_resolution_clock::now();
-            accumulator -= fixedUpdateIntervalInSeconds;
+            accumulator -= FIXED_UPDATE_INTERVAL_IN_SECONDS;
         }
 
         glClear(GL_COLOR_BUFFER_BIT);
@@ -290,7 +290,7 @@ int main() {
         auto endOfLoopTime = std::chrono::high_resolution_clock::now();
         auto updateTime = std::chrono::duration<double, std::milli>(endOfLoopTime - startOfLoopTime).count();
 
-        auto targetFrameTimeMs = 1000.0 / fps;
+        auto targetFrameTimeMs = 1000.0 / FPS;
 
         const auto timeToSleepMs = targetFrameTimeMs - updateTime;
 

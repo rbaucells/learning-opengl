@@ -6,8 +6,9 @@
 
 class Object;
 
-class Transform final : public Component{
+class Transform {
 private:
+    // both raw pointers are fine because non owning
     Transform *parent = nullptr;
     std::vector<Transform *> children;
 
@@ -15,7 +16,7 @@ public:
     Transform(Object* owner, Vector2 pos, float rot, Vector2 scale, Transform *parent);
     Transform(Object* owner, Vector2 pos, float rot, Vector2 scale);
 
-    ~Transform() override;
+    ~Transform();
 
     [[nodiscard]] Matrix<4,4> localToWorldMatrix() const;
     [[nodiscard]] Matrix<4,4> worldToLocalMatrix() const;
@@ -35,9 +36,11 @@ public:
     void deleteAllChildren();
 
     void setParent(Transform* parent);
-    Transform* getParent();
+    Transform* getParent() const;
 
     Vector2 localPosition = {0, 0};
     float localRotation = 0;
     Vector2 localScale = {0, 0};
+
+    Object* object;
 };

@@ -49,17 +49,21 @@ Decomposed2D decompose2D(const Matrix<4, 4> &m) {
     return out;
 }
 
-Transform::Transform(Object *owner, const Vector2 pos, const float rot, const Vector2 scale) : Component(owner) {
+Transform::Transform(Object *owner, const Vector2 pos, const float rot, const Vector2 scale) {
     setGlobalPosition(pos);
     setGlobalRotation(rot);
     setGlobalScale(scale);
+
+    object = owner;
 }
 
-Transform::Transform(Object *owner, const Vector2 pos, const float rot, const Vector2 scale, Transform *parent) : Component(owner) {
+Transform::Transform(Object *owner, const Vector2 pos, const float rot, const Vector2 scale, Transform *parent) {
     setParent(parent);
     this->localPosition = pos;
     this->localRotation = rot;
     this->localScale = scale;
+
+    object = owner;
 }
 
 Vector2 Transform::getGlobalPosition() const {
@@ -242,7 +246,7 @@ void Transform::setParent(Transform *parent) {
     setGlobalScale(globalScale);
 }
 
-Transform* Transform::getParent() {
+Transform* Transform::getParent() const {
     return parent;
 }
 

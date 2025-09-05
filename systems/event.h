@@ -1,10 +1,10 @@
 #pragma once
 #include <functional>
 
-template<typename... Args>
+template<typename... ARGS>
 class Event {
 private:
-    using handler = std::function<void(Args...)>;
+    using handler = std::function<void(ARGS...)>;
     std::vector<handler> handlers;
 
 public:
@@ -12,38 +12,38 @@ public:
         handlers.push_back(functionHandler);
     }
     template<class T>
-    void subscribe(T *instance, void (T::*method)(Args...) const) {
+    void subscribe(T *instance, void (T::*method)(ARGS...) const) {
         // push back the function signature from a class instance
-        handlers.push_back([instance, method](Args... args) {
+        handlers.push_back([instance, method](ARGS... args) {
             (instance->*method)(args...);
         });
     }
 
     template<class T>
-    void subscribe(T *instance, void (T::*method)(Args...)) {
+    void subscribe(T *instance, void (T::*method)(ARGS...)) {
         // push back the function signature from a class instance
-        handlers.push_back([instance, method](Args... args) {
+        handlers.push_back([instance, method](ARGS... args) {
             (instance->*method)(args...);
         });
     }
 
     template<class T>
-    void unSubscribe(T *instance, void (T::*method)(Args...) const) {
+    void unSubscribe(T *instance, void (T::*method)(ARGS...) const) {
         // remove the function siganture from the handlers
-        std::erase(handlers, [instance, method](Args... args) {
+        std::erase(handlers, [instance, method](ARGS... args) {
             (instance->*method)(args...);
         });
     }
 
     template<class T>
-    void unSubscribe(T *instance, void (T::*method)(Args...)) {
+    void unSubscribe(T *instance, void (T::*method)(ARGS...)) {
         // remove the function siganture from the handlers
-        std::erase(handlers, [instance, method](Args... args) {
+        std::erase(handlers, [instance, method](ARGS... args) {
             (instance->*method)(args...);
         });
     }
 
-    void invoke(Args... args) {
+    void invoke(ARGS... args) {
         if (handlers.empty())
             return;
 

@@ -1,8 +1,8 @@
 #pragma once
-#include "math/mathematics.h"
-#include "systems/component.h"
+#include "../math/mathematics.h"
+#include "../systems/component.h"
 
-class Camera : public Component {
+class Camera final : public Component {
 public:
     using Component::Component;
     void awake() override;

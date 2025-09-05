@@ -6,26 +6,22 @@
 
 #include "systems/workQueue.h"
 
-Object::Object(const std::string &objectName, const int objectTag, const Vector2 pos, const float rot, const Vector2 scale) : name(objectName), tag(objectTag) {
+Object::Object(const std::string &objectName, const int objectTag, const Vector2 pos, const float rot, const Vector2 scale) : name(objectName), tag(objectTag), transform(this, pos, rot, scale) {
     allObjects.push_back(this);
 
     // subscribe to the main game loop events
     updateEvent.subscribe(this, &Object::update);
     lateUpdateEvent.subscribe(this, &Object::lateUpdate);
     fixedUpdateEvent.subscribe(this, &Object::fixedUpdate);
-
-    transform = addComponent<Transform>(pos, rot, scale);
 }
 
-Object::Object(const std::string &objectName, const int objectTag, Vector2 pos, float rot, Vector2 scale, Transform *parent) : name(objectName), tag(objectTag) {
+Object::Object(const std::string &objectName, const int objectTag, Vector2 pos, float rot, Vector2 scale, Transform *parent) : name(objectName), tag(objectTag), transform(this, pos, rot, scale) {
     allObjects.push_back(this);
 
     // subscribe to the main game loop events
     updateEvent.subscribe(this, &Object::update);
     lateUpdateEvent.subscribe(this, &Object::lateUpdate);
     fixedUpdateEvent.subscribe(this, &Object::fixedUpdate);
-
-    transform = addComponent<Transform>(pos, rot, scale, parent);
 }
 
 /**
@@ -88,12 +84,12 @@ void Object::destroy() {
 void Object::destroyImmediately() {
     // we need to deactivate before destroying
     if (getActive()) {
-        for (Component* component : components) {
+        for (const auto& component : components) {
             component->onDisable();
         }
     }
 
-    for (Component* component : components) {
+    for (const auto& component : components) {
         component->onDestroy();
     }
 
@@ -110,13 +106,13 @@ bool Object::getActive() const {
 void Object::setActive(const bool state) {
     // if activated but not anymore
     if (activated && !state) {
-        for (Component* component : components) {
+        for (const auto& component : components) {
             component->onDisable();
         }
     }
     // if not activated but are now
     else if (!activated && state) {
-        for (Component* component : components) {
+        for (const auto& component : components) {
             component->onEnable();
         }
     }

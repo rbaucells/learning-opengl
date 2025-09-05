@@ -1,5 +1,5 @@
 #pragma once
-#include "camera.h"
+#include "components/camera.h"
 #include <vector>
 
 #include "systems/event.h"
@@ -8,18 +8,18 @@ struct GLFWwindow;
 class Component;
 
 // variables
-inline int SCREEN_WIDTH = 1920;
-inline int SCREEN_HEIGHT = 1080;
+inline int screenWidth = 1920;
+inline int screenHeight = 1080;
 
 inline GLFWwindow *mainWindow;
 
 inline std::vector<Component*> componentsToInitialize {};
 
-constexpr float fixedUpdatePerSecond = 60;
-constexpr int fps = 60;
+constexpr float FIXED_UPDATE_PER_SECOND = 60;
+constexpr int FPS = 60;
 
 // constexpr float fixedUpdateIntervalInMilli = 1000.0f / fixedUpdatePerSecond;
-constexpr float fixedUpdateIntervalInSeconds = 1.0f / fixedUpdatePerSecond;
+constexpr float FIXED_UPDATE_INTERVAL_IN_SECONDS = 1.0f / FIXED_UPDATE_PER_SECOND;
 
 inline Event<double> updateEvent;
 inline Event<double> lateUpdateEvent;

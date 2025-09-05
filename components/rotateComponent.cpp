@@ -15,13 +15,6 @@ void RotateComponent::start() {
 
 void RotateComponent::update(const double deltaTime) {
     std::printf("Update \n");
-    // object->transform.localRotation += speed * static_cast<float>(deltaTime);
-    //
-    // if (object->transform.localRotation < -180 || object->transform.localRotation > 90) {
-    //     speed = -speed;
-    // }
-
-    Camera::mainCamera->object->transform->localPosition.x += 100 * deltaTime;
 }
 
 void RotateComponent::awake() {

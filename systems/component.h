@@ -24,5 +24,7 @@ public:
     virtual void onDisable() {};
     virtual void onDestroy() {};
 
+    // fine to use raw pointer since component will never be alive at a time where the object isnt
+    // and because component doesnt own object
     Object* object = nullptr;
 };
