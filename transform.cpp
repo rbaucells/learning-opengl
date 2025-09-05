@@ -50,13 +50,13 @@ Decomposed2D decompose2D(const ColumnMatrix4X4 &m) {
     return out;
 }
 
-Transform::Transform(const Vector2 pos, const float rot, const Vector2 scale) {
+Transform::Transform(Object* owner, const Vector2 pos, const float rot, const Vector2 scale) : Component(owner) {
     setGlobalPosition(pos);
     setGlobalRotation(rot);
     setGlobalScale(scale);
 }
 
-Transform::Transform(const Vector2 pos, const float rot, const Vector2 scale, Transform *parent) {
+Transform::Transform(Object* owner, const Vector2 pos, const float rot, const Vector2 scale, Transform *parent) : Component(owner) {
     setParent(parent);
     this->localPosition = pos;
     this->localRotation = rot;

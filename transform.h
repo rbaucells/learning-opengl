@@ -2,16 +2,18 @@
 #include "math/mathematics.h"
 #include <vector>
 
+#include "systems/component.h"
+
 class Object;
 
-class Transform {
+class Transform : public Component{
 private:
     Transform *parent = nullptr;
     std::vector<Transform *> children;
 
 public:
-    Transform(Vector2 pos, float rot, Vector2 scale, Transform *parent);
-    Transform(Vector2 pos, float rot, Vector2 scale);
+    Transform(Object* owner, Vector2 pos, float rot, Vector2 scale, Transform *parent);
+    Transform(Object* owner, Vector2 pos, float rot, Vector2 scale);
 
     ~Transform();
 

@@ -183,16 +183,16 @@ int main() {
         2, 3, 0
     };
 
-    Object origin1("origin1", 0, {{0, 0}, 0, {1, 1}});
+    Object origin1("origin1", 0, {0, 0}, 0, {1, 1});
     origin1.addComponent<RotateComponent>(-45);
 
-    Object origin2("origin2", 0, {{0, 0}, 0, {1, 1}});
+    Object origin2("origin2", 0, {0, 0}, 0, {1, 1});
     origin2.addComponent<RotateComponent>(45);
 
-    Object square("square", 0, {{200, 0}, 0, {1, 1}, &origin1.transform});
+    Object square("square", 0, {200, 0}, 0, {1, 1}, origin1.transform);
     square.addComponent<Renderer>(vertices, indices, GL_STATIC_DRAW, "/Users/ricardito/CLionProjects/OpenGL/res/textures/super-mario-transparent-background-20.png", true, GL_CLAMP, shader, 2);
 
-    Object otherSquare("other square", 0, {{600, 0}, 0, {1, 1}, &origin2.transform});
+    Object otherSquare("other square", 0, {600, 0}, 0, {1, 1}, origin2.transform);
     otherSquare.addComponent<Renderer>(vertices, indices, GL_STATIC_DRAW, "/Users/ricardito/CLionProjects/OpenGL/res/textures/dvdvd.jpg", true, GL_CLAMP, shader, 1);
 
     // empty the buffers to make sure its drawing properly

@@ -6,13 +6,7 @@
 
 #include "systems/workQueue.h"
 
-/**
- * @brief constructs a new Object.
- * @param objectName the name of the object.
- * @param objectTag the tag of the object.
- * @param transform the initial transform of the object.
- */
-Object::Object(const std::string &objectName, const int objectTag, const Transform &transform) : name(objectName), tag(objectTag), transform(transform) {
+Object::Object(const std::string &objectName, const int objectTag, const Vector2 pos, const float rot, const Vector2 scale) : name(objectName), tag(objectTag) {
     allObjects.push_back(this);
 
     // subscribe to the main game loop events
@@ -20,7 +14,18 @@ Object::Object(const std::string &objectName, const int objectTag, const Transfo
     lateUpdateEvent.subscribe(this, &Object::lateUpdate);
     fixedUpdateEvent.subscribe(this, &Object::fixedUpdate);
 
-    transform.owner = this;
+    transform = addComponent<Transform>(pos, rot, scale);
+}
+
+Object::Object(const std::string &objectName, const int objectTag, Vector2 pos, float rot, Vector2 scale, Transform *parent) : name(objectName), tag(objectTag) {
+    allObjects.push_back(this);
+
+    // subscribe to the main game loop events
+    updateEvent.subscribe(this, &Object::update);
+    lateUpdateEvent.subscribe(this, &Object::lateUpdate);
+    fixedUpdateEvent.subscribe(this, &Object::fixedUpdate);
+
+    transform = addComponent<Transform>(pos, rot, scale, parent);
 }
 
 /**
@@ -32,6 +37,7 @@ Object::Object(const std::string &objectName, const int objectTag, const Transfo
 void Object::update(double deltaTime) const {
     if (!activated)
         return;
+
     for (const auto &component: components) {
         component->update(deltaTime);
     }
@@ -46,6 +52,7 @@ void Object::update(double deltaTime) const {
 void Object::fixedUpdate(double fixedDeltaTime) const {
     if (!activated)
         return;
+
     for (const auto &component: components) {
         component->fixedUpdate(fixedDeltaTime);
     }
@@ -60,6 +67,7 @@ void Object::fixedUpdate(double fixedDeltaTime) const {
 void Object::lateUpdate(double deltaTime) const {
     if (!activated)
         return;
+
     for (const auto &component: components) {
         component->lateUpdate(deltaTime);
     }
@@ -91,6 +99,7 @@ void Object::destroyImmediately() {
 
     components.clear();
     std::erase(allObjects, this);
+    removeAllQueueEntries(this);
     // don't worry about transform, destructor will clean up for us
 }
 

@@ -20,10 +20,11 @@ public:
 
     std::vector<Component*> components;
 
-    // all objects must have a transform
-    Transform transform;
+    // all objects must have a transform component
+    Transform* transform;
 
-    Object(const std::string &name, int objectTag, const Transform &transform);
+    Object(const std::string &objectName, int objectTag, Vector2 pos, float rot, Vector2 scale);
+    Object(const std::string &objectName, int objectTag, Vector2 pos, float rot, Vector2 scale, Transform* parent);
 
     void update(double deltaTime) const;
     void fixedUpdate(double fixedDeltaTime) const;
