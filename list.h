@@ -3,8 +3,68 @@
 #include <cstring>
 #include <iostream>
 
+template<typename LIST>
+class ListIterator {
+public:
+    using value_type = LIST::value_type;
+    using pointer_type = value_type*;
+    using reference_type = value_type&;
+
+    ListIterator(pointer_type ptr) : pointer(ptr) {
+
+    };
+
+    ListIterator& operator++() {
+        pointer++;
+        return *this;
+    }
+
+    ListIterator operator++(int) {
+        ListIterator iterator = *this;
+        ++(*this);
+        return iterator;
+    }
+
+    ListIterator& operator--() {
+        pointer--;
+        return *this;
+    }
+
+    ListIterator operator--(int) {
+        ListIterator iterator = *this;
+        --(*this);
+        return iterator;
+    }
+
+    ListIterator& operator[](int index) {
+        return *(pointer[index]);
+    }
+
+    reference_type operator*() {
+        return *pointer;
+    }
+
+    pointer_type operator->() {
+        return pointer;
+    }
+
+    bool operator==(const ListIterator & other) const {
+        return pointer == other.pointer;
+    }
+
+    bool operator!=(const ListIterator& other) const {
+        return !(*this == other);
+    }
+
+private:
+    pointer_type pointer;
+};
+
 template<typename T>
 class List {
+public:
+    using value_type = T;
+    using iterator = ListIterator<List>;
 private:
     T *dataArray;
 
@@ -234,7 +294,16 @@ public:
         return dataArray;
     }
 
+    iterator begin() {
+        return iterator(dataArray);
+    }
+
+    iterator end() {
+        return iterator(dataArray + arraySize);
+    }
+
     ~List() {
         delete[] dataArray;
     }
+
 };
