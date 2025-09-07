@@ -115,47 +115,6 @@ public:
     }
 
     void remove(const T &object) {
-        assert(arraySize > 0);
-        // [1, 2, 3, 4, 5] -> [1, 2, 4, 5]
-        // object = 3
-        // objIndex = 2
-
-        for (int i = 0; i < elementCount; i++) {
-            T element = dataArray[i];
-            if (element == object) {
-                arraySize--;
-                T *temp = new T[arraySize];
-
-                memcpy(temp, dataArray, sizeof(T) * i);
-                memcpy(temp + i, dataArray + (i + 1), (arraySize - i) * sizeof(T));
-
-                delete[] dataArray;
-                dataArray = temp;
-                elementCount--;
-                break;
-            }
-        }
-    }
-
-    void removeAt(const int index) {
-        assert(arraySize > 0);
-        // [1, 2, 3, 4, 5] -> [1, 2, 4, 5]
-        // object = 3
-        // objIndex = 2
-
-        T element = dataArray[index];
-        arraySize--;
-        T *temp = new T[arraySize];
-
-        memcpy(temp, dataArray, sizeof(T) * index);
-        memcpy(temp + index, dataArray + (index + 1), (arraySize - index) * sizeof(T));
-
-        delete[] dataArray;
-        dataArray = temp;
-        elementCount--;
-    }
-
-    void removeNoAlloc(const T &object) {
         // [1, 2, 3, 4, 5] -> [1, 2, 4, 5]
         // object = 3
         // objIndex = 2
@@ -177,7 +136,7 @@ public:
             elementCount--;
     }
 
-    void removeNoAllocAt(const int index) {
+    void removeAt(const int index) {
         // [1, 2, 3, 4, 5] -> [1, 2, 4, 5]
         // object = 3
         // objIndex = 2
@@ -305,5 +264,4 @@ public:
     ~List() {
         delete[] dataArray;
     }
-
 };

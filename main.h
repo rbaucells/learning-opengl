@@ -13,7 +13,7 @@ inline int screenHeight = 1080;
 
 inline GLFWwindow *mainWindow;
 
-inline std::vector<Component*> componentsToInitialize {};
+inline std::vector<std::weak_ptr<Component>> componentsToInitialize {};
 
 constexpr float FIXED_UPDATE_PER_SECOND = 60;
 constexpr int FPS = 60;

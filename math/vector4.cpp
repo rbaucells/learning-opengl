@@ -9,11 +9,11 @@ Vector4 Vector4::operator-(const Vector4 &other) const {
     return Vector4{x - other.x, y - other.y, z - other.z, w - other.w};
 }
 
-Vector4 Vector4::operator*(float scalar) const {
+Vector4 Vector4::operator*(const float scalar) const {
     return Vector4{x * scalar, y * scalar, z * scalar, w * scalar};
 }
 
-Vector4 Vector4::operator/(float scalar) const {
+Vector4 Vector4::operator/(const float scalar) const {
     if (scalar == 0) {
         // Handle division by zero to prevent crashes
         return Vector4{0, 0, 0, 0};
@@ -37,7 +37,7 @@ Vector4 &Vector4::operator-=(const Vector4 &other) {
     return *this;
 }
 
-Vector4 &Vector4::operator*=(float scalar) {
+Vector4 &Vector4::operator*=(const float scalar) {
     x *= scalar;
     y *= scalar;
     z *= scalar;
@@ -45,7 +45,7 @@ Vector4 &Vector4::operator*=(float scalar) {
     return *this;
 }
 
-Vector4 &Vector4::operator/=(float scalar) {
+Vector4 &Vector4::operator/=(const float scalar) {
     if (scalar != 0) {
         x /= scalar;
         y /= scalar;

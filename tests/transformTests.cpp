@@ -5,7 +5,7 @@
 #include <iostream>
 #include <sstream>
 
-#include "../components/transform.h"
+#include "../transform.h"
 
 std::string getStringFromMatrix(const ColumnMatrix4X4 &matrix) {
     std::stringstream result;

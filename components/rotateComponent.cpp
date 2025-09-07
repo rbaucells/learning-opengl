@@ -3,14 +3,18 @@
 #include "renderer.h"
 #include "../object.h"
 
-RotateComponent::RotateComponent(Object* owner, const float speed) : Component(owner) {
+RotateComponent::RotateComponent(Object *owner, const float speed) : Component(owner) {
     this->speed = speed;
 }
 
 void RotateComponent::start() {
     std::printf("Start \n");
 
-    // object->destroy();
+    const auto rendererPtr = object->getComponent<Renderer>();
+
+    if (const auto renderer = rendererPtr.lock()) {
+        renderer->tweenAlpha(0, 5, linear);
+    }
 }
 
 void RotateComponent::update(const double deltaTime) {

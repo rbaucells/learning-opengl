@@ -28,11 +28,18 @@ Object::Object(const std::string &objectName, const int objectTag, Vector2 pos, 
  * @brief called every frame, if the object is activated.
  *
  * it calls the update method on all of its components.
+ * and also the doTween method on all of its components.
  * @param deltaTime the time elapsed since the last frame.
  */
-void Object::update(double deltaTime) const {
+void Object::update(double deltaTime) {
     if (!activated)
         return;
+
+    for (const auto &component: components) {
+        component->doTweens(deltaTime);
+    }
+
+    transform.doTweens(deltaTime);
 
     for (const auto &component: components) {
         component->update(deltaTime);
@@ -45,7 +52,7 @@ void Object::update(double deltaTime) const {
  * it calls the fixedUpdate method on all of its components.
  * @param fixedDeltaTime the fixed time step.
  */
-void Object::fixedUpdate(double fixedDeltaTime) const {
+void Object::fixedUpdate(const double fixedDeltaTime) const {
     if (!activated)
         return;
 
@@ -60,7 +67,7 @@ void Object::fixedUpdate(double fixedDeltaTime) const {
  * it calls the lateUpdate method on all of its components.
  * @param deltaTime the time elapsed since the last frame.
  */
-void Object::lateUpdate(double deltaTime) const {
+void Object::lateUpdate(const double deltaTime) const {
     if (!activated)
         return;
 
@@ -99,10 +106,6 @@ void Object::destroyImmediately() {
     // don't worry about transform, destructor will clean up for us
 }
 
-bool Object::getActive() const {
-    return activated;
-}
-
 void Object::setActive(const bool state) {
     // if activated but not anymore
     if (activated && !state) {
@@ -118,6 +121,10 @@ void Object::setActive(const bool state) {
     }
 
     activated = state;
+}
+
+bool Object::getActive() const {
+    return activated;
 }
 
 

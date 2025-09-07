@@ -1,11 +1,11 @@
 #include "glad/gl.h"
 #include "GLFW/glfw3.h"
 
-#include "math/mathematics.h"
-#include "components/camera.h"
-#include "object.h"
-#include "components/rotateComponent.h"
 #include "main.h"
+#include "object.h"
+#include "components/camera.h"
+#include "components/rotateComponent.h"
+#include "math/mathematics.h"
 
 #include <complex>
 #include <fstream>
@@ -15,9 +15,10 @@
 #include <string>
 #include <thread>
 
+#include "list.h"
+#include "components/renderer.h"
 #include "systems/input.h"
 #include "systems/workQueue.h"
-#include "components/renderer.h"
 
 // needed by framebuffer_size_callback() and by object.draw()
 Matrix<4,4> projection;
@@ -185,16 +186,19 @@ int main() {
 
     Object camera("mainCamera", 69, {0, 0}, 0, {1,1});
     auto cameraComponent = camera.addComponent<Camera>();
-    cameraComponent->setMain();
+    if (auto cam = cameraComponent.lock()) {
+        cam->setMain();
+    }
 
     Object origin1("origin1", 0, {0, 0}, 0, {1, 1});
     // origin1.addComponent<RotateComponent>(-45);
 
     Object origin2("origin2", 0, {0, 0}, 0, {1, 1});
-    origin2.addComponent<RotateComponent>(45);
+    // origin2.addComponent<RotateComponent>(45);
 
     Object square("square", 0, {200, 0}, 0, {1, 1}, &origin1.transform);
     square.addComponent<Renderer>(vertices, indices, GL_STATIC_DRAW, "/Users/ricardito/CLionProjects/OpenGL/res/textures/super-mario-transparent-background-20.png", true, GL_CLAMP, shader, 2);
+    square.addComponent<RotateComponent>(45);
 
     Object otherSquare("other square", 0, {600, 0}, 0, {1, 1}, &origin2.transform);
     otherSquare.addComponent<Renderer>(vertices, indices, GL_STATIC_DRAW, "/Users/ricardito/CLionProjects/OpenGL/res/textures/dvdvd.jpg", true, GL_CLAMP, shader, 1);
@@ -225,21 +229,30 @@ int main() {
 
         // if there are some components left to be "started", start em and remove them from the queueueue
         if (!componentsToInitialize.empty()) {
-            // awaken
-            for (Component *component: componentsToInitialize) {
-                component->awake();
+            for (auto it = componentsToInitialize.begin(); it != componentsToInitialize.end(); ) {
+                if (auto comp = it->lock()) {
+                    comp->awake();
+                    ++it;
+                }
+                else {
+                    it = componentsToInitialize.erase(it);
+                }
             }
 
             // if the object is supposed to be active, call the onEnable
-            for (Component *component: componentsToInitialize) {
-                if (component->object->getActive()) {
-                    component->onEnable();
+            for (auto component: componentsToInitialize) {
+                if (auto comp = component.lock()) {
+                    if (comp->object->getActive()) {
+                        comp->onEnable();
+                    }
                 }
             }
 
             // start
-            for (Component *component: componentsToInitialize) {
-                component->start();
+            for (auto component: componentsToInitialize) {
+                if (auto comp = component.lock()) {
+                    comp->start();
+                }
             }
 
             componentsToInitialize.clear();

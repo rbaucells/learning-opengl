@@ -5,7 +5,6 @@ help me learn complicated things in game dev and game engine design
 ## Dependencies
 - GLFW - For cross-platform window creation
 - GLAD - For loading modern Opengl functions
-- Linmath - Included but not used, only used to base my custom Matrix4x4 class off of
 
 ## Goals
 - Learn how to work with graphics programming

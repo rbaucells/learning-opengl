@@ -23,18 +23,18 @@ struct Vector2 {
 
     Vector2 &operator*=(float scalar);
 
-    Vector2 &operator/=(float scalar);
+     Vector2 &operator/=(float scalar);
 
     bool operator==(const Vector2 &other) const;
 
     // functions
-    float Magnitude() const;
+    float magnitude() const;
 
-    Vector2 Normalized() const;
+    Vector2 normalized() const;
 
     Vector2 hadamard(const Vector2 &other) const;
 
-    float Dot(const Vector2 &other) const;
+    float dot(const Vector2 &other) const;
 };
 
 struct Vector3 {
@@ -43,29 +43,29 @@ struct Vector3 {
     float z = {};
 
     // operator overloads
-    Vector3 operator+(const Vector3 &other) const;
+     Vector3 operator+(const Vector3 &other) const;
 
-    Vector3 operator-(const Vector3 &other) const;
+     Vector3 operator-(const Vector3 &other) const;
 
-    Vector3 operator*(float scalar) const;
+     Vector3 operator*(float scalar) const;
 
-    Vector3 operator/(float scalar) const;
+     Vector3 operator/(float scalar) const;
 
-    Vector3 &operator+=(const Vector3 &other);
+     Vector3 &operator+=(const Vector3 &other);
 
-    Vector3 &operator-=(const Vector3 &other);
+     Vector3 &operator-=(const Vector3 &other);
 
-    Vector3 &operator*=(float scalar);
+     Vector3 &operator*=(float scalar);
 
-    Vector3 &operator/=(float scalar);
+     Vector3 &operator/=(float scalar);
 
-    float magnitude() const;
+     float magnitude() const;
 
-    Vector3 normalized() const;
+     Vector3 normalized() const;
 
-    float dot(const Vector3 &other) const;
+     float dot(const Vector3 &other) const;
 
-    Vector3 cross(const Vector3 &other) const;
+     Vector3 cross(const Vector3 &other) const;
 };
 
 struct Vector4 {
@@ -74,27 +74,27 @@ struct Vector4 {
     float z = {};
     float w = {};
 
-    Vector4 operator+(const Vector4 &other) const;
+     Vector4 operator+(const Vector4 &other) const;
 
-    Vector4 operator-(const Vector4 &other) const;
+     Vector4 operator-(const Vector4 &other) const;
 
-    Vector4 operator*(float scalar) const;
+     Vector4 operator*(float scalar) const;
 
-    Vector4 operator/(float scalar) const;
+     Vector4 operator/(float scalar) const;
 
-    Vector4 &operator+=(const Vector4 &other);
+     Vector4 &operator+=(const Vector4 &other);
 
-    Vector4 &operator-=(const Vector4 &other);
+     Vector4 &operator-=(const Vector4 &other);
 
-    Vector4 &operator*=(float scalar);
+     Vector4 &operator*=(float scalar);
 
-    Vector4 &operator/=(float scalar);
+     Vector4 &operator/=(float scalar);
 
-    float magnitude() const;
+     float magnitude() const;
 
-    Vector4 normalized() const;
+     Vector4 normalized() const;
 
-    float dot(const Vector4 &other) const;
+     float dot(const Vector4 &other) const;
 };
 
 struct Vertex {
@@ -120,8 +120,8 @@ public:
     Matrix(const Matrix<ROWS, COLUMNS> &other) {
         assert(ROWS == other.rows && COLUMNS == other.columns);
 
-        for (int c = 0; c < columns; c++) {
-            for (int r = 0; r < rows; r++) {
+        for (int c = 0; c < COLUMNS; c++) {
+            for (int r = 0; r < ROWS; r++) {
                 data[c][r] = other.data[c][r];
             }
         }
@@ -145,7 +145,7 @@ public:
      * @param other The matrix to add to this one
      * @return Matrix with each element in this one added to the corresponding element in the other one
      */
-    [[nodiscard]] Matrix<ROWS, COLUMNS> add(const Matrix<ROWS, COLUMNS> &other) const {
+     Matrix<ROWS, COLUMNS> add(const Matrix<ROWS, COLUMNS> &other) const {
         assert(other.rows == ROWS || other.columns == COLUMNS);
 
         Matrix result;
@@ -169,7 +169,7 @@ public:
      * @param other The matrix to subtract from this one
      * @return Matrix with each element in other one subtracted from the corresponding element in the this one
      */
-    [[nodiscard]] Matrix<ROWS, COLUMNS> subtract(const Matrix<ROWS, COLUMNS> &other) const {
+     Matrix<ROWS, COLUMNS> subtract(const Matrix<ROWS, COLUMNS> &other) const {
         assert(other.rows == ROWS || other.columns == COLUMNS);
 
         Matrix result;
@@ -193,7 +193,7 @@ public:
    * @return The product of the two matrix. Having Number of rows as this, and number of columns as other
    */
     template<int OTHER_ROWS, int OTHER_COLUMNS>
-    [[nodiscard]] Matrix<ROWS, OTHER_COLUMNS> multiply(const Matrix<OTHER_ROWS, OTHER_COLUMNS> &other) const {
+     Matrix<ROWS, OTHER_COLUMNS> multiply(const Matrix<OTHER_ROWS, OTHER_COLUMNS> &other) const {
         assert(COLUMNS == other.rows);
 
         Matrix<ROWS, OTHER_COLUMNS> result;
@@ -250,7 +250,7 @@ public:
      * @note Matrix must be a square matrix (n x n)
      * @return Matrix with columns and rows swapped
      */
-    [[nodiscard]] Matrix<ROWS, COLUMNS> transpose() const requires (ROWS == COLUMNS) {
+     Matrix<ROWS, COLUMNS> transpose() const requires (ROWS == COLUMNS) {
         Matrix<ROWS, ROWS> result;
 
         for (int c = 0; c < COLUMNS; c++) {
@@ -267,7 +267,7 @@ public:
      * @throws Runtime errors if matrix is singular (not invertible)
      * @return The inverse of the matrix
      */
-    [[nodiscard]] Matrix<ROWS, COLUMNS> inverse() const requires (ROWS == COLUMNS) {
+     Matrix<ROWS, COLUMNS> inverse() const requires (ROWS == COLUMNS) {
         // its a one by one, we can just return 1 / value
         if constexpr (ROWS == 1) {
             if (data[0][0] == 0) {
@@ -368,7 +368,7 @@ public:
      * @warning if zero do not attempt to find inverse of this matrix
      * @return The determinant of this matrix
      */
-    [[nodiscard]] float determinant() const requires (ROWS == COLUMNS) {
+     float determinant() const requires (ROWS == COLUMNS) {
         if constexpr (ROWS == 1) {
             return data[0][0];
         }
@@ -414,7 +414,7 @@ public:
      * @param z The scale factor for the z-axis.
      * @return The matrix scaled along {x, y, z}
      */
-    Matrix<4, 4> scaleAnisotropic(const float x, const float y, const float z) const requires (ROWS == COLUMNS && COLUMNS == 4) {
+     Matrix<4, 4> scaleAnisotropic(const float x, const float y, const float z) const requires (ROWS == COLUMNS && COLUMNS == 4) {
         Matrix<4, 4> scaleMatrix = identity();
 
         scaleMatrix.data[0][0] = x;
@@ -431,7 +431,7 @@ public:
      * @param z How much to translate along the z
      * @return The matrix translated by x, y, and z
      */
-    Matrix<4, 4> translate(const float x, const float y, const float z) const requires (ROWS == COLUMNS && COLUMNS == 4) {
+     Matrix<4, 4> translate(const float x, const float y, const float z) const requires (ROWS == COLUMNS && COLUMNS == 4) {
         Matrix<4, 4> translationMatrix = identity();
 
         translationMatrix.data[3][0] = x;
@@ -446,7 +446,7 @@ public:
      * @param angle How many DEGREES to rotate along the x
      * @return Matrix rotated by angle
      */
-    Matrix<4, 4> rotateX(const float angle) const requires (ROWS == COLUMNS && COLUMNS == 4) {
+     Matrix<4, 4> rotateX(const float angle) const requires (ROWS == COLUMNS && COLUMNS == 4) {
         const float sin = std::sinf(angle * (static_cast<float>(M_PI) / 180.0f));
         const float cos = std::cosf(angle * (static_cast<float>(M_PI) / 180.0f));
 
@@ -465,7 +465,7 @@ public:
      * @param angle How many DEGREES to rotate along the y
      * @return Matrix rotated by angle
      */
-    Matrix<4, 4> rotateY(const float angle) const requires (ROWS == COLUMNS && COLUMNS == 4) {
+     Matrix<4, 4> rotateY(const float angle) const requires (ROWS == COLUMNS && COLUMNS == 4) {
         const float sin = std::sinf(angle * (static_cast<float>(M_PI) / 180.0f));
         const float cos = std::cosf(angle * (static_cast<float>(M_PI) / 180.0f));
 
@@ -484,7 +484,7 @@ public:
      * @param angle How many DEGREES to rotate along the y
      * @return Matrix rotated by angle
      */
-    Matrix<4,4> rotateZ(const float angle) const requires (ROWS == COLUMNS && COLUMNS == 4) {
+     Matrix<4,4> rotateZ(const float angle) const requires (ROWS == COLUMNS && COLUMNS == 4) {
         const float sin = std::sinf(angle * (static_cast<float>(M_PI) / 180.0f));
         const float cos = std::cosf(angle * (static_cast<float>(M_PI) / 180.0f));
 
@@ -501,7 +501,7 @@ public:
     /**
      * @return The column-major matrix as a string for printing
      */
-    [[nodiscard]] std::string toString() const {
+     std::string toString() const {
         std::stringstream ss;
         ss.precision(2);
 
@@ -532,7 +532,7 @@ public:
      * @param columnToRemove What column shouldnt be included
      * @return A matrix of <ROWS - 1, COLUMNS - 1> without the rowToRemove and columnToRemove
      */
-    [[nodiscard]] Matrix<ROWS - 1, COLUMNS - 1> getSubMatrix(const int rowToRemove, const int columnToRemove) const {
+     Matrix<ROWS - 1, COLUMNS - 1> getSubMatrix(const int rowToRemove, const int columnToRemove) const {
         Matrix<ROWS - 1, COLUMNS - 1> subMatrix;
         int subMatrixR = 0;
         for (int r = 0; r < ROWS; r++) {
@@ -628,15 +628,15 @@ public:
         return &data[0][0];
     }
 
-    [[nodiscard]] Vector4 operator*(const Vector4& other) const requires (ROWS == 4 && COLUMNS == 4) {
+     Vector4 operator*(const Vector4& other) const requires (ROWS == 4 && COLUMNS == 4) {
         return multiply(other);
     }
 
-    [[nodiscard]] Vector3 operator*(const Vector3& other) const requires (ROWS == 4 && COLUMNS == 4) {
+     Vector3 operator*(const Vector3& other) const requires (ROWS == 4 && COLUMNS == 4) {
         return multiply(other);
     }
 
-    [[nodiscard]] Vector2 operator*(const Vector2& other) const requires (ROWS == 4 && COLUMNS == 4) {
+     Vector2 operator*(const Vector2& other) const requires (ROWS == 4 && COLUMNS == 4) {
         return multiply(other);
     }
 
@@ -645,7 +645,7 @@ public:
      * @param other The 4D vector to multiply by.
      * @return A new 4D vector that is the result of the multiplication.
      */
-    [[nodiscard]] Vector4 multiply(const Vector4& other) const requires (ROWS == 4 && COLUMNS == 4) {
+     Vector4 multiply(const Vector4& other) const requires (ROWS == 4 && COLUMNS == 4) {
         Vector4 result;
 
         result.x = data[0][0] * other.x + data[1][0] * other.y + data[2][0] * other.z + data[3][0] * other.w;
@@ -661,7 +661,7 @@ public:
      * @param other The 3D vector to multiply by.
      * @return A new 3D vector that is the result of the multiplication.
      */
-    [[nodiscard]] Vector3 multiply(const Vector3& other) const requires (ROWS == 4 && COLUMNS == 4) {
+     Vector3 multiply(const Vector3& other) const requires (ROWS == 4 && COLUMNS == 4) {
         // Promote the 3D vector to a 4D vector with w=1 for a point
         Vector4 tempVector4{other.x, other.y, other.z, 1.0f};
 
@@ -677,7 +677,7 @@ public:
      * @param other The 2D vector to multiply by.
      * @return A new 2D vector that is the result of the multiply.
      */
-    [[nodiscard]] Vector2 multiply(const Vector2& other) const requires (ROWS == 4 && COLUMNS == 4) {
+     Vector2 multiply(const Vector2& other) const requires (ROWS == 4 && COLUMNS == 4) {
         // Promote the 2D vector to a 4D vector with z=0 and w=1 for a point in 2D space
         Vector4 tempVector4{other.x, other.y, 0.0f, 1.0f};
 

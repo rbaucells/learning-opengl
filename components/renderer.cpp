@@ -1,8 +1,9 @@
 #include "renderer.h"
-#include "../object.h"
-#include "stb_image.h"
-#include "glad/gl.h"
 #include <iostream>
+#include "stb_image.h"
+#include "../object.h"
+#include "glad/gl.h"
+#include "../systems/tween.h"
 
 Renderer::Renderer(Object *owner, const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices, const unsigned int usage, const std::string& texturePath, const bool flipTexture, const int textureParam, unsigned int shaderProgram, int layer) : Component(owner) {
     this->vertices = vertices;
@@ -141,3 +142,8 @@ void Renderer::draw(const Matrix<4, 4>& view, const Matrix<4, 4> &projection, co
     // draw call
     glDrawElements(mode, static_cast<int>(indices.size()), GL_UNSIGNED_INT, nullptr);
 }
+
+void Renderer::tweenAlpha(float target, float duration, Easer easer) {
+    tweens.push_back(std::make_unique<Tween<float>>(&alpha, alpha, target, duration, easer));
+}
+

@@ -9,8 +9,7 @@ public:
 
     void draw(const Matrix<4, 4>& view, const Matrix<4, 4> &projection, int mode) const;
 
-    float alpha = 1.f;
-    unsigned int layer = 0;
+    void tweenAlpha(float target, float duration, Easer easer);
 
     ~Renderer() override;
 
@@ -26,6 +25,9 @@ private:
     int mvpLocation = -1;
     int channelsLocation = -1;
     int alphaLocation = -1;
+
+    unsigned int layer = 0;
+    float alpha = 1.f;
 };
 
 inline std::map<unsigned int, std::vector<Renderer*>> allRenderers;

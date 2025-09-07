@@ -41,11 +41,11 @@ Vector2& Vector2::operator/=(float scalar) {
     return *this;
 }
 
-float Vector2::Magnitude() const {
+float Vector2::magnitude() const {
     return std::sqrt(x * x + y * y);
 }
-Vector2 Vector2::Normalized() const {
-    float mag = Magnitude();
+Vector2 Vector2::normalized() const {
+    float mag = magnitude();
 
     if (mag > 0) {
         return Vector2{x / mag, y / mag};
@@ -57,6 +57,6 @@ Vector2 Vector2::hadamard(const Vector2 &other) const {
     return {x * other.x, y * other.y};
 }
 
-float Vector2::Dot(const Vector2 &other) const {
+float Vector2::dot(const Vector2 &other) const {
     return (x * other.x + y * other.y);
 }

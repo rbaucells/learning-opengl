@@ -2,138 +2,93 @@
 #include <map>
 #include <memory>
 #include <vector>
-
-#include "list.h"
 #include "main.h"
 #include "systems/component.h"
-#include "components/transform.h"
+#include "transform.h"
 
 template<typename T>
-concept IsComponent = std::is_base_of_v<Component, T>;
+concept is_component = std::is_base_of_v<Component, T>;
 
 class Object {
-private:
     bool activated = true;
+    std::vector<std::shared_ptr<Component> > components;
+
 public:
     const std::string name;
     const int tag;
     bool markedForDeath = false;
 
-    // unique because Object owns components
-    std::vector<std::unique_ptr<Component>> components;
 
     // all objects must have a transform
     Transform transform;
 
     Object(const std::string &objectName, int objectTag, Vector2 pos, float rot, Vector2 scale);
-    Object(const std::string &objectName, int objectTag, Vector2 pos, float rot, Vector2 scale, Transform* parent);
+    Object(const std::string &objectName, int objectTag, Vector2 pos, float rot, Vector2 scale, Transform *parent);
 
-    void update(double deltaTime) const;
+    void update(double deltaTime);
     void fixedUpdate(double fixedDeltaTime) const;
     void lateUpdate(double deltaTime) const;
     void destroy();
     void destroyImmediately();
 
-    template<IsComponent T, typename... ARGS>
-    T *addComponent(ARGS &&... args) {
-        auto newComponent = std::make_unique<T>(this, std::forward<ARGS>(args)...);
+    template<is_component T, typename... ARGS>
+    std::weak_ptr<T> addComponent(ARGS &&... args) {
+        // make the component
+        std::shared_ptr<T> newComponent = std::make_shared<T>(this, std::forward<ARGS>(args)...);
 
-        T* componentPtr = newComponent.get();
+        // get a weak ptr and add it to components
+        std::weak_ptr<T> componentPtr(newComponent);
         componentsToInitialize.push_back(componentPtr);
 
-        components.push_back(std::move(newComponent));
-
+        components.push_back(newComponent);
         return componentPtr;
     }
 
-    template<IsComponent T>
-    T *getComponent() {
+    template<is_component T>
+    std::weak_ptr<T> getComponent() {
         // loop until
-        for (const auto& component: components) {
-            // one of them is the correct type
-            if (T *specificComp = dynamic_cast<T *>(component.get())) {
-                return specificComp;
+        for (const auto &component: components) {
+            // the component raw pointer is of type T
+            if (auto comp = std::dynamic_pointer_cast<T>(component)) {
+                return std::weak_ptr<T>(comp);
             }
         }
         // nothing was found
-        return nullptr;
+        return std::weak_ptr<T>{};
     }
 
-    template<IsComponent T>
-    std::vector<T *> getComponents() {
-        // same as GetComponent only it adds it to a vector then returns it
-        std::vector<T *> foundComponents;
-        for (const auto& component: components) {
-            if (T *specificComp = dynamic_cast<T *>(component.get())) {
-                foundComponents.push_back(specificComp);
+    template<is_component T>
+    std::vector<std::weak_ptr<T> > getComponents() {
+        // same as getComponent only it adds it to a vector then returns it
+        std::vector<std::weak_ptr<T> > foundComponents(components.size());
+
+        for (const auto &component: components) {
+            if (auto comp = std::dynamic_pointer_cast<T>(component)) {
+                foundComponents.push_back(std::weak_ptr<T>(component));
             }
         }
+
         return foundComponents;
     }
 
-    template<IsComponent T>
-    const T *getComponentConst() const {
-        // loop until
-        for (const auto& component: components) {
-            // one of them is the correct type
-            if (const T *specificComp = dynamic_cast<const T *>(component.get())) {
-                return specificComp;
-            }
-        }
-        // nothing was found
-        return nullptr;
-    }
-
-    template<IsComponent T>
-    std::vector<const T *> getComponentsConst() const {
-        // same as GetComponent only it adds it to a vector then returns it
-        std::vector<const T*> foundComponents;
-        for (const auto& component: components) {
-            if (const T *specificComp = dynamic_cast<const T *>(component.get())) {
-                foundComponents.push_back(specificComp);
-            }
-        }
-        return foundComponents;
-    }
-
-    template<IsComponent T>
+    template<is_component T>
     void removeComponent() {
-        for (int i = 0; i < components.size(); i++) {
-            auto& component = components.at(i);
-
-            if (const T *specificComp = dynamic_cast<T *>(component.get())) {
-                delete specificComp;
-                components.erase(components.begin() + i);
+        for (auto it = components.begin(); it != components.end(); ++it) {
+            if (std::dynamic_pointer_cast<T>(*it)) {
+                components.erase(it);
                 break;
             }
         }
     }
 
-    template<IsComponent T>
+    template<is_component T>
     void removeAllComponents() {
-        // std::vector<int> componentsToRemove;
-        //
-        // for (int i = 0; i < components.size(); i++) {
-        //     auto &component = components.at(i);
-        //
-        //     if (T *specificComp = dynamic_cast<T *>(component)) {
-        //         delete specificComp;
-        //         componentsToRemove.push_back(i);
-        //     }
-        // }
-        //
-        // for (int i = 0; i < componentsToRemove.size(); i++) {
-        //     const int index = componentsToRemove.back();
-        //
-        //     components.erase(components.begin() + index);
-        //
-        //     componentsToRemove.pop_back();
-        // }
-
-        for (auto it = components.begin(); it != components.end(); ) {
-            if (const T *specificComp = dynamic_cast<T *>(*it)) {
-                delete specificComp;
+        for (auto it = components.begin(); it != components.end();) {
+            if (std::dynamic_pointer_cast<T>(*it)) {
                 it = components.erase(it);
+            }
+            else {
+                ++it;
             }
         }
     }
@@ -144,8 +99,8 @@ public:
     static std::vector<Object *> findObjectsByTag(int tag);
 
     void setActive(bool state);
-    bool getActive() const;
+    [[nodiscard]] bool getActive() const;
 };
 
 inline std::vector<Object *> allObjects;
-inline std::vector<Object*> waitingLineOfDeath;
+inline std::vector<Object *> waitingLineOfDeath;

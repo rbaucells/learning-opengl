@@ -29,8 +29,10 @@ Matrix<4, 4> Camera::calculateCameraLocalToWorld() const {
     localToWorldMatrix = localToWorldMatrix.rotateZ(object->transform.localRotation);
     localToWorldMatrix = localToWorldMatrix.scaleAnisotropic(object->transform.localScale.x, object->transform.localScale.y, 1);
 
-    if (object->transform.getParent() != nullptr) {
-        return object->transform.getParent()->localToWorldMatrix().multiply(localToWorldMatrix);
+    Transform* parent = object->transform.getParent();
+
+    if (parent != nullptr) {
+        return parent->localToWorldMatrix().multiply(localToWorldMatrix);
     }
 
     return localToWorldMatrix;
