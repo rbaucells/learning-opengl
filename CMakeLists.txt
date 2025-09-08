@@ -14,6 +14,7 @@ add_executable(OpenGL components/rotateComponent.cpp components/rotateComponent.
         systems/workQueue.h
         systems/workQueue.cpp
         systems/tween.h
+        math/curve.cpp
 )
 
 target_include_directories(OpenGL PRIVATE dependencies/include)
@@ -40,3 +41,9 @@ add_executable(listTests tests/listTests.cpp list.h)
 target_include_directories(listTests PRIVATE dependencies/include)
 
 add_test(NAME listTests COMMAND listTests)
+
+add_executable(curveTests tests/curveTests.cpp dependencies/include math/mathematics.h math/curve.cpp math/vector2.cpp)
+
+target_include_directories(curveTests PRIVATE)
+
+add_test(NAME curveTests COMMAND curveTests)

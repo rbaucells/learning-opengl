@@ -1,13 +1,6 @@
 #pragma once
 #include <functional>
 
-enum Easer : int {
-    linear,
-    sine_in, sine_out, sine_in_out,
-    cubic_in, cubic_out, cubic_in_out,
-    expo_in, expo_out, expo_in_out,
-};
-
 class TweenBase {
 public:
     virtual ~TweenBase() = default;
@@ -25,24 +18,24 @@ public:
     float duration;
     float elapsed = 0;
 
-    Easer easer;
+    Curve curve;
 
-    Tween(T *targetPtr, const T &start, const T &end, float duration, Easer easer) {
+    Tween(T *targetPtr, const T &start, const T &end, float duration, Curve curve) {
         this->targetPtr = targetPtr;
         this->start = start;
         this->end = end;
         this->duration = duration;
-        this->easer = easer;
+        this->curve = curve;
 
         functional = false;
     }
 
-    Tween(std::function<void(T)> targetFunc, const T &start, const T &end, float duration, Easer easer) {
+    Tween(std::function<void(T)> targetFunc, const T &start, const T &end, float duration, Curve curve) {
         this->targetFunc = targetFunc;
         this->start = start;
         this->end = end;
         this->duration = duration;
-        this->easer = easer;
+        this->curve = curve;
 
         functional = true;
     }
@@ -54,9 +47,9 @@ public:
         elapsed += deltaTime;
 
         if (functional)
-            targetFunc(lerp(start, end, elapsed / duration));
+            targetFunc(lerp(start, end, curve.evaluate(elapsed / duration)));
         else
-            (*targetPtr) = lerp(start, end, elapsed / duration);
+            (*targetPtr) = lerp(start, end, curve.evaluate(elapsed / duration));
 
         return elapsed >= duration;
     }
