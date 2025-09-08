@@ -1,7 +1,11 @@
 #pragma once
 #include <map>
-#include "../math/mathematics.h"
 #include "../systems/component.h"
+#include "math/buffers.h"
+#include "math/curve.h"
+#include "math/matrix.h"
+
+struct Vertex;
 
 class Renderer final : public Component {
 public:
@@ -9,7 +13,7 @@ public:
 
     void draw(const Matrix<4, 4>& view, const Matrix<4, 4> &projection, int mode) const;
 
-    void tweenAlpha(float target, float duration, Easer easer);
+    void tweenAlpha(float target, float duration, const Curve& curve);
 
     ~Renderer() override;
 

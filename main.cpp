@@ -1,11 +1,4 @@
-#include "glad/gl.h"
-#include "GLFW/glfw3.h"
-
 #include "main.h"
-#include "object.h"
-#include "components/camera.h"
-#include "components/rotateComponent.h"
-#include "math/mathematics.h"
 
 #include <complex>
 #include <fstream>
@@ -16,7 +9,13 @@
 #include <thread>
 
 #include "list.h"
+#include "object.h"
+#include "components/camera.h"
 #include "components/renderer.h"
+#include "components/rotateComponent.h"
+#include "glad/gl.h"
+#include "GLFW/glfw3.h"
+#include "math/vertex.h"
 #include "systems/input.h"
 #include "systems/workQueue.h"
 
@@ -200,8 +199,8 @@ int main() {
     square.addComponent<Renderer>(vertices, indices, GL_STATIC_DRAW, "/Users/ricardito/CLionProjects/OpenGL/res/textures/super-mario-transparent-background-20.png", true, GL_CLAMP, shader, 2);
     square.addComponent<RotateComponent>(45);
 
-    Object otherSquare("other square", 0, {600, 0}, 0, {1, 1}, &origin2.transform);
-    otherSquare.addComponent<Renderer>(vertices, indices, GL_STATIC_DRAW, "/Users/ricardito/CLionProjects/OpenGL/res/textures/dvdvd.jpg", true, GL_CLAMP, shader, 1);
+    // Object otherSquare("other square", 0, {600, 0}, 0, {1, 1}, &origin2.transform);
+    // otherSquare.addComponent<Renderer>(vertices, indices, GL_STATIC_DRAW, "/Users/ricardito/CLionProjects/OpenGL/res/textures/dvdvd.jpg", true, GL_CLAMP, shader, 1);
 
     // empty the buffers to make sure its drawing properly
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);

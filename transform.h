@@ -1,10 +1,9 @@
 #pragma once
 #include <vector>
-#include "math/mathematics.h"
-
 #include "systems/component.h"
+#include "math/matrix.h"
+#include "math/vector2.h"
 
-enum Easer : int;
 class Object;
 class TweenBase;
 
@@ -48,23 +47,23 @@ public:
     Vector2 localScale = {0, 0};
 
     // animations
-    void tweenLocalPosition(const Vector2 &target, float duration, Easer easeFunction);
-    void tweenLocalPosition(const Vector2 &start, const Vector2 &end, float duration, Easer easeFunction);
+    void tweenLocalPosition(const Vector2 &target, float duration, const Curve& curve);
+    void tweenLocalPosition(const Vector2 &start, const Vector2 &end, float duration, const Curve& curve);
 
-    void tweenGlobalPosition(const Vector2 &target, float duration, Easer easeFunction);
-    void tweenGlobalPosition(const Vector2 &start, const Vector2 &end, float duration, Easer easeFunction);
+    void tweenGlobalPosition(const Vector2 &target, float duration, const Curve& curve);
+    void tweenGlobalPosition(const Vector2 &start, const Vector2 &end, float duration, const Curve& curve);
 
-    void tweenLocalRotation(float target, float duration, Easer easeFunction);
-    void tweenLocalRotation(float start, float end, float duration, Easer easeFunction);
+    void tweenLocalRotation(float target, float duration, const Curve& curve);
+    void tweenLocalRotation(float start, float end, float duration, const Curve& curve);
 
-    void tweenGlobalRotation(float target, float duration, Easer easeFunction);
-    void tweenGlobalRotation(float start, float end, float duration, Easer easeFunction);
+    void tweenGlobalRotation(float target, float duration, const Curve& curve);
+    void tweenGlobalRotation(float start, float end, float duration, const Curve& curve);
 
-    void tweenLocalScale(const Vector2 &target, float duration, Easer easeFunction);
-    void tweenLocalScale(const Vector2 &start, const Vector2 &end, float duration, Easer easeFunction);
+    void tweenLocalScale(const Vector2 &target, float duration, const Curve& curve);
+    void tweenLocalScale(const Vector2 &start, const Vector2 &end, float duration, const Curve& curve);
 
-    void tweenGlobalScale(const Vector2 &target, float duration, Easer easeFunction);
-    void tweenGlobalScale(const Vector2 &start, const Vector2 &end, float duration, Easer easeFunction);
+    void tweenGlobalScale(const Vector2 &target, float duration, const Curve& curve);
+    void tweenGlobalScale(const Vector2 &start, const Vector2 &end, float duration, const Curve& curve);
 
     Object *object;
 };

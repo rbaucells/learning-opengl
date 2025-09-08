@@ -3,8 +3,8 @@
 #include <memory>
 #include <vector>
 #include "main.h"
-#include "systems/component.h"
 #include "transform.h"
+#include "systems/component.h"
 
 template<typename T>
 concept is_component = std::is_base_of_v<Component, T>;

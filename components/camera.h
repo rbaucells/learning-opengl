@@ -1,6 +1,6 @@
 #pragma once
-#include "../math/mathematics.h"
 #include "../systems/component.h"
+#include "math/matrix.h"
 
 class Camera final : public Component {
 public:
@@ -16,5 +16,5 @@ private:
 
     Matrix<4, 4> viewMatrix;
 
-    Matrix<4, 4> calculateCameraLocalToWorld() const;
+    [[nodiscard]] Matrix<4, 4> calculateCameraLocalToWorld() const;
 };

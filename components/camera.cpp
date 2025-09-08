@@ -10,9 +10,7 @@ void Camera::setMain() {
 }
 
 Matrix<4, 4> Camera::getViewMatrix() {
-    auto localToWorldMatrix = calculateCameraLocalToWorld();
-
-    if (lastLocalToWorldMatrix != localToWorldMatrix) {
+    if (auto localToWorldMatrix = calculateCameraLocalToWorld(); lastLocalToWorldMatrix != localToWorldMatrix) {
         lastLocalToWorldMatrix = localToWorldMatrix;
         viewMatrix = localToWorldMatrix;
     }

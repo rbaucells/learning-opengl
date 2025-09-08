@@ -1,4 +1,6 @@
-#include "../math/mathematics.h"
+#include <iostream>
+
+#include "../math//curve.h"
 
 int main() {
     Curve quadraticBeizier;
@@ -20,15 +22,15 @@ int main() {
 
     std::cout << "4-point curve value at t=0.5: " << cubicBezier.evaluate(0.5) << '\n';
 
-    Curve QuarticBezier;
+    Curve quarticBezier;
 
     // Quartic Bézier (5 points)
-    QuarticBezier.addPoint({0, 1});
-    QuarticBezier.addPoint({0, 0});
-    QuarticBezier.addPoint({1, 0});
-    QuarticBezier.addPoint({1, 1});
-    QuarticBezier.addPoint({2, 1});
+    quarticBezier.addPoint({0, 1});
+    quarticBezier.addPoint({0, 0});
+    quarticBezier.addPoint({1, 0});
+    quarticBezier.addPoint({1, 1});
+    quarticBezier.addPoint({2, 1});
 
-    std::cout << "5-point curve value at t=0.5: " << QuarticBezier.evaluate(0.5) << '\n';
+    std::cout << "5-point curve value at t=0.5: " << quarticBezier.evaluate(0.5) << '\n';
     return 0;
 }

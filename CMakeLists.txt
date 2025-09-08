@@ -3,7 +3,7 @@ project(OpenGL)
 
 set(CMAKE_CXX_STANDARD 20)
 
-add_executable(OpenGL components/rotateComponent.cpp components/rotateComponent.h systems/component.h math/mathematics.h math/vector2.cpp math/vector3.cpp components/camera.cpp main.cpp main.h object.cpp object.h components/camera.h dependencies/stb_image.cpp
+add_executable(OpenGL components/rotateComponent.cpp components/rotateComponent.h systems/component.h math/vector2.cpp math/vector3.cpp components/camera.cpp main.cpp main.h object.cpp object.h components/camera.h dependencies/stb_image.cpp
         systems/input.h
         systems/input.cpp
         systems/event.h
@@ -15,22 +15,29 @@ add_executable(OpenGL components/rotateComponent.cpp components/rotateComponent.
         systems/workQueue.cpp
         systems/tween.h
         math/curve.cpp
+        math/vector2.h
+        math/vector3.h
+        math/vector4.h
+        math/vertex.h
+        math/buffers.h
+        math/matrix.h
+        math/curve.h
 )
 
 target_include_directories(OpenGL PRIVATE dependencies/include)
-
+target_include_directories(OpenGL PRIVATE ${CMAKE_SOURCE_DIR})
 target_link_libraries(OpenGL PRIVATE ${CMAKE_SOURCE_DIR}/dependencies/lib/glfw/libglfw3.a "-framework Cocoa" "-framework IOKit" "-framework CoreFoundation")
 target_link_libraries(OpenGL PRIVATE ${CMAKE_SOURCE_DIR}/dependencies/lib/glad/libglad.a)
 
 enable_testing()
 
-add_executable(matrixTests math/mathematics.h tests/matrixTests.cpp)
+add_executable(matrixTests tests/matrixTests.cpp)
 
 target_include_directories(matrixTests PRIVATE dependencies/include)
 
 add_test(NAME matrixTests COMMAND matrixTests)
 
-add_executable(transformTests tests/transformTests.cpp math/mathematics.h transform.cpp math/vector2.cpp)
+add_executable(transformTests tests/transformTests.cpp transform.cpp math/vector2.cpp)
 
 target_include_directories(transformTests PRIVATE dependencies/include)
 
@@ -42,7 +49,7 @@ target_include_directories(listTests PRIVATE dependencies/include)
 
 add_test(NAME listTests COMMAND listTests)
 
-add_executable(curveTests tests/curveTests.cpp dependencies/include math/mathematics.h math/curve.cpp math/vector2.cpp)
+add_executable(curveTests tests/curveTests.cpp math/curve.cpp math/vector2.cpp math/curve.h math/vector2.cpp)
 
 target_include_directories(curveTests PRIVATE)
 

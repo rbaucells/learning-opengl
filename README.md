@@ -14,5 +14,5 @@ help me learn complicated things in game dev and game engine design
 - Make games how I want with no limitations (If that makes sense)
 - ### Goals for Engine itself
   - Scene saving/loading system
-  - Animation system
+  - Animation system - Done :)
   - GUI for editing scenes

@@ -1,5 +1,6 @@
 #pragma once
 #include <functional>
+#include "math/curve.h"
 
 class TweenBase {
 public:

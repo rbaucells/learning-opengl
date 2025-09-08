@@ -1,5 +1,5 @@
+#include "vector2.h"
 #include <cmath>
-#include "mathematics.h"
 
 Vector2 Vector2::operator+(const Vector2 &other) const {
     return Vector2{x + other.x, y + other.y};
@@ -13,12 +13,6 @@ Vector2 Vector2::operator*(float scalar) const {
 Vector2 Vector2::operator/(float scalar) const {
     return Vector2{x / scalar, y / scalar};
 }
-
-bool Vector2::operator==(const Vector2& other) const {
-    return x == other.x && y == other.y;
-}
-
-
 
 Vector2& Vector2::operator+=(const Vector2 &other) {
     x += other.x;
@@ -40,6 +34,9 @@ Vector2& Vector2::operator/=(float scalar) {
     y /= scalar;
     return *this;
 }
+bool Vector2::operator==(const Vector2& other) const {
+    return x == other.x && y == other.y;
+}
 
 float Vector2::magnitude() const {
     return std::sqrt(x * x + y * y);
@@ -56,7 +53,6 @@ Vector2 Vector2::normalized() const {
 Vector2 Vector2::hadamard(const Vector2 &other) const {
     return {x * other.x, y * other.y};
 }
-
 float Vector2::dot(const Vector2 &other) const {
     return (x * other.x + y * other.y);
 }

@@ -1,6 +1,6 @@
 #pragma once
-#include "components/camera.h"
 #include <vector>
+#include "components/camera.h"
 
 #include "systems/event.h"
 

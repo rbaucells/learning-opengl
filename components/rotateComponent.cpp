@@ -1,5 +1,5 @@
 #include "rotateComponent.h"
-
+#include "math/curve.h"
 #include "renderer.h"
 #include "../object.h"
 
@@ -10,11 +10,7 @@ RotateComponent::RotateComponent(Object *owner, const float speed) : Component(o
 void RotateComponent::start() {
     std::printf("Start \n");
 
-    const auto rendererPtr = object->getComponent<Renderer>();
-
-    if (const auto renderer = rendererPtr.lock()) {
-        renderer->tweenAlpha(0, 5, linear);
-    }
+    object->transform.tweenGlobalRotation(90, 3, Curve::expoInOut);
 }
 
 void RotateComponent::update(const double deltaTime) {

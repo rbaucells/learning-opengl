@@ -1,6 +1,6 @@
 #pragma once
-#include "../math/mathematics.h"
 #include "event.h"
+#include "math/vector2.h"
 
 // forward declaration of GLFW things
 struct GLFWwindow;
