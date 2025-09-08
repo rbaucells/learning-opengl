@@ -20,7 +20,7 @@ public:
 
     ~Transform();
 
-    void doTweens(float deltaTime);
+    void doTweens(double deltaTime);
 
     [[nodiscard]] Matrix<4, 4> localToWorldMatrix() const;
     [[nodiscard]] Matrix<4, 4> worldToLocalMatrix() const;

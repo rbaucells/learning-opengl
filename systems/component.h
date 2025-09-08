@@ -26,7 +26,7 @@ public:
     virtual void lateUpdate(double deltaTime) {}
     virtual void fixedUpdate(double fixedDeltaTime) {}
 
-    void doTweens(const float deltaTime) {
+    void doTweens(const double deltaTime) {
         for (auto it = tweens.begin(); it != tweens.end(); ) {
             if ((*it)->update(deltaTime))
                 it = tweens.erase(it);

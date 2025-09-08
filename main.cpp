@@ -185,15 +185,14 @@ int main() {
 
     Object camera("mainCamera", 69, {0, 0}, 0, {1,1});
     auto cameraComponent = camera.addComponent<Camera>();
+
     if (auto cam = cameraComponent.lock()) {
         cam->setMain();
     }
 
     Object origin1("origin1", 0, {0, 0}, 0, {1, 1});
-    // origin1.addComponent<RotateComponent>(-45);
 
     Object origin2("origin2", 0, {0, 0}, 0, {1, 1});
-    // origin2.addComponent<RotateComponent>(45);
 
     Object square("square", 0, {200, 0}, 0, {1, 1}, &origin1.transform);
     square.addComponent<Renderer>(vertices, indices, GL_STATIC_DRAW, "/Users/ricardito/CLionProjects/OpenGL/res/textures/super-mario-transparent-background-20.png", true, GL_CLAMP, shader, 2);
@@ -216,6 +215,7 @@ int main() {
     auto lastLoopTime = std::chrono::high_resolution_clock::now();
     double accumulator = 0.0;
     auto lastFixedUpdateTime = std::chrono::high_resolution_clock::now();
+    // ReSharper disable once CppTooWideScope
     GLFWgamepadstate lastGamepadState;
 
     // main update loop

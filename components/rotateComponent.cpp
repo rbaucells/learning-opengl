@@ -25,11 +25,11 @@ void RotateComponent::onEnable() {
     std::printf("onEnable \n");
 }
 
-void RotateComponent::lateUpdate(double deltaTime) {
+void RotateComponent::lateUpdate(const double deltaTime) {
     std::printf("lateUpdate \n");
 }
 
-void RotateComponent::fixedUpdate(double fixedDeltaTime) {
+void RotateComponent::fixedUpdate(const double fixedDeltaTime) {
     std::printf("fixedUpdate \n");
 }
 

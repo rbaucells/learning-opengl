@@ -72,7 +72,7 @@ Transform::~Transform() {
     setParent(nullptr);
 }
 
-void Transform::doTweens(const float deltaTime) {
+void Transform::doTweens(const double deltaTime) {
     for (auto it = tweens.begin(); it != tweens.end(); ) {
         if ((*it)->update(deltaTime)) {
             it = tweens.erase(it);

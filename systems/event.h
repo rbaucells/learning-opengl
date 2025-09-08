@@ -4,11 +4,10 @@
 template<typename... ARGS>
 class Event {
 private:
-    using handler = std::function<void(ARGS...)>;
-    std::vector<handler> handlers;
-
+    using Handler = std::function<void(ARGS...)>;
+    std::vector<Handler> handlers;
 public:
-    void subscribe(const handler& functionHandler) {
+    void subscribe(const Handler& functionHandler) {
         handlers.push_back(functionHandler);
     }
     template<class T>
