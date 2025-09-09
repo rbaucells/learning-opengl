@@ -1,36 +1,47 @@
 #pragma once
 #include <functional>
-#include <vector>
 
-class Object;
+class Component;
 
-struct ConditionalQueueEntry {
-    std::function<bool()> condition;
-    std::function<void()> action;
-    Object* owner;
+class QueueEntry {
+public:
+    virtual ~QueueEntry() = default;
+
+private:
+    virtual bool run() {return true;};
 };
 
-struct TimedQueueEntry {
-    std::function<void()> action;
-    float time;
-    Object* owner;
+class ConditionalQueueEntry final : public QueueEntry {
+    using Action = std::function<void()>;
+    using Condition = std::function<bool()>;
+
+    Condition condition;
+    Action action;
+
+public:
+    ConditionalQueueEntry(const Condition& condition, const Action& action);
+
+    bool run() override;
 };
 
-struct NextFrameQueueEntry {
-    std::function<void()> action;
-    Object* owner;
+class TimedQueueEntry final : public QueueEntry {
+    using Action = std::function<void()>;
+
+    Action action;
+    float time = 0.f;
+
+public:
+    TimedQueueEntry(const Action& action, float time);
+
+    bool run() override;
+    void decreaseTime(double deltaTime);
 };
 
-inline std::vector<ConditionalQueueEntry> conditionalQueue;
-inline std::vector<TimedQueueEntry> timedQueue;
-inline std::vector<NextFrameQueueEntry> nextFrameQueue;
+class NextFrameQueueEntry final : public QueueEntry {
+    using Action = std::function<void()>;
+    std::function<void()> action;
 
-void addConditionalQueueEntry(Object* owner, const std::function<bool()> &condition, const std::function<void()> &action);
-void addTimedQueueEntry(Object* owner, float time, const std::function<void()> &action);
-void addNextFrameEntry(Object* owner, const std::function<void()> &action);
-
-void removeConditionalQueueEntry(const ConditionalQueueEntry &entry);
-void removeTimedQueueEntry(const TimedQueueEntry &entry);
-void removeNextFrameQueueEntry(const NextFrameQueueEntry &entry);
-
-void removeAllQueueEntries(const Object *owner);
+public:
+    NextFrameQueueEntry(const Action& action); // NOLINT(google-explicit-constructor)
+    bool run() override;
+};

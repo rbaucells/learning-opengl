@@ -3,11 +3,12 @@
 #include "systems/component.h"
 #include "math/matrix.h"
 #include "math/vector2.h"
+#include "systems/tween.h"
 
 class Object;
 class TweenBase;
 
-class Transform {
+class Transform : public Component {
 private:
     // both raw pointers are fine because non owning
     Transform *parent = nullptr;
@@ -18,7 +19,7 @@ public:
     Transform(Object *owner, Vector2 pos, float rot, Vector2 scale, Transform *parent);
     Transform(Object *owner, Vector2 pos, float rot, Vector2 scale);
 
-    ~Transform();
+    ~Transform() override;
 
     void doTweens(double deltaTime);
 
@@ -65,5 +66,5 @@ public:
     void tweenGlobalScale(const Vector2 &target, float duration, const Curve& curve);
     void tweenGlobalScale(const Vector2 &start, const Vector2 &end, float duration, const Curve& curve);
 
-    Object *object;
+    std::unique_ptr<TweenBase> tweenLocalPos(const Vector2 &target, float duration, const Curve& curve);
 };

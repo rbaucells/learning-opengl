@@ -96,36 +96,6 @@ unsigned int createShader(const std::string &vertexShader, const std::string &fr
     return program;
 }
 
-void handleQueue(const double deltaTime) {
-    for (const auto& [action, owner] : nextFrameQueue) {
-        action();
-    }
-
-    nextFrameQueue.clear();
-
-    for (auto it = timedQueue.begin(); it != timedQueue.end(); ) {
-        it->time -= static_cast<float>(deltaTime);
-
-        if (it->time <= 0) {
-            it->action();
-            it = timedQueue.erase(it);
-            continue;
-        }
-
-        ++it;
-    }
-
-    for (auto it = conditionalQueue.begin(); it != conditionalQueue.end(); ) {
-        if (it->condition()) {
-            it->action();
-            it = conditionalQueue.erase(it);
-            continue;
-        }
-
-        ++it;
-    }
-}
-
 int main() {
     // when we get an glfwError, lmk
     glfwSetErrorCallback(errorCallback);
@@ -285,8 +255,6 @@ int main() {
                 renderer->draw(cameraViewMatrix, projection, GL_TRIANGLES);
             }
         }
-
-        handleQueue(deltaTime);
 
         for (Object* object : waitingLineOfDeath) {
             object->destroyImmediately();

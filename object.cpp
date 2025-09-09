@@ -31,18 +31,22 @@ Object::Object(const std::string &objectName, const int objectTag, Vector2 pos, 
  * and also the doTween method on all of its components.
  * @param deltaTime the time elapsed since the last frame.
  */
-void Object::update(double deltaTime) {
+void Object::update(const double deltaTime) {
     if (!activated)
         return;
 
     for (const auto &component: components) {
-        component->doTweens(deltaTime);
+        component->manageTweens(deltaTime);
     }
 
     transform.doTweens(deltaTime);
 
     for (const auto &component: components) {
         component->update(deltaTime);
+    }
+
+    for (const auto &component: components) {
+        component->manageQueue(deltaTime);
     }
 }
 
@@ -102,7 +106,6 @@ void Object::destroyImmediately() {
 
     components.clear();
     std::erase(allObjects, this);
-    removeAllQueueEntries(this);
     // don't worry about transform, destructor will clean up for us
 }
 

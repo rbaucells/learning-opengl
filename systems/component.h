@@ -1,7 +1,7 @@
 #pragma once
 #include <vector>
 
-#include "tween.h"
+#include "workQueue.h"
 // forward declaration
 class Object;
 class TweenBase;
@@ -9,11 +9,9 @@ class TweenBase;
 class Component {
 protected:
     std::vector<std::unique_ptr<TweenBase>> tweens;
+    std::vector<std::unique_ptr<QueueEntry>> queue;
 public:
-    explicit Component(Object *owner) {
-        object = owner;
-    };
-
+    explicit Component(Object *owner);
     virtual ~Component() = default;
 
     // initialization
@@ -26,18 +24,14 @@ public:
     virtual void lateUpdate(double deltaTime) {}
     virtual void fixedUpdate(double fixedDeltaTime) {}
 
-    void doTweens(const double deltaTime) {
-        for (auto it = tweens.begin(); it != tweens.end(); ) {
-            if ((*it)->update(deltaTime))
-                it = tweens.erase(it);
-            else
-                ++it;
-        }
-    }
+    void manageTweens(double deltaTime);
+    void manageQueue(double deltaTime);
 
     // de-initialization
     virtual void onDisable() {};
     virtual void onDestroy() {};
+
+    void addTween(std::unique_ptr<TweenBase> tween);
 
     // fine to use raw pointer since component will never be alive at a time where the object isnt
     // and because component doesnt own object

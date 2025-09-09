@@ -1,6 +1,8 @@
 #pragma once
 #include <functional>
 #include "math/curve.h"
+#include "component.h"
+#include "event.h"
 
 // transform.tweenLocalPosition(...) returns a tween that can be started() and that will add it to the update loop and let it run
 // if used in sequence.append(transform.tweenLocalPosition(...)) it will instead add it to the sequence
@@ -12,55 +14,78 @@ class TweenBase {
 public:
     virtual ~TweenBase() = default;
 
+    virtual void start();
+
     virtual bool update(double deltaTime) {
         return true;
     };
     virtual void kill() {};
+
+    virtual bool getFinished() const {
+        return true;
+    };
+
+    // will run when tween is started
+    Event<> onStart;
+    // will run in the update loop after the value is changed
+    Event<> onUpdate;
+    // will run when tween finishes naturally
+    Event<> onFinished;
+    // will run when the tween is killed/cancelled
+    Event<> onKilled;
 };
 
 template<typename T>
 class Tween final : public TweenBase {
 private:
+    bool functional = false;
     std::function<void(T)> targetFunc = nullptr;
     T* targetPtr = nullptr;
+
     T startValue;
     T endValue;
+
     float duration;
     float elapsed = 0;
+    bool finished = false;
 
     Curve curve;
 
+    Component* owner;
+
+    static T lerp(const T& start, const T& end, float t) {
+        return start + (end - start) * t;
+    }
+
 public:
-    Tween(std::function<void(T)> targetFunc, const T& start, const T& end, float duration, Curve curve) {
+    Tween(Component* owner, std::function<void(T)> targetFunc, const T& start, const T& end, float duration, Curve curve) {
         this->targetFunc = targetFunc;
         this->startValue = start;
         this->endValue = end;
         this->duration = duration;
         this->curve = curve;
+        this->owner = owner;
 
         functional = true;
     }
-    Tween(T* targetPtr, const T& start, const T& end, float duration, Curve curve) {
+    Tween(Component* owner, T* targetPtr, const T& start, const T& end, float duration, Curve curve) {
         this->targetPtr = targetPtr;
         this->startValue = start;
         this->endValue = end;
         this->duration = duration;
         this->curve = curve;
+        this->owner = owner;
 
         functional = false;
     }
 
-    void start() {
-
+    void start() override {
+        owner->addTween(this);
+        onStart.invoke();
     }
 
-    /**
-     * @note Dont call manually, will be automatically called
-     * @param deltaTime How much time has elapsed from the last frame
-     * @return Is the tween already done (finished)
-     */
     bool update(const double deltaTime) override {
-        if (finished)
+        if (finished) // we dont call onFinished here, because if finished == true but we are still alive, it means we were cancelled, onCancel was already run
             return true;
 
         elapsed += deltaTime;
@@ -70,22 +95,23 @@ public:
         else
             (*targetPtr) = lerp(startValue, endValue, curve.evaluate(elapsed / duration));
 
-        return elapsed >= duration;
+        onUpdate.invoke();
+
+        if (elapsed >= duration) {
+            finished = true;
+            onFinished.invoke();
+            return true;
+        }
+
+        return false;
     }
 
     void kill() override {
         finished = true;
+        onKilled.invoke();
     }
 
-    bool getFinished() const {
+    bool getFinished() const override {
         return finished;
-    }
-
-private:
-    bool finished = false;
-    bool functional = false;
-
-    static T lerp(const T& start, const T& end, float t) {
-        return start + (end - start) * t;
     }
 };

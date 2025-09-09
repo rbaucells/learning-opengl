@@ -24,6 +24,7 @@ add_executable(OpenGL components/rotateComponent.cpp components/rotateComponent.
         math/curve.h
         systems/sequence.cpp
         systems/sequence.h
+        systems/component.cpp
 )
 
 target_include_directories(OpenGL PRIVATE dependencies/include)

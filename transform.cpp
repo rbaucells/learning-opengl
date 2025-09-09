@@ -50,7 +50,7 @@ Decomposed2D decompose2D(const Matrix<4, 4> &m) {
     return out;
 }
 
-Transform::Transform(Object *owner, const Vector2 pos, const float rot, const Vector2 scale, Transform *parent) {
+Transform::Transform(Object *owner, const Vector2 pos, const float rot, const Vector2 scale, Transform *parent) : Component(owner) {
     setParent(parent);
     this->localPosition = pos;
     this->localRotation = rot;
@@ -59,7 +59,7 @@ Transform::Transform(Object *owner, const Vector2 pos, const float rot, const Ve
     object = owner;
 }
 
-Transform::Transform(Object *owner, const Vector2 pos, const float rot, const Vector2 scale) {
+Transform::Transform(Object *owner, const Vector2 pos, const float rot, const Vector2 scale) : Component(owner) {
     setGlobalPosition(pos);
     setGlobalRotation(rot);
     setGlobalScale(scale);
@@ -262,6 +262,10 @@ void Transform::setParent(Transform *newParent) {
 }
 Transform *Transform::getParent() const {
     return parent;
+}
+
+std::unique_ptr<TweenBase> Transform::tweenLocalPos(const Vector2& target, const float duration, const Curve& curve) {
+    return std::make_unique<Tween<Vector2>>(this, &localPosition, localPosition, target, duration, curve);
 }
 
 void Transform::tweenLocalPosition(const Vector2 &target, const float duration, const Curve& curve) {

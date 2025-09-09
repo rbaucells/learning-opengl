@@ -50,4 +50,8 @@ public:
             handler(args...); // invoke the method with the proper arguments
         }
     }
+
+    void operator()(ARGS... args) {
+        invoke(args...);
+    }
 };
