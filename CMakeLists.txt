@@ -22,8 +22,6 @@ add_executable(OpenGL components/rotateComponent.cpp components/rotateComponent.
         math/buffers.h
         math/matrix.h
         math/curve.h
-        systems/sequence.cpp
-        systems/sequence.h
         systems/component.cpp
 )
 

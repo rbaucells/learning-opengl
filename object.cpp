@@ -39,7 +39,7 @@ void Object::update(const double deltaTime) {
         component->manageTweens(deltaTime);
     }
 
-    transform.doTweens(deltaTime);
+    transform.manageTweens(deltaTime);
 
     for (const auto &component: components) {
         component->update(deltaTime);

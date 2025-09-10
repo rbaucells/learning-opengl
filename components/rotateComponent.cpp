@@ -2,6 +2,7 @@
 
 #include "renderer.h"
 #include "../object.h"
+#include "systems/tween.h"
 
 RotateComponent::RotateComponent(Object *owner, const float speed) : Component(owner) {
     this->speed = speed;
@@ -9,6 +10,8 @@ RotateComponent::RotateComponent(Object *owner, const float speed) : Component(o
 
 void RotateComponent::start() {
     std::printf("Start \n");
+
+    object->transform.registerTween(object->transform.localPosTween({500, 200}, 5, Curve::sineInOut));
 }
 
 void RotateComponent::update(const double deltaTime) {

@@ -145,7 +145,3 @@ void Renderer::draw(const Matrix<4, 4>& view, const Matrix<4, 4> &projection, co
     glDrawElements(mode, static_cast<int>(indices.size()), GL_UNSIGNED_INT, nullptr);
 }
 
-void Renderer::tweenAlpha(float target, float duration, const Curve& curve) {
-    tweens.push_back(std::make_unique<Tween<float>>(&alpha, alpha, target, duration, curve));
-}
-

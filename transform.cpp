@@ -1,6 +1,5 @@
 #include "transform.h"
 #include "object.h"
-#include "systems/tween.h"
 
 struct Decomposed2D {
     Vector2 position{};
@@ -70,16 +69,6 @@ Transform::Transform(Object *owner, const Vector2 pos, const float rot, const Ve
 Transform::~Transform() {
     deleteAllChildren();
     setParent(nullptr);
-}
-
-void Transform::doTweens(const double deltaTime) {
-    for (auto it = tweens.begin(); it != tweens.end(); ) {
-        if ((*it)->update(deltaTime)) {
-            it = tweens.erase(it);
-        }
-        else
-            ++it;
-    }
 }
 
 Matrix<4, 4> Transform::localToWorldMatrix() const {
@@ -264,49 +253,6 @@ Transform *Transform::getParent() const {
     return parent;
 }
 
-std::unique_ptr<TweenBase> Transform::tweenLocalPos(const Vector2& target, const float duration, const Curve& curve) {
-    return std::make_unique<Tween<Vector2>>(this, &localPosition, localPosition, target, duration, curve);
+std::unique_ptr<Tween<Vector2>> Transform::localPosTween(const Vector2& target, float duration, Curve curve) {
+    return std::make_unique<Tween<Vector2>>(&localPosition, localPosition, target, duration, curve);
 }
-
-void Transform::tweenLocalPosition(const Vector2 &target, const float duration, const Curve& curve) {
-    tweens.push_back(std::make_unique<Tween<Vector2>>(&localPosition, localPosition, target, duration, curve));
-}
-void Transform::tweenLocalPosition(const Vector2 &start, const Vector2 &end, float duration, const Curve& curve) {
-    tweens.push_back(std::make_unique<Tween<Vector2>>(&localPosition, start, end, duration, curve));
-}
-
-void Transform::tweenGlobalPosition(const Vector2 &target, float duration, const Curve& curve) {
-    tweens.push_back(std::make_unique<Tween<Vector2>>([this](const Vector2& pos) {setGlobalPosition(pos);}, getGlobalPosition(), target, duration, curve));
-}
-void Transform::tweenGlobalPosition(const Vector2 &start, const Vector2 &end, float duration, const Curve& curve) {
-    tweens.push_back(std::make_unique<Tween<Vector2>>([this](const Vector2& pos) {setGlobalPosition(pos);}, start, end, duration, curve));
-}
-
-void Transform::tweenLocalRotation(float target, float duration, const Curve& curve) {
-    tweens.push_back(std::make_unique<Tween<float>>(&localRotation, localRotation, target, duration, curve));
-}
-void Transform::tweenLocalRotation(float start, float end, float duration, const Curve& curve) {
-    tweens.push_back(std::make_unique<Tween<float>>(&localRotation, start, end, duration, curve));
-}
-
-void Transform::tweenGlobalRotation(float target, float duration, const Curve& curve) {
-    tweens.push_back(std::make_unique<Tween<float>>([this](const float rot) {setGlobalRotation(rot);}, getGlobalRotation(), target, duration, curve));
-}
-void Transform::tweenGlobalRotation(float start, float end, float duration, const Curve& curve) {
-    tweens.push_back(std::make_unique<Tween<float>>([this](const float rot) {setGlobalRotation(rot);}, start, end, duration, curve));
-}
-
-void Transform::tweenLocalScale(const Vector2 &target, float duration, const Curve& curve) {
-    tweens.push_back(std::make_unique<Tween<Vector2>>(&localScale, localScale, target, duration, curve));
-}
-void Transform::tweenLocalScale(const Vector2 &start, const Vector2 &end, float duration, const Curve& curve) {
-    tweens.push_back(std::make_unique<Tween<Vector2>>(&localScale, start, end, duration, curve));
-}
-
-void Transform::tweenGlobalScale(const Vector2 &target, float duration, const Curve& curve) {
-    tweens.push_back(std::make_unique<Tween<Vector2>>([this](const Vector2& scale) {setGlobalScale(scale);}, getGlobalScale(), target, duration, curve));
-}
-void Transform::tweenGlobalScale(const Vector2 &start, const Vector2 &end, float duration, const Curve& curve) {
-    tweens.push_back(std::make_unique<Tween<Vector2>>([this](const Vector2& scale) {setGlobalScale(scale);}, start, end, duration, curve));
-}
-

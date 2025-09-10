@@ -13,8 +13,6 @@ public:
 
     void draw(const Matrix<4, 4>& view, const Matrix<4, 4> &projection, int mode) const;
 
-    void tweenAlpha(float target, float duration, const Curve& curve);
-
     ~Renderer() override;
 
 private:

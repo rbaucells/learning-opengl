@@ -1,27 +1,24 @@
 #pragma once
 #include <vector>
+
+#include "math/curve.h"
 #include "systems/component.h"
 #include "math/matrix.h"
 #include "math/vector2.h"
 #include "systems/tween.h"
 
 class Object;
-class TweenBase;
 
-class Transform : public Component {
-private:
+class Transform final : public Component {
     // both raw pointers are fine because non owning
     Transform *parent = nullptr;
     std::vector<Transform *> children;
-    std::vector<std::unique_ptr<TweenBase>> tweens;
 
 public:
     Transform(Object *owner, Vector2 pos, float rot, Vector2 scale, Transform *parent);
     Transform(Object *owner, Vector2 pos, float rot, Vector2 scale);
 
     ~Transform() override;
-
-    void doTweens(double deltaTime);
 
     [[nodiscard]] Matrix<4, 4> localToWorldMatrix() const;
     [[nodiscard]] Matrix<4, 4> worldToLocalMatrix() const;
@@ -43,28 +40,9 @@ public:
     void setParent(Transform *newParent);
     [[nodiscard]] Transform *getParent() const;
 
+    std::unique_ptr<Tween<Vector2>> localPosTween(const Vector2& target, float duration, Curve curve);
+
     Vector2 localPosition = {0, 0};
     float localRotation = 0;
     Vector2 localScale = {0, 0};
-
-    // animations
-    void tweenLocalPosition(const Vector2 &target, float duration, const Curve& curve);
-    void tweenLocalPosition(const Vector2 &start, const Vector2 &end, float duration, const Curve& curve);
-
-    void tweenGlobalPosition(const Vector2 &target, float duration, const Curve& curve);
-    void tweenGlobalPosition(const Vector2 &start, const Vector2 &end, float duration, const Curve& curve);
-
-    void tweenLocalRotation(float target, float duration, const Curve& curve);
-    void tweenLocalRotation(float start, float end, float duration, const Curve& curve);
-
-    void tweenGlobalRotation(float target, float duration, const Curve& curve);
-    void tweenGlobalRotation(float start, float end, float duration, const Curve& curve);
-
-    void tweenLocalScale(const Vector2 &target, float duration, const Curve& curve);
-    void tweenLocalScale(const Vector2 &start, const Vector2 &end, float duration, const Curve& curve);
-
-    void tweenGlobalScale(const Vector2 &target, float duration, const Curve& curve);
-    void tweenGlobalScale(const Vector2 &start, const Vector2 &end, float duration, const Curve& curve);
-
-    std::unique_ptr<TweenBase> tweenLocalPos(const Vector2 &target, float duration, const Curve& curve);
 };

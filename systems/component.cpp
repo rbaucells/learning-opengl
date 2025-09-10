@@ -5,15 +5,6 @@ Component::Component(Object* owner) {
     this->object = owner;
 };
 
-void Component::manageTweens(const double deltaTime) {
-    for (auto it = tweens.begin(); it != tweens.end(); ) {
-        if ((*it)->update(deltaTime))
-            it = tweens.erase(it);
-        else
-            ++it;
-    }
-}
-
 void Component::manageQueue(const double deltaTime) {
     for (auto it = queue.begin(); it != queue.end(); ) {
         if (const auto conditionalQueueEntry = dynamic_cast<ConditionalQueueEntry*>(it->get())) {
@@ -42,7 +33,18 @@ void Component::manageQueue(const double deltaTime) {
     }
 }
 
-void Component::addTween(std::unique_ptr<TweenBase> tween) {
-    tweens.push_back(std::move(tween));
+void Component::manageTweens(const double deltaTime) {
+    for (auto it = tweens.begin(); it != tweens.end(); ) {
+        (*it)->update(deltaTime);
+
+        if ((*it)->isDone())
+            it = tweens.erase(it);
+        else
+            ++it;
+    }
 }
 
+void Component::registerTween(std::unique_ptr<TweenBase> tween) {
+    tween->start();
+    tweens.push_back(std::move(tween));
+}
