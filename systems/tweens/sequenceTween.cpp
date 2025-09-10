@@ -1,61 +1,75 @@
 #include "tween.h"
+
 void SequenceTween::add(std::unique_ptr<TweenBase> tween) {
-    tweens_.push(std::move(tween));
+    tweens_.emplace();
+    tweens_.back().push_back(std::move(tween));
+}
+
+void SequenceTween::join(std::unique_ptr<TweenBase> tween) {
+    if (tweens_.empty())
+        tweens_.emplace();
+    tweens_.back().push_back(std::move(tween));
 }
 
 void SequenceTween::start() {
     running_ = true;
     completed_ = false;
+    onStart.invoke();
+
     if (!tweens_.empty()) {
-        currentTween_ = tweens_.front().get();
-        currentTween_->start();
+        for (const auto& tween : tweens_.front()) {
+            tween->start();
+        }
     }
 }
 
 void SequenceTween::update(const double deltaTime) {
-    if (!currentTween_)
+    if (tweens_.empty()) {
+        complete();
         return;
+    }
 
-    currentTween_->update(deltaTime);
+    for (auto it = tweens_.front().begin(); it != tweens_.front().end(); ) {
+        (*it)->update(deltaTime);
 
-    if (currentTween_->shouldDelete()) {
-        // aka pop_front
+        if ((*it)->shouldDelete())
+            it = tweens_.front().erase(it);
+        else
+            ++it;
+    }
+
+    // no more tweens in step
+    if (tweens_.front().empty()) {
         tweens_.pop();
-        currentTween_ = nullptr;
-
-        // start the next tween if it isnt empty
-        if (!tweens_.empty()) {
-            currentTween_ = tweens_.front().get();
-            currentTween_->start();
-        }
-        else {
-            // else we are done
-            completed_ = true;
-            running_ = false;
-        }
     }
 }
 
 void SequenceTween::complete() {
-    // force complete all the tweens inside
-    while (!tweens_.empty()) {
-        tweens_.front()->complete();
-        tweens_.pop();
-    }
-
     completed_ = true;
     running_ = false;
+    onComplete.invoke();
+
+    // force complete all the tweens inside
+    while (!tweens_.empty()) {
+        for (const auto& tween : tweens_.front()) {
+            tween->complete();
+            tweens_.pop();
+        }
+    }
 }
 
 void SequenceTween::cancel() {
-    // cancel all the tweens inside
-    while (!tweens_.empty()) {
-        tweens_.front()->cancel();
-        tweens_.pop();
-    }
-
     canceled_ = true;
     running_ = false;
+    onCancel.invoke();
+
+    // cancel all the tweens inside
+    while (!tweens_.empty()) {
+        for (auto& tween : tweens_.front()) {
+            tween->cancel();
+            tweens_.pop();
+        }
+    }
 }
 
 bool SequenceTween::shouldDelete() {

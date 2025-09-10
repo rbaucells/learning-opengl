@@ -34,9 +34,16 @@ void RotateComponent::start() {
 
     auto* sequence = addTween(std::make_unique<SequenceTween>());
 
-    sequence->add(object->transform.localPosTween({0, 0}, {500, -300}, 3, Curve::sineInOut));
-    sequence->add(object->transform.localRotationTween(90, 5, Curve::bounceInOut));
-    sequence->add(object->transform.localScaleTween({1.3, 0.7}, {2, 1.7}, 2, Curve::linear));
+    sequence->add(object->transform.localPosTween({500, -300}, 3, Curve::sineInOut));
+    sequence->join(object->transform.localRotationTween(90, 5, Curve::bounceInOut));
+    sequence->add(object->transform.localScaleTween({2, 1.7}, 2, Curve::linear));
+
+    sequence->onComplete.subscribe([]() {
+        std::printf("The sequence is complete \n");
+    });
+    sequence->onCancel.subscribe([]() {
+        std::printf("The sequence is canceled \n");
+    });
 
     sequence->start();
 }

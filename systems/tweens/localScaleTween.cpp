@@ -9,6 +9,8 @@ LocalScaleTween::LocalScaleTween(Vector2* target, const Vector2& start, const Ve
 }
 
 void LocalScaleTween::start() {
+    running_ = true;
+    completed_ = false;
     *target_ = start_;
     onStart.invoke();
 }

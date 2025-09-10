@@ -27,6 +27,7 @@ add_executable(OpenGL components/rotateComponent.cpp components/rotateComponent.
         systems/tweens/localScaleTween.cpp
         systems/tweens/localRotationTween.cpp
         systems/tweens/sequenceTween.cpp
+        systems/tweens/waitTween.cpp
 )
 
 target_include_directories(OpenGL PRIVATE dependencies/include)

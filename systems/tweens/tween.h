@@ -91,12 +91,28 @@ private:
     double elapsed_ = 0.f;
 };
 
-class SequenceTween : public TweenBase {
+class WaitTween : public TweenBase {
+public:
+    WaitTween(double duration);
+
+    void start() override;
+    void update(double deltaTime) override;
+    void complete() override;
+    void cancel() override;
+
+    bool shouldDelete() override;
 private:
-    std::queue<std::unique_ptr<TweenBase>> tweens_;
-    TweenBase* currentTween_ = nullptr;
+    double duration_ = 0.f;
+    double elapsed_ = 0.f;
+};
+
+class SequenceTween final : public TweenBase {
+private:
+    std::queue<std::vector<std::unique_ptr<TweenBase>>> tweens_;
+
 public:
     void add(std::unique_ptr<TweenBase> tween);
+    void join(std::unique_ptr<TweenBase> tween);
 
     void start() override;
     void update(double deltaTime) override;
