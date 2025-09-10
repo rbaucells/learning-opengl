@@ -11,7 +11,7 @@ public:
     Curve() = default;
     Curve(const Curve &other);
     Curve(std::initializer_list<Vector2> l);
-    [[nodiscard]] float evaluate(float t) const;
+    [[nodiscard]] float evaluate(double t) const;
     std::vector<Vector2> getPoints();
     void addPoint(const Vector2 &point);
 

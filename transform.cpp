@@ -253,6 +253,23 @@ Transform *Transform::getParent() const {
     return parent;
 }
 
-std::unique_ptr<Tween<Vector2>> Transform::localPosTween(const Vector2& target, float duration, Curve curve) {
-    return std::make_unique<Tween<Vector2>>(&localPosition, localPosition, target, duration, curve);
+std::unique_ptr<TweenBase> Transform::localPosTween(const Vector2 target, const double duration, const Curve& curve) {
+    return std::make_unique<LocalPositionTween>(&localPosition, localPosition, target, duration, curve);
+}
+std::unique_ptr<TweenBase> Transform::localPosTween(const Vector2 start, const Vector2 end, const double duration, const Curve& curve) {
+    return std::make_unique<LocalPositionTween>(&localPosition, start, end, duration, curve);
+}
+
+std::unique_ptr<TweenBase> Transform::localRotationTween(const float target, const double duration, const Curve& curve) {
+    return std::make_unique<LocalRotationTween>(&localRotation, localRotation, target, duration, curve);
+}
+std::unique_ptr<TweenBase> Transform::localRotationTween(const float start, const float end, const double duration, const Curve& curve) {
+    return std::make_unique<LocalRotationTween>(&localRotation, start, end, duration, curve);
+}
+
+std::unique_ptr<TweenBase> Transform::localScaleTween(const Vector2 target, const double duration, const Curve& curve) {
+    return std::make_unique<LocalScaleTween>(&localScale, localPosition, target, duration, curve);
+}
+std::unique_ptr<TweenBase> Transform::localScaleTween(const Vector2 start, const Vector2 end, const double duration, const Curve& curve) {
+    return std::make_unique<LocalScaleTween>(&localScale, start, end, duration, curve);
 }

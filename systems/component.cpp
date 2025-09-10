@@ -1,5 +1,5 @@
 #include "component.h"
-#include "tween.h"
+#include "tweens/tween.h"
 
 Component::Component(Object* owner) {
     this->object = owner;
@@ -37,14 +37,12 @@ void Component::manageTweens(const double deltaTime) {
     for (auto it = tweens.begin(); it != tweens.end(); ) {
         (*it)->update(deltaTime);
 
-        if ((*it)->isDone())
+        if ((*it)->shouldDelete()) {
+            std::printf("Deleting tween \n");
             it = tweens.erase(it);
-        else
+        }
+        else {
             ++it;
+        }
     }
-}
-
-void Component::registerTween(std::unique_ptr<TweenBase> tween) {
-    tween->start();
-    tweens.push_back(std::move(tween));
 }

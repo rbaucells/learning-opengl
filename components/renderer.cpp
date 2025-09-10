@@ -3,7 +3,7 @@
 #include "stb_image.h"
 #include "../object.h"
 #include "glad/gl.h"
-#include "../systems/tween.h"
+#include "../systems/tweens/tween.h"
 #include "math/curve.h"
 #include "math/vertex.h"
 

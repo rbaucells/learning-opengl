@@ -13,7 +13,7 @@ add_executable(OpenGL components/rotateComponent.cpp components/rotateComponent.
         math/vector4.cpp
         systems/workQueue.h
         systems/workQueue.cpp
-        systems/tween.h
+        systems/tweens/tween.h
         math/curve.cpp
         math/vector2.h
         math/vector3.h
@@ -23,6 +23,10 @@ add_executable(OpenGL components/rotateComponent.cpp components/rotateComponent.
         math/matrix.h
         math/curve.h
         systems/component.cpp
+        systems/tweens/LocalPositionTween.cpp
+        systems/tweens/localScaleTween.cpp
+        systems/tweens/localRotationTween.cpp
+        systems/tweens/sequenceTween.cpp
 )
 
 target_include_directories(OpenGL PRIVATE dependencies/include)

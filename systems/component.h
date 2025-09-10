@@ -32,7 +32,12 @@ public:
     virtual void onDisable() {}
     virtual void onDestroy() {}
 
-    void registerTween(std::unique_ptr<TweenBase> tween);
+    template<typename TWEEN_TYPE>
+    TWEEN_TYPE* addTween(std::unique_ptr<TWEEN_TYPE> tween) {
+        TWEEN_TYPE* rawPtr = tween.get();
+        tweens.push_back(std::move(tween));
+        return rawPtr;
+    }
 
     // fine to use raw pointer since component will never be alive at a time where the object isnt
     // and because component doesnt own object

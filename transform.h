@@ -5,7 +5,7 @@
 #include "systems/component.h"
 #include "math/matrix.h"
 #include "math/vector2.h"
-#include "systems/tween.h"
+#include "systems/tweens/tween.h"
 
 class Object;
 
@@ -40,7 +40,14 @@ public:
     void setParent(Transform *newParent);
     [[nodiscard]] Transform *getParent() const;
 
-    std::unique_ptr<Tween<Vector2>> localPosTween(const Vector2& target, float duration, Curve curve);
+    std::unique_ptr<TweenBase> localPosTween(Vector2 target, double duration, const Curve& curve);
+    std::unique_ptr<TweenBase> localPosTween(Vector2 start, Vector2 end, double duration, const Curve& curve);
+
+    std::unique_ptr<TweenBase> localRotationTween(float target, double duration, const Curve& curve);
+    std::unique_ptr<TweenBase> localRotationTween(float start, float end, double duration, const Curve& curve);
+
+    std::unique_ptr<TweenBase> localScaleTween(Vector2 target, double duration, const Curve& curve);
+    std::unique_ptr<TweenBase> localScaleTween(Vector2 start, Vector2 end, double duration, const Curve& curve);
 
     Vector2 localPosition = {0, 0};
     float localRotation = 0;

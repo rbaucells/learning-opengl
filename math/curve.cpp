@@ -18,7 +18,7 @@ Curve::Curve(const std::initializer_list<Vector2> l) {
     }
 }
 
-float Curve::evaluate(const float t) const {
+float Curve::evaluate(const double t) const {
     std::vector<Vector2> result = points;
     while (result.size() > 1) {
         std::vector<Vector2> thePoints;
