@@ -16,3 +16,23 @@ help me learn complicated things in game dev and game engine design
   - Scene saving/loading system
   - Animation system - Done :)
   - GUI for editing scenes
+  - Lighting system - like RTX
+  - 2 channel audio system (with procedural-ness, like random pitch changes)
+  - UI system
+  - Physics and colliders
+  - Text fonts and animations
+
+## Naming Scheme
+  - PascalCase for classes, structs, typedef/using, namespaces, enums
+  - camelCase for variables, and functions
+    - Private class fields have prefix of '_'
+  - ALL_CAPS for template variables and constexprs
+  - all_lower for enum options (enumerators)
+  - loops use
+
+## Coding Style
+  - I implement all of things myself instead of using standard library or other library because i want to learn how its done
+  - I find lots of small functions harder to read than 1 big function so expect big functions
+  - I really like giving the user (dev) lots of control
+
+## Building

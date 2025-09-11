@@ -5,48 +5,50 @@ template<typename... ARGS>
 class Event {
 private:
     using Handler = std::function<void(ARGS...)>;
-    std::vector<Handler> handlers;
+    std::vector<Handler> handlers_;
+
 public:
     void subscribe(const Handler& functionHandler) {
-        handlers.push_back(functionHandler);
+        handlers_.push_back(functionHandler);
     }
+
     template<class T>
-    void subscribe(T *instance, void (T::*method)(ARGS...) const) {
+    void subscribe(T* instance, void (T::*method)(ARGS...) const) {
         // push back the function signature from a class instance
-        handlers.push_back([instance, method](ARGS... args) {
+        handlers_.push_back([instance, method](ARGS... args) {
             (instance->*method)(args...);
         });
     }
 
     template<class T>
-    void subscribe(T *instance, void (T::*method)(ARGS...)) {
+    void subscribe(T* instance, void (T::*method)(ARGS...)) {
         // push back the function signature from a class instance
-        handlers.push_back([instance, method](ARGS... args) {
+        handlers_.push_back([instance, method](ARGS... args) {
             (instance->*method)(args...);
         });
     }
 
     template<class T>
-    void unSubscribe(T *instance, void (T::*method)(ARGS...) const) {
+    void unSubscribe(T* instance, void (T::*method)(ARGS...) const) {
         // remove the function siganture from the handlers
-        std::erase(handlers, [instance, method](ARGS... args) {
+        std::erase(handlers_, [instance, method](ARGS... args) {
             (instance->*method)(args...);
         });
     }
 
     template<class T>
-    void unSubscribe(T *instance, void (T::*method)(ARGS...)) {
+    void unSubscribe(T* instance, void (T::*method)(ARGS...)) {
         // remove the function siganture from the handlers
-        std::erase(handlers, [instance, method](ARGS... args) {
+        std::erase(handlers_, [instance, method](ARGS... args) {
             (instance->*method)(args...);
         });
     }
 
     void invoke(ARGS... args) {
-        if (handlers.empty())
+        if (handlers_.empty())
             return;
 
-        for (auto &handler: handlers) {
+        for (auto& handler : handlers_) {
             handler(args...); // invoke the method with the proper arguments
         }
     }

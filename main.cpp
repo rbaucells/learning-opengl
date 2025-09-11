@@ -258,7 +258,7 @@ int main() {
 
         for (Object* object : waitingLineOfDeath) {
             object->destroyImmediately();
-            // delete object;
+            // delete object; <- put this when objects moved to heap
         }
 
         waitingLineOfDeath.clear();

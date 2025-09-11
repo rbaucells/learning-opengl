@@ -14,38 +14,23 @@ void RotateComponent::start() {
 
     // Normal Sequenctial Tweens
 
-    // auto* posTween = addTween(object->transform.localPosTween({0, 0}, {500, -300}, 3, Curve::sineInOut));
-    // auto* rotTween = addTween(object->transform.localRotationTween(90, 5, Curve::bounceInOut));
-    // auto* scaleTween = addTween(object->transform.localScaleTween({1.3, 0.7}, {2, 1.7}, 2, Curve::linear));
-    //
-    // posTween->onComplete.subscribe([]() {
-    //     std::printf("local pos tween is done \n");
-    // });
-    //
-    // rotTween->onComplete.subscribe([]() {
-    //     std::printf("local rot tween is done \n");
-    // });
-    //
-    // scaleTween->onComplete.subscribe([]() {
-    //     std::printf("local scale tween is done \n");
-    // });
+    // auto* localPosTween = addTween(object->transform.localPosTween({0, 0}, {500, -300}, 3, Curve::sineInOut));
+    // auto* localRotTween = addTween(object->transform.localRotationTween(90, 5, Curve::bounceInOut));
+    // auto* localScaleTween = addTween(object->transform.localScaleTween({1.3, 0.7}, {2, 1.7}, 2, Curve::linear));
+
+    // auto* globalPosTween = addTween(object->transform.globalPosTween({100, 200}, {300, 400}, 5.6, Curve::sineInOut));
+    // auto* globalRotTween = addTween(object->transform.globalRotationTween(90,  7.2, Curve::bounceIn));
+    // auto* globalScaleTween = addTween(object->transform.globalScaleTween({1, 2},  3.4, Curve::linear));
 
     // Sequence Tweens
-
-    auto* sequence = addTween(std::make_unique<SequenceTween>());
-
-    sequence->add(object->transform.localPosTween({500, -300}, 3, Curve::sineInOut));
-    sequence->join(object->transform.localRotationTween(90, 5, Curve::bounceInOut));
-    sequence->add(object->transform.localScaleTween({2, 1.7}, 2, Curve::linear));
-
-    sequence->onComplete.subscribe([]() {
-        std::printf("The sequence is complete \n");
-    });
-    sequence->onCancel.subscribe([]() {
-        std::printf("The sequence is canceled \n");
-    });
-
-    sequence->start();
+    //
+    // auto* sequence = addTween(std::make_unique<SequenceTween>());
+    //
+    // sequence->add(object->transform.localPosTween({500, -300}, 3, Curve::sineIn));
+    // sequence->join(object->transform.localRotationTween(90, 5, Curve::expoOut));
+    // sequence->add(object->transform.localScaleTween({2, 1.7}, 2, Curve::quartInOut));
+    //
+    // sequence->start();
 }
 
 void RotateComponent::update(const double deltaTime) {

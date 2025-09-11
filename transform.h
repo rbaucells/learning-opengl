@@ -49,6 +49,15 @@ public:
     std::unique_ptr<TweenBase> localScaleTween(Vector2 target, double duration, const Curve& curve);
     std::unique_ptr<TweenBase> localScaleTween(Vector2 start, Vector2 end, double duration, const Curve& curve);
 
+    std::unique_ptr<TweenBase> globalPosTween(Vector2 target, double duration, const Curve& curve);
+    std::unique_ptr<TweenBase> globalPosTween(Vector2 start, Vector2 end, double duration, const Curve& curve);
+
+    std::unique_ptr<TweenBase> globalRotationTween(float target, double duration, const Curve& curve);
+    std::unique_ptr<TweenBase> globalRotationTween(float start, float end, double duration, const Curve& curve);
+
+    std::unique_ptr<TweenBase> globalScaleTween(Vector2 target, double duration, const Curve& curve);
+    std::unique_ptr<TweenBase> globalScaleTween(Vector2 start, Vector2 end, double duration, const Curve& curve);
+
     Vector2 localPosition = {0, 0};
     float localRotation = 0;
     Vector2 localScale = {0, 0};

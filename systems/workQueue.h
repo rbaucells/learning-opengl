@@ -7,7 +7,6 @@ class QueueEntry {
 public:
     virtual ~QueueEntry() = default;
 
-private:
     virtual bool run() {return true;};
 };
 
@@ -15,8 +14,8 @@ class ConditionalQueueEntry final : public QueueEntry {
     using Action = std::function<void()>;
     using Condition = std::function<bool()>;
 
-    Condition condition;
-    Action action;
+    Condition condition_;
+    Action action_;
 
 public:
     ConditionalQueueEntry(const Condition& condition, const Action& action);
@@ -27,8 +26,8 @@ public:
 class TimedQueueEntry final : public QueueEntry {
     using Action = std::function<void()>;
 
-    Action action;
-    float time = 0.f;
+    Action action_;
+    float time_ = 0.f;
 
 public:
     TimedQueueEntry(const Action& action, float time);
@@ -39,7 +38,7 @@ public:
 
 class NextFrameQueueEntry final : public QueueEntry {
     using Action = std::function<void()>;
-    std::function<void()> action;
+    std::function<void()> action_;
 
 public:
     NextFrameQueueEntry(const Action& action); // NOLINT(google-explicit-constructor)

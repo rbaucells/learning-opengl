@@ -1,13 +1,13 @@
 #include "workQueue.h"
 
 ConditionalQueueEntry::ConditionalQueueEntry(const Condition& condition, const Action& action) {
-    this->condition = condition;
-    this->action = action;
+    this->condition_ = condition;
+    this->action_ = action;
 }
 
 bool ConditionalQueueEntry::run() {
-    if (condition()) {
-        action();
+    if (condition_()) {
+        action_();
         return true;
     }
 
@@ -15,28 +15,28 @@ bool ConditionalQueueEntry::run() {
 }
 
 TimedQueueEntry::TimedQueueEntry(const Action& action, float time) {
-    this->action = action;
-    this->time = time;
+    this->action_ = action;
+    this->time_ = time;
 }
 
 bool TimedQueueEntry::run() {
-    if (time > 0)
+    if (time_ > 0)
         return false;
 
-    action();
+    action_();
     return true;
 }
 
 void TimedQueueEntry::decreaseTime(const double deltaTime) {
-    this->time -= deltaTime;
+    this->time_ -= deltaTime;
 }
 
 NextFrameQueueEntry::NextFrameQueueEntry(const Action& action) {
-    this->action = action;
+    this->action_ = action;
 }
 
 bool NextFrameQueueEntry::run() {
-    action();
+    action_();
     return true;
 }
 

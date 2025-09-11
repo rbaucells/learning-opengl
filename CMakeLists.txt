@@ -23,9 +23,6 @@ add_executable(OpenGL components/rotateComponent.cpp components/rotateComponent.
         math/matrix.h
         math/curve.h
         systems/component.cpp
-        systems/tweens/LocalPositionTween.cpp
-        systems/tweens/localScaleTween.cpp
-        systems/tweens/localRotationTween.cpp
         systems/tweens/sequenceTween.cpp
         systems/tweens/waitTween.cpp
 )
