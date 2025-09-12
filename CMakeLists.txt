@@ -7,8 +7,7 @@ add_executable(OpenGL components/rotateComponent.cpp components/rotateComponent.
         systems/input.h
         systems/input.cpp
         systems/event.h
-        components/renderer.cpp
-        components/renderer.h
+        components/renderer/renderer.h
         transform.cpp
         math/vector4.cpp
         systems/workQueue.h
@@ -25,6 +24,8 @@ add_executable(OpenGL components/rotateComponent.cpp components/rotateComponent.
         systems/component.cpp
         systems/tweens/sequenceTween.cpp
         systems/tweens/waitTween.cpp
+        components/renderer/spriteRenderer.cpp
+        components/renderer/customRenderer.cpp
 )
 
 target_include_directories(OpenGL PRIVATE dependencies/include)

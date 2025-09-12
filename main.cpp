@@ -11,13 +11,12 @@
 #include "list.h"
 #include "object.h"
 #include "components/camera.h"
-#include "components/renderer.h"
+#include "components/renderer/renderer.h"
 #include "components/rotateComponent.h"
 #include "glad/gl.h"
 #include "GLFW/glfw3.h"
 #include "math/vertex.h"
 #include "systems/input.h"
-#include "systems/workQueue.h"
 
 // needed by framebuffer_size_callback() and by object.draw()
 Matrix<4,4> projection;
@@ -165,18 +164,15 @@ int main() {
     Object origin2("origin2", 0, {0, 0}, 0, {1, 1});
 
     Object square("square", 0, {200, 0}, 0, {1, 1}, &origin1.transform);
-    square.addComponent<Renderer>(vertices, indices, GL_STATIC_DRAW, "/Users/ricardito/CLionProjects/OpenGL/res/textures/super-mario-transparent-background-20.png", true, GL_CLAMP, shader, 2);
+    // square.addComponent<SpriteRenderer>(Vector2(1000, 200), GL_STATIC_DRAW, "/Users/ricardito/CLionProjects/OpenGL/res/textures/super-mario-transparent-background-20.png", true, GL_CLAMP, shader, 2);
+    square.addComponent<CustomRenderer>(vertices, indices, GL_STATIC_DRAW, "/Users/ricardito/CLionProjects/OpenGL/res/textures/super-mario-transparent-background-20.png", true, GL_CLAMP, shader, 2);
     square.addComponent<RotateComponent>(45);
-
-    // Object otherSquare("other square", 0, {600, 0}, 0, {1, 1}, &origin2.transform);
-    // otherSquare.addComponent<Renderer>(vertices, indices, GL_STATIC_DRAW, "/Users/ricardito/CLionProjects/OpenGL/res/textures/dvdvd.jpg", true, GL_CLAMP, shader, 1);
 
     // empty the buffers to make sure its drawing properly
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindTexture(GL_TEXTURE0, 0);
     glBindVertexArray(0);
-
 
     // update the window size initialiy
     framebufferSizeCallback(mainWindow, screenWidth, screenHeight);
@@ -268,13 +264,11 @@ int main() {
 
         // framerate capping
         auto endOfLoopTime = std::chrono::high_resolution_clock::now();
-        auto updateTime = std::chrono::duration<double, std::milli>(endOfLoopTime - startOfLoopTime).count();
+        double updateTime = std::chrono::duration<double, std::milli>(endOfLoopTime - startOfLoopTime).count();
 
-        auto targetFrameTimeMs = 1000.0 / FPS;
+        double targetFrameTimeMs = 1000.0 / FPS;
 
-        const auto timeToSleepMs = targetFrameTimeMs - updateTime;
-
-        if (timeToSleepMs > 0)
+        if (const auto timeToSleepMs = targetFrameTimeMs - updateTime; timeToSleepMs > 0)
             std::this_thread::sleep_for(std::chrono::duration<double, std::milli>(timeToSleepMs));
     }
 

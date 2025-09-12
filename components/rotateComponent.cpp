@@ -1,6 +1,6 @@
 #include "rotateComponent.h"
 
-#include "renderer.h"
+#include "renderer/renderer.h"
 #include "../object.h"
 #include "../systems/tweens/tween.h"
 #include "systems/input.h"
