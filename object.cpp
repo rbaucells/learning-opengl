@@ -32,20 +32,20 @@ Object::Object(const std::string &objectName, const int objectTag, Vector2 pos, 
  * @param deltaTime the time elapsed since the last frame.
  */
 void Object::update(const double deltaTime) {
-    if (!activated)
+    if (!activated_)
         return;
 
-    for (const auto &component: components) {
+    for (const auto &component: components_) {
         component->manageTweens(deltaTime);
     }
 
     transform.manageTweens(deltaTime);
 
-    for (const auto &component: components) {
+    for (const auto &component: components_) {
         component->update(deltaTime);
     }
 
-    for (const auto &component: components) {
+    for (const auto &component: components_) {
         component->manageQueue(deltaTime);
     }
 }
@@ -57,10 +57,10 @@ void Object::update(const double deltaTime) {
  * @param fixedDeltaTime the fixed time step.
  */
 void Object::fixedUpdate(const double fixedDeltaTime) const {
-    if (!activated)
+    if (!activated_)
         return;
 
-    for (const auto &component: components) {
+    for (const auto &component: components_) {
         component->fixedUpdate(fixedDeltaTime);
     }
 }
@@ -72,10 +72,10 @@ void Object::fixedUpdate(const double fixedDeltaTime) const {
  * @param deltaTime the time elapsed since the last frame.
  */
 void Object::lateUpdate(const double deltaTime) const {
-    if (!activated)
+    if (!activated_)
         return;
 
-    for (const auto &component: components) {
+    for (const auto &component: components_) {
         component->lateUpdate(deltaTime);
     }
 }
@@ -95,39 +95,39 @@ void Object::destroy() {
 void Object::destroyImmediately() {
     // we need to deactivate before destroying
     if (getActive()) {
-        for (const auto& component : components) {
+        for (const auto& component : components_) {
             component->onDisable();
         }
     }
 
-    for (const auto& component : components) {
+    for (const auto& component : components_) {
         component->onDestroy();
     }
 
-    components.clear();
+    components_.clear();
     std::erase(allObjects, this);
     // don't worry about transform, destructor will clean up for us
 }
 
 void Object::setActive(const bool state) {
     // if activated but not anymore
-    if (activated && !state) {
-        for (const auto& component : components) {
+    if (activated_ && !state) {
+        for (const auto& component : components_) {
             component->onDisable();
         }
     }
     // if not activated but are now
-    else if (!activated && state) {
-        for (const auto& component : components) {
+    else if (!activated_ && state) {
+        for (const auto& component : components_) {
             component->onEnable();
         }
     }
 
-    activated = state;
+    activated_ = state;
 }
 
 bool Object::getActive() const {
-    return activated;
+    return activated_;
 }
 
 

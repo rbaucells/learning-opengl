@@ -11,31 +11,31 @@
 #include "list.h"
 #include "object.h"
 #include "components/camera.h"
-#include "components/renderer/renderer.h"
 #include "components/rotateComponent.h"
+#include "components/renderer/renderer.h"
 #include "glad/gl.h"
 #include "GLFW/glfw3.h"
 #include "math/vertex.h"
 #include "systems/input.h"
 
 // needed by framebuffer_size_callback() and by object.draw()
-Matrix<4,4> projection;
+Matrix<4, 4> projection;
 
 // callbacks
-void errorCallback(const int error, const char *description) {
+void errorCallback(const int error, const char* description) {
     std::printf("Error with code'%d': %s\n", error, description);
 }
 
-void debugErrorCallback(GLenum source, GLenum type, GLuint id, const GLenum severity, const GLsizei length, const GLchar *message, const void *userParam) {
+void debugErrorCallback(GLenum source, GLenum type, GLuint id, const GLenum severity, const GLsizei length, const GLchar* message, const void* userParam) {
     std::string messageString(message, length);
     std::cout << severity << ": OpenGL error: %s\n" << messageString.c_str() << std::endl;
 };
 
-void closeCallback(GLFWwindow *window) {
+void closeCallback(GLFWwindow* window) {
     std::printf("user closing window");
 }
 
-void framebufferSizeCallback(GLFWwindow *window, const int width, const int height) {
+void framebufferSizeCallback(GLFWwindow* window, const int width, const int height) {
     screenWidth = width;
     screenHeight = height;
     glViewport(0, 0, width, height);
@@ -43,7 +43,7 @@ void framebufferSizeCallback(GLFWwindow *window, const int width, const int heig
 }
 
 // shading
-std::string getShaderString(const std::string &filePath) {
+std::string getShaderString(const std::string& filePath) {
     std::fstream fileStream(filePath);
 
     std::string line;
@@ -56,9 +56,9 @@ std::string getShaderString(const std::string &filePath) {
     return ss.str();
 }
 
-unsigned int compileShader(unsigned int type, const std::string &source) {
+unsigned int compileShader(unsigned int type, const std::string& source) {
     const unsigned int id = glCreateShader(type);
-    const char *src = source.c_str();
+    const char* src = source.c_str();
     glShaderSource(id, 1, &src, nullptr);
     glCompileShader(id);
 
@@ -78,7 +78,7 @@ unsigned int compileShader(unsigned int type, const std::string &source) {
     return id;
 }
 
-unsigned int createShader(const std::string &vertexShader, const std::string &fragmentShader) {
+unsigned int createShader(const std::string& vertexShader, const std::string& fragmentShader) {
     unsigned int program = glCreateProgram();
     unsigned int vertexShaderId = compileShader(GL_VERTEX_SHADER, vertexShader);
     unsigned int fragmentShaderId = compileShader(GL_FRAGMENT_SHADER, fragmentShader);
@@ -152,7 +152,7 @@ int main() {
         2, 3, 0
     };
 
-    Object camera("mainCamera", 69, {0, 0}, 0, {1,1});
+    Object camera("mainCamera", 69, {0, 0}, 0, {1, 1});
     auto cameraComponent = camera.addComponent<Camera>();
 
     if (auto cam = cameraComponent.lock()) {
@@ -164,8 +164,9 @@ int main() {
     Object origin2("origin2", 0, {0, 0}, 0, {1, 1});
 
     Object square("square", 0, {200, 0}, 0, {1, 1}, &origin1.transform);
-    // square.addComponent<SpriteRenderer>(Vector2(1000, 200), GL_STATIC_DRAW, "/Users/ricardito/CLionProjects/OpenGL/res/textures/super-mario-transparent-background-20.png", true, GL_CLAMP, shader, 2);
-    square.addComponent<CustomRenderer>(vertices, indices, GL_STATIC_DRAW, "/Users/ricardito/CLionProjects/OpenGL/res/textures/super-mario-transparent-background-20.png", true, GL_CLAMP, shader, 2);
+    square.addComponent<SpriteSheetRenderer>(Vector2(64, 64), 0, GL_STATIC_DRAW, "/Users/ricardito/CLionProjects/OpenGL/res/textures/spritesheet.png", true, GL_CLAMP, shader, 2);
+    // square.addComponent<SpriteRenderer>(Vector2(1000, 200), GL_STATIC_DRAW, "/Users/ricardito/CLionProjects/OpenGL/res/textures/spritesheet.png", true, GL_CLAMP, shader, 2);
+    // square.addComponent<CustomRenderer>(vertices, indices, GL_STATIC_DRAW, "/Users/ricardito/CLionProjects/OpenGL/res/textures/super-mario-transparent-background-20.png", true, GL_CLAMP, shader, 2);
     square.addComponent<RotateComponent>(45);
 
     // empty the buffers to make sure its drawing properly
@@ -194,7 +195,7 @@ int main() {
 
         // if there are some components left to be "started", start em and remove them from the queueueue
         if (!componentsToInitialize.empty()) {
-            for (auto it = componentsToInitialize.begin(); it != componentsToInitialize.end(); ) {
+            for (auto it = componentsToInitialize.begin(); it != componentsToInitialize.end();) {
                 if (auto comp = it->lock()) {
                     comp->awake();
                     ++it;
@@ -205,7 +206,7 @@ int main() {
             }
 
             // if the object is supposed to be active, call the onEnable
-            for (auto component: componentsToInitialize) {
+            for (auto component : componentsToInitialize) {
                 if (auto comp = component.lock()) {
                     if (comp->object->getActive()) {
                         comp->onEnable();
@@ -214,7 +215,7 @@ int main() {
             }
 
             // start
-            for (auto component: componentsToInitialize) {
+            for (auto component : componentsToInitialize) {
                 if (auto comp = component.lock()) {
                     comp->start();
                 }
@@ -246,8 +247,8 @@ int main() {
 
         Matrix<4, 4> cameraViewMatrix = Camera::mainCamera->getViewMatrix();
         // iterate through all the renderers in reverse. AKA: from back to front
-        for (auto &renderersInLayer: std::ranges::reverse_view(allRenderers)) {
-            for (const auto &renderer: renderersInLayer.second) {
+        for (auto& renderersInLayer : std::ranges::reverse_view(allRenderers)) {
+            for (const auto& renderer : renderersInLayer.second) {
                 renderer->draw(cameraViewMatrix, projection, GL_TRIANGLES);
             }
         }

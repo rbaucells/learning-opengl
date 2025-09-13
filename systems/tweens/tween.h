@@ -173,6 +173,22 @@ private:
     double elapsed_ = 0.f;
 };
 
+class CallbackTween final : public TweenBase {
+public:
+    explicit CallbackTween(const std::function<void()>& func);
+
+    void start() override;
+    void update(double deltaTime) override;
+    void complete() override;
+    void cancel() override;
+
+    bool shouldDelete() override {
+        return true;
+    }
+private:
+    std::function<void()> func_;
+};
+
 /**
  * @brief Tween that manages other tweens in a sequence
  * To add it to a component you do addTween(std::make_unique<SequenceTween>())

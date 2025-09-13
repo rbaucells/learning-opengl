@@ -3,6 +3,7 @@
 #include "renderer/renderer.h"
 #include "../object.h"
 #include "../systems/tweens/tween.h"
+#include "glad/gl.h"
 #include "systems/input.h"
 
 RotateComponent::RotateComponent(Object* owner, const float speed) : Component(owner) {
@@ -24,17 +25,31 @@ void RotateComponent::start() {
 
     // Sequence Tweens
     //
-    // auto* sequence = addTween(std::make_unique<SequenceTween>());
-    //
-    // sequence->add(object->transform.localPosTween({500, -300}, 3, Curve::sineIn));
-    // sequence->join(object->transform.localRotationTween(90, 5, Curve::expoOut));
-    // sequence->add(object->transform.localScaleTween({2, 1.7}, 2, Curve::quartInOut));
-    //
-    // sequence->start();
+    auto* sequence = addTween(std::make_unique<SequenceTween>());
+
+    sequence->add(object->transform.localPosTween({500, -300}, 3, Curve::sineIn));
+    sequence->join(object->transform.localRotationTween(90, 5, Curve::expoOut));
+    sequence->add(std::make_unique<CallbackTween>([this]() {
+        std::printf("This is a callback \n");
+
+        const auto renderer = this->object->getComponent<RendererBase>();
+
+        if (const auto rendererPtr = renderer.lock())
+            rendererPtr->changeSpriteTexture("/Users/ricardito/CLionProjects/OpenGL/res/textures/anotherDvd.png", false, GL_REPEAT);
+    }));
+    sequence->add(object->transform.localScaleTween({2, 1.7}, 2, Curve::quartInOut));
+
+    sequence->start();
 }
 
 void RotateComponent::update(const double deltaTime) {
-    // std::printf("Update \n");
+    // static int i;
+    // // std::printf("Update \n");
+    // const auto rendererPtr = object->getComponent<SpriteSheetRenderer>();
+    //
+    // if (const auto renderer = rendererPtr.lock()) {
+    //     renderer->moveTo(++i);
+    // }
 }
 
 void RotateComponent::awake() {

@@ -10,8 +10,8 @@ template<typename T>
 concept is_component = std::is_base_of_v<Component, T>;
 
 class Object {
-    bool activated = true;
-    std::vector<std::shared_ptr<Component>> components;
+    bool activated_ = true;
+    std::vector<std::shared_ptr<Component>> components_;
 
 public:
     const std::string name;
@@ -39,14 +39,14 @@ public:
         std::weak_ptr<T> componentPtr(newComponent);
         componentsToInitialize.push_back(componentPtr);
 
-        components.push_back(newComponent);
+        components_.push_back(newComponent);
         return componentPtr;
     }
 
     template<is_component T>
     std::weak_ptr<T> getComponent() {
         // loop until
-        for (const auto& component : components) {
+        for (const auto& component : components_) {
             // the component raw pointer is of type T
             if (auto comp = std::dynamic_pointer_cast<T>(component)) {
                 return std::weak_ptr<T>(comp);
@@ -59,9 +59,9 @@ public:
     template<is_component T>
     std::vector<std::weak_ptr<T>> getComponents() {
         // same as getComponent only it adds it to a vector then returns it
-        std::vector<std::weak_ptr<T>> foundComponents(components.size());
+        std::vector<std::weak_ptr<T>> foundComponents(components_.size());
 
-        for (const auto& component : components) {
+        for (const auto& component : components_) {
             if (auto comp = std::dynamic_pointer_cast<T>(component)) {
                 foundComponents.push_back(std::weak_ptr<T>(component));
             }
@@ -72,9 +72,9 @@ public:
 
     template<is_component T>
     void removeComponent() {
-        for (auto it = components.begin(); it != components.end(); ++it) {
+        for (auto it = components_.begin(); it != components_.end(); ++it) {
             if (std::dynamic_pointer_cast<T>(*it)) {
-                components.erase(it);
+                components_.erase(it);
                 break;
             }
         }
@@ -82,9 +82,9 @@ public:
 
     template<is_component T>
     void removeAllComponents() {
-        for (auto it = components.begin(); it != components.end();) {
+        for (auto it = components_.begin(); it != components_.end();) {
             if (std::dynamic_pointer_cast<T>(*it)) {
-                it = components.erase(it);
+                it = components_.erase(it);
             }
             else {
                 ++it;

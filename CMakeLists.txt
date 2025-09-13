@@ -26,6 +26,8 @@ add_executable(OpenGL components/rotateComponent.cpp components/rotateComponent.
         systems/tweens/waitTween.cpp
         components/renderer/spriteRenderer.cpp
         components/renderer/customRenderer.cpp
+        systems/tweens/callbackTween.cpp
+        components/renderer/spriteSheetRenderer.cpp
 )
 
 target_include_directories(OpenGL PRIVATE dependencies/include)

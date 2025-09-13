@@ -5,18 +5,15 @@
 #include "glad/gl.h"
 #include "math/vertex.h"
 
-SpriteRenderer::SpriteRenderer(Object* owner, Vector2 size, unsigned int usage, const std::string& texturePath, bool flipTexture, int textureParam, unsigned int shaderProgram, int layer) : RendererBase(owner) {
-    vertices_ = {
-        {{-size.x / 2, -size.y / 2}, {0, 0}}, // bottom left
-        {{-size.x / 2, size.y / 2}, {0, 1}}, // top left
-        {{size.x / 2, -size.y / 2}, {1, 0}}, // bottom right
-        {{size.x / 2, size.y / 2}, {1, 1}}, // top right
-    };
-
+SpriteSheetRenderer::SpriteSheetRenderer(Object* owner, Vector2 gridSize, const int padding, unsigned int usage, const std::string& texturePath, bool flipTexture, int textureParam, unsigned int shaderProgram, int layer) : RendererBase(owner) {
     indices_ = {
         0, 1, 2,
         1, 3, 2
     };
+
+    this->gridSize_ = gridSize;
+    this->usage_ = usage;
+    this->padding_ = padding;
 
     this->shaderProgram_ = shaderProgram;
     this->layer_ = layer;
@@ -30,9 +27,14 @@ SpriteRenderer::SpriteRenderer(Object* owner, Vector2 size, unsigned int usage, 
         allRenderers[layer] = {this};
     }
 
-    int width, height;
     stbi_set_flip_vertically_on_load(flipTexture);
-    unsigned char* data = stbi_load(texturePath.c_str(), &width, &height, &numberOfChannels_, 0);
+    unsigned char* data = stbi_load(texturePath.c_str(), &height_, &height_, &numberOfChannels_, 0);
+
+    moveTo(0);
+
+    // simple division while rounding down to ensure no cropped out things
+    numberOfColumns_ = static_cast<int>(std::floor(height_ / gridSize.x));
+    numberOfRows_ = static_cast<int>(std::floor(height_ / gridSize.y));
 
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -68,7 +70,7 @@ SpriteRenderer::SpriteRenderer(Object* owner, Vector2 size, unsigned int usage, 
             return;
     }
 
-    glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
+    glTexImage2D(GL_TEXTURE_2D, 0, format, width_, height_, 0, format, GL_UNSIGNED_BYTE, data);
     glGenerateMipmap(GL_TEXTURE_2D);
 
     stbi_image_free(data);
@@ -106,7 +108,7 @@ SpriteRenderer::SpriteRenderer(Object* owner, Vector2 size, unsigned int usage, 
     alphaLocation_ = glGetUniformLocation(shaderProgram, "alpha");
 }
 
-void SpriteRenderer::draw(const Matrix<4, 4>& view, const Matrix<4, 4>& projection, const int mode) const {
+void SpriteSheetRenderer::draw(const Matrix<4, 4>& view, const Matrix<4, 4>& projection, const int mode) const {
     // create the model matrix from the transform
     const Matrix<4, 4> model = object->transform.localToWorldMatrix();
 
@@ -133,7 +135,29 @@ void SpriteRenderer::draw(const Matrix<4, 4>& view, const Matrix<4, 4>& projecti
     glDrawElements(mode, static_cast<int>(indices_.size()), GL_UNSIGNED_INT, nullptr);
 }
 
-SpriteRenderer::~SpriteRenderer() {
+void SpriteSheetRenderer::moveTo(const int i) {
+    const int leftX = (i * width_) + (padding_ * i);
+    const int rightX = (i + 1) * width_ + (padding_ * i);
+
+    const int topY = i * -height_ + (-padding_ * i);
+    const int bottomY = (i + 1) * -height_ + (-padding_ * i);
+
+    vertices_ = {
+        {{-gridSize_.x / 2, -gridSize_.y / 2}, Vector2(leftX, bottomY)}, // bottom left
+        {{-gridSize_.x / 2, gridSize_.y / 2}, Vector2(leftX, topY)}, // top left
+        {{gridSize_.x / 2, -gridSize_.y / 2}, Vector2(rightX, bottomY)}, // bottom right
+        {{gridSize_.x / 2, gridSize_.y / 2}, Vector2(rightX, topY)}, // top right
+    };
+
+    // we are working on the vao
+    glBindVertexArray(vao_);
+    // we are working on the vertexBuffer
+    glBindBuffer(GL_ARRAY_BUFFER, buffers_.vertexBuffer);
+    // define all the data to use. Use STATIC for objects that are defined once and reused, use DYNAMIC for objects that are redefined multiple times and reused
+    glBufferData(GL_ARRAY_BUFFER, vertices_.size() * sizeof(Vertex), vertices_.data(), usage_);
+}
+
+SpriteSheetRenderer::~SpriteSheetRenderer() {
     // get iterator for layer in map
     auto it = allRenderers.find(layer_);
 
@@ -152,7 +176,7 @@ SpriteRenderer::~SpriteRenderer() {
     }
 }
 
-void SpriteRenderer::changeSpriteTexture(const std::string& texturePath, const bool flipTexture, const int textureParam) {
+void SpriteSheetRenderer::changeSpriteTexture(const std::string& texturePath, const bool flipTexture, const int textureParam) {
     int width, height;
     stbi_set_flip_vertically_on_load(flipTexture);
     unsigned char* data = stbi_load(texturePath.c_str(), &width, &height, &numberOfChannels_, 0);

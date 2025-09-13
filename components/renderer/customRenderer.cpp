@@ -5,7 +5,7 @@
 #include "glad/gl.h"
 #include "math/vertex.h"
 
-CustomRenderer::CustomRenderer(Object *owner, const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices, const unsigned int usage, const std::string& texturePath, const bool flipTexture, const int textureParam, const unsigned int shaderProgram, const int layer) : Component(owner) {
+CustomRenderer::CustomRenderer(Object *owner, const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices, const unsigned int usage, const std::string& texturePath, const bool flipTexture, const int textureParam, const unsigned int shaderProgram, const int layer) : RendererBase(owner) {
     this->vertices_ = vertices;
     this->indices_ = indices;
     this->shaderProgram_ = shaderProgram;
