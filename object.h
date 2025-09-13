@@ -24,9 +24,9 @@ public:
     Object(const std::string& objectName, int objectTag, Vector2 pos, float rot, Vector2 scale);
     Object(const std::string& objectName, int objectTag, Vector2 pos, float rot, Vector2 scale, Transform* parent);
 
-    void update(double deltaTime);
-    void fixedUpdate(double fixedDeltaTime) const;
-    void lateUpdate(double deltaTime) const;
+    void update(float deltaTime);
+    void fixedUpdate(float fixedDeltaTime) const;
+    void lateUpdate(float deltaTime) const;
     void destroy();
     void destroyImmediately();
 

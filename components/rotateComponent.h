@@ -7,11 +7,11 @@ private:
 public:
     explicit RotateComponent(Object* owner, float speed);
     void start() override;
-    void update(double deltaTime) override;
+    void update(float deltaTime) override;
     void awake() override;
     void onEnable() override;
-    void lateUpdate(double deltaTime) override;
-    void fixedUpdate(double fixedDeltaTime) override;
+    void lateUpdate(float deltaTime) override;
+    void fixedUpdate(float fixedDeltaTime) override;
     void onDisable() override;
     void onDestroy() override;
 };

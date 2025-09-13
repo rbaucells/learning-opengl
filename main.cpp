@@ -163,8 +163,8 @@ int main() {
 
     Object origin2("origin2", 0, {0, 0}, 0, {1, 1});
 
-    Object square("square", 0, {200, 0}, 0, {1, 1}, &origin1.transform);
-    square.addComponent<SpriteSheetRenderer>(Vector2(64, 64), 0, GL_STATIC_DRAW, "/Users/ricardito/CLionProjects/OpenGL/res/textures/spritesheet.png", true, GL_CLAMP, shader, 2);
+    Object square("square", 0, {200, 0}, 0, {5, 5}, &origin1.transform);
+    square.addComponent<SpriteSheetRenderer>(128, 128, 0, GL_STATIC_DRAW, "/Users/ricardito/CLionProjects/OpenGL/res/textures/spritesheet.png", true, GL_CLAMP, shader, 2);
     // square.addComponent<SpriteRenderer>(Vector2(1000, 200), GL_STATIC_DRAW, "/Users/ricardito/CLionProjects/OpenGL/res/textures/spritesheet.png", true, GL_CLAMP, shader, 2);
     // square.addComponent<CustomRenderer>(vertices, indices, GL_STATIC_DRAW, "/Users/ricardito/CLionProjects/OpenGL/res/textures/super-mario-transparent-background-20.png", true, GL_CLAMP, shader, 2);
     square.addComponent<RotateComponent>(45);
@@ -180,7 +180,7 @@ int main() {
 
     // variables for inside main loop to last between loops
     auto lastLoopTime = std::chrono::high_resolution_clock::now();
-    double accumulator = 0.0;
+    float accumulator = 0.0;
     auto lastFixedUpdateTime = std::chrono::high_resolution_clock::now();
     // ReSharper disable once CppTooWideScope
     GLFWgamepadstate lastGamepadState;
@@ -189,8 +189,8 @@ int main() {
     while (!glfwWindowShouldClose(mainWindow)) {
         auto startOfLoopTime = std::chrono::high_resolution_clock::now();
         // calculate deltaTime
-        std::chrono::duration<double> timeSinceLastUpdate = startOfLoopTime - lastLoopTime;
-        double deltaTime = timeSinceLastUpdate.count();
+        std::chrono::duration<float> timeSinceLastUpdate = startOfLoopTime - lastLoopTime;
+        float deltaTime = timeSinceLastUpdate.count();
         lastLoopTime = std::chrono::high_resolution_clock::now();
 
         // if there are some components left to be "started", start em and remove them from the queueueue
@@ -206,7 +206,7 @@ int main() {
             }
 
             // if the object is supposed to be active, call the onEnable
-            for (auto component : componentsToInitialize) {
+            for (const auto& component : componentsToInitialize) {
                 if (auto comp = component.lock()) {
                     if (comp->object->getActive()) {
                         comp->onEnable();
@@ -215,7 +215,7 @@ int main() {
             }
 
             // start
-            for (auto component : componentsToInitialize) {
+            for (const auto& component : componentsToInitialize) {
                 if (auto comp = component.lock()) {
                     comp->start();
                 }
@@ -232,7 +232,7 @@ int main() {
         accumulator += deltaTime;
 
         while (accumulator >= FIXED_UPDATE_INTERVAL_IN_SECONDS) {
-            double fixedDeltaTime = std::chrono::duration<double>(std::chrono::high_resolution_clock::now() - lastFixedUpdateTime).count();
+            float fixedDeltaTime = std::chrono::duration<float>(std::chrono::high_resolution_clock::now() - lastFixedUpdateTime).count();
 
             fixedUpdateEvent.invoke(fixedDeltaTime);
 
@@ -265,12 +265,12 @@ int main() {
 
         // framerate capping
         auto endOfLoopTime = std::chrono::high_resolution_clock::now();
-        double updateTime = std::chrono::duration<double, std::milli>(endOfLoopTime - startOfLoopTime).count();
+        float updateTime = std::chrono::duration<float, std::milli>(endOfLoopTime - startOfLoopTime).count();
 
-        double targetFrameTimeMs = 1000.0 / FPS;
+        float targetFrameTimeMs = 1000.0f / FPS;
 
         if (const auto timeToSleepMs = targetFrameTimeMs - updateTime; timeToSleepMs > 0)
-            std::this_thread::sleep_for(std::chrono::duration<double, std::milli>(timeToSleepMs));
+            std::this_thread::sleep_for(std::chrono::duration<float, std::milli>(timeToSleepMs));
     }
 
     // clean uo things

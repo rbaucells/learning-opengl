@@ -31,7 +31,7 @@ Object::Object(const std::string &objectName, const int objectTag, Vector2 pos, 
  * and also the doTween method on all of its components.
  * @param deltaTime the time elapsed since the last frame.
  */
-void Object::update(const double deltaTime) {
+void Object::update(const float deltaTime) {
     if (!activated_)
         return;
 
@@ -56,7 +56,7 @@ void Object::update(const double deltaTime) {
  * it calls the fixedUpdate method on all of its components.
  * @param fixedDeltaTime the fixed time step.
  */
-void Object::fixedUpdate(const double fixedDeltaTime) const {
+void Object::fixedUpdate(const float fixedDeltaTime) const {
     if (!activated_)
         return;
 
@@ -71,7 +71,7 @@ void Object::fixedUpdate(const double fixedDeltaTime) const {
  * it calls the lateUpdate method on all of its components.
  * @param deltaTime the time elapsed since the last frame.
  */
-void Object::lateUpdate(const double deltaTime) const {
+void Object::lateUpdate(const float deltaTime) const {
     if (!activated_)
         return;
 

@@ -5,7 +5,7 @@ ConditionalQueueEntry::ConditionalQueueEntry(const Condition& condition, const A
     this->action_ = action;
 }
 
-bool ConditionalQueueEntry::run() {
+bool ConditionalQueueEntry::run(float deltaTime) {
     if (condition_()) {
         action_();
         return true;
@@ -14,28 +14,35 @@ bool ConditionalQueueEntry::run() {
     return false;
 }
 
-TimedQueueEntry::TimedQueueEntry(const Action& action, float time) {
+TimedQueueEntry::TimedQueueEntry(const Action& action, const float time, const int timesToRun) {
     this->action_ = action;
-    this->time_ = time;
+    this->duration_ = time;
+    this->timesToRun_ = timesToRun;
 }
 
-bool TimedQueueEntry::run() {
-    if (time_ > 0)
-        return false;
+bool TimedQueueEntry::run(const float deltaTime) {
+    elapsed_ += deltaTime;
 
-    action_();
-    return true;
-}
+    if (elapsed_ >= duration_) {
+        action_();
 
-void TimedQueueEntry::decreaseTime(const double deltaTime) {
-    this->time_ -= deltaTime;
+        if (timesToRun_ > 0) {
+            timesToRun_--;
+            elapsed_ = 0;
+            return false;
+        }
+
+        return true;
+    }
+
+    return false;
 }
 
 NextFrameQueueEntry::NextFrameQueueEntry(const Action& action) {
     this->action_ = action;
 }
 
-bool NextFrameQueueEntry::run() {
+bool NextFrameQueueEntry::run(float deltaTime) {
     action_();
     return true;
 }

@@ -5,13 +5,14 @@
 #include "glad/gl.h"
 #include "math/vertex.h"
 
-SpriteSheetRenderer::SpriteSheetRenderer(Object* owner, Vector2 gridSize, const int padding, unsigned int usage, const std::string& texturePath, bool flipTexture, int textureParam, unsigned int shaderProgram, int layer) : RendererBase(owner) {
+SpriteSheetRenderer::SpriteSheetRenderer(Object* owner, const int gridWitdh, const int gridHeight, const int padding, unsigned int usage, const std::string& texturePath, bool flipTexture, int textureParam, unsigned int shaderProgram, int layer) : RendererBase(owner) {
     indices_ = {
         0, 1, 2,
         1, 3, 2
     };
 
-    this->gridSize_ = gridSize;
+    this->gridWitdh_ = gridWitdh;
+    this->gridHeight_ = gridHeight;
     this->usage_ = usage;
     this->padding_ = padding;
 
@@ -28,13 +29,12 @@ SpriteSheetRenderer::SpriteSheetRenderer(Object* owner, Vector2 gridSize, const 
     }
 
     stbi_set_flip_vertically_on_load(flipTexture);
-    unsigned char* data = stbi_load(texturePath.c_str(), &height_, &height_, &numberOfChannels_, 0);
+    unsigned char* data = stbi_load(texturePath.c_str(), &imageWidth_, &imageHeight_, &numberOfChannels_, 0);
 
-    moveTo(0);
 
     // simple division while rounding down to ensure no cropped out things
-    numberOfColumns_ = static_cast<int>(std::floor(height_ / gridSize.x));
-    numberOfRows_ = static_cast<int>(std::floor(height_ / gridSize.y));
+    numberOfColumns_ = imageWidth_ / gridWitdh_;
+    numberOfRows_ = imageHeight_ / gridHeight_;
 
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -70,7 +70,7 @@ SpriteSheetRenderer::SpriteSheetRenderer(Object* owner, Vector2 gridSize, const 
             return;
     }
 
-    glTexImage2D(GL_TEXTURE_2D, 0, format, width_, height_, 0, format, GL_UNSIGNED_BYTE, data);
+    glTexImage2D(GL_TEXTURE_2D, 0, format, imageWidth_, imageHeight_, 0, format, GL_UNSIGNED_BYTE, data);
     glGenerateMipmap(GL_TEXTURE_2D);
 
     stbi_image_free(data);
@@ -84,14 +84,28 @@ SpriteSheetRenderer::SpriteSheetRenderer(Object* owner, Vector2 gridSize, const 
     glGenBuffers(1, &vertexBuffer);
     // I am going to work with this buffer. select it
     glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
+
+    constexpr int leftX = 0;
+    constexpr int bottomY = 0;
+
+    const float topY = static_cast<float>(gridHeight_) / imageHeight_;
+    const float rightX = static_cast<float>(gridWitdh_) / imageWidth_;
+
+    vertices_ = {
+        {Vector2(static_cast<float>(-gridWitdh_) / 2, static_cast<float>(-gridHeight_) / 2), Vector2(leftX, bottomY)}, // bottom left
+        {Vector2(static_cast<float>(-gridWitdh_) / 2, static_cast<float>(gridHeight_) / 2), Vector2(leftX, topY)}, // top left
+        {Vector2(static_cast<float>(gridWitdh_) / 2, static_cast<float>(-gridHeight_) / 2), Vector2(rightX, bottomY)}, // bottom right
+        {Vector2(static_cast<float>(gridWitdh_) / 2, static_cast<float>(gridHeight_) / 2), Vector2(rightX, topY)}, // top right
+    };
+
     // define all the data to use. Use STATIC for objects that are defined once and reused, use DYNAMIC for objects that are redefined multiple times and reused
     glBufferData(GL_ARRAY_BUFFER, vertices_.size() * sizeof(Vertex), vertices_.data(), usage);
     // define the position vertexAttribute
-    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (const void*) offsetof(Vertex, position));
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), reinterpret_cast<const void*>(offsetof(Vertex, position)));
     // enable the position vertexAttribute
     glEnableVertexAttribArray(0);
     // define the texture attribute
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (const void*) offsetof(Vertex, uv));
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), reinterpret_cast<const void*>(offsetof(Vertex, uv)));
     // enable the texture attribute
     glEnableVertexAttribArray(1);
 
@@ -135,18 +149,28 @@ void SpriteSheetRenderer::draw(const Matrix<4, 4>& view, const Matrix<4, 4>& pro
     glDrawElements(mode, static_cast<int>(indices_.size()), GL_UNSIGNED_INT, nullptr);
 }
 
-void SpriteSheetRenderer::moveTo(const int i) {
-    const int leftX = (i * width_) + (padding_ * i);
-    const int rightX = (i + 1) * width_ + (padding_ * i);
+void SpriteSheetRenderer::moveTo(int i) {
+    // R = (n - 1) / nc
+    // C = (n - 1) % nc
 
-    const int topY = i * -height_ + (-padding_ * i);
-    const int bottomY = (i + 1) * -height_ + (-padding_ * i);
+    // x = (W + P) * C
+    // Y = (H + P) * R
+
+    const int row    = (i - 1) / numberOfColumns_;
+    const int column = (i - 1) % numberOfColumns_;
+
+    const float leftX   = static_cast<float>(column * (gridWitdh_  + padding_)) / imageWidth_;
+    const float rightX  = static_cast<float>((column * (gridWitdh_ + padding_)) + gridWitdh_) / imageWidth_;
+
+    const float bottomY = static_cast<float>(row * (gridHeight_ + padding_)) / imageHeight_;
+    const float topY    = static_cast<float>((row * (gridHeight_ + padding_)) + gridHeight_) / imageHeight_;
+
 
     vertices_ = {
-        {{-gridSize_.x / 2, -gridSize_.y / 2}, Vector2(leftX, bottomY)}, // bottom left
-        {{-gridSize_.x / 2, gridSize_.y / 2}, Vector2(leftX, topY)}, // top left
-        {{gridSize_.x / 2, -gridSize_.y / 2}, Vector2(rightX, bottomY)}, // bottom right
-        {{gridSize_.x / 2, gridSize_.y / 2}, Vector2(rightX, topY)}, // top right
+        {Vector2(static_cast<float>(-gridWitdh_) / 2, static_cast<float>(-gridHeight_) / 2), Vector2(leftX, bottomY)}, // bottom left
+        {Vector2(static_cast<float>(-gridWitdh_) / 2, static_cast<float>(gridHeight_) / 2), Vector2(leftX, topY)}, // top left
+        {Vector2(static_cast<float>(gridWitdh_) / 2, static_cast<float>(-gridHeight_) / 2), Vector2(rightX, bottomY)}, // bottom right
+        {Vector2(static_cast<float>(gridWitdh_) / 2, static_cast<float>(gridHeight_) / 2), Vector2(rightX, topY)}, // top right
     };
 
     // we are working on the vao

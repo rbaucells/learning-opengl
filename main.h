@@ -21,6 +21,6 @@ constexpr int FPS = 60;
 // constexpr float fixedUpdateIntervalInMilli = 1000.0f / fixedUpdatePerSecond;
 constexpr float FIXED_UPDATE_INTERVAL_IN_SECONDS = 1.0f / FIXED_UPDATE_PER_SECOND;
 
-inline Event<double> updateEvent;
-inline Event<double> lateUpdateEvent;
-inline Event<double> fixedUpdateEvent;
+inline Event<float> updateEvent;
+inline Event<float> lateUpdateEvent;
+inline Event<float> fixedUpdateEvent;

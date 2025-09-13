@@ -21,12 +21,12 @@ public:
     virtual void start() {}
 
     // update loop
-    virtual void update(double deltaTime) {}
-    virtual void lateUpdate(double deltaTime) {}
-    virtual void fixedUpdate(double fixedDeltaTime) {}
+    virtual void update(float deltaTime) {}
+    virtual void lateUpdate(float deltaTime) {}
+    virtual void fixedUpdate(float fixedDeltaTime) {}
 
-    void manageQueue(double deltaTime);
-    void manageTweens(double deltaTime);
+    void manageQueue(float deltaTime);
+    void manageTweens(float deltaTime);
 
     // de-initialization
     virtual void onDisable() {}

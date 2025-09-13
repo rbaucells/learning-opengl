@@ -4,7 +4,7 @@ CallbackTween::CallbackTween(const std::function<void()>& func) {
     func_ = func;
 }
 
-void CallbackTween::update(double deltaTime) {
+void CallbackTween::update(float deltaTime) {
     func_();
 }
 

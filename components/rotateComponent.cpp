@@ -25,30 +25,49 @@ void RotateComponent::start() {
 
     // Sequence Tweens
     //
-    auto* sequence = addTween(std::make_unique<SequenceTween>());
+    // auto* sequence = addTween(std::make_unique<SequenceTween>());
+    //
+    // sequence->add(object->transform.localPosTween({500, -300}, 3, Curve::sineIn));
+    // sequence->join(object->transform.localRotationTween(90, 5, Curve::expoOut));
+    // sequence->add(std::make_unique<CallbackTween>([this]() {
+    //     std::printf("This is a callback \n");
+    //
+    //     const auto renderer = this->object->getComponent<RendererBase>();
+    //
+    //     if (const auto rendererPtr = renderer.lock())
+    //         rendererPtr->changeSpriteTexture("/Users/ricardito/CLionProjects/OpenGL/res/textures/anotherDvd.png", false, GL_REPEAT);
+    // }));
+    // sequence->add(object->transform.localScaleTween({2, 1.7}, 2, Curve::quartInOut));
+    //
+    // sequence->start();
 
-    sequence->add(object->transform.localPosTween({500, -300}, 3, Curve::sineIn));
-    sequence->join(object->transform.localRotationTween(90, 5, Curve::expoOut));
-    sequence->add(std::make_unique<CallbackTween>([this]() {
-        std::printf("This is a callback \n");
+    queue.push_back(std::move(std::make_unique<TimedQueueEntry>([this]() {
+        static int i = 0;
+        const auto rendererPtr = object->getComponent<SpriteSheetRenderer>();
 
-        const auto renderer = this->object->getComponent<RendererBase>();
+        if (const auto renderer = rendererPtr.lock()) {
+            renderer->moveTo(i);
 
-        if (const auto rendererPtr = renderer.lock())
-            rendererPtr->changeSpriteTexture("/Users/ricardito/CLionProjects/OpenGL/res/textures/anotherDvd.png", false, GL_REPEAT);
-    }));
-    sequence->add(object->transform.localScaleTween({2, 1.7}, 2, Curve::quartInOut));
-
-    sequence->start();
+            if (i <= 4)
+                ++i;
+            else
+                i = 1;
+        }
+    }, 0.02, 100000)));
 }
 
-void RotateComponent::update(const double deltaTime) {
-    // static int i;
-    // // std::printf("Update \n");
+void RotateComponent::update(float deltaTime) {
+    // static int i = 0;
+    // std::printf("Update \n");
     // const auto rendererPtr = object->getComponent<SpriteSheetRenderer>();
     //
     // if (const auto renderer = rendererPtr.lock()) {
-    //     renderer->moveTo(++i);
+    //     renderer->moveTo(i);
+    //
+    //     if (i <= 4)
+    //         ++i;
+    //     else
+    //         i = 0;
     // }
 }
 
@@ -60,11 +79,11 @@ void RotateComponent::onEnable() {
     // std::printf("onEnable \n");
 }
 
-void RotateComponent::lateUpdate(const double deltaTime) {
+void RotateComponent::lateUpdate(float deltaTime) {
     // std::printf("lateUpdate \n");
 }
 
-void RotateComponent::fixedUpdate(const double fixedDeltaTime) {
+void RotateComponent::fixedUpdate(float fixedDeltaTime) {
     // std::printf("fixedUpdate \n");
 }
 

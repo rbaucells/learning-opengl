@@ -21,7 +21,7 @@ public:
     virtual ~TweenBase() = default;
 
     virtual void start() = 0;
-    virtual void update(double deltaTime) = 0;
+    virtual void update(float deltaTime) = 0;
     virtual void complete() = 0;
     virtual void cancel() = 0;
 
@@ -58,7 +58,7 @@ public:
         onStart.invoke();
     }
 
-    void update(const double deltaTime) override {
+    void update(const float deltaTime) override {
         elapsed_ += deltaTime;
 
         const double t = curve_.evaluate(elapsed_ / duration_);
@@ -115,7 +115,7 @@ public:
         onStart.invoke();
     }
 
-    void update(const double deltaTime) override {
+    void update(const float deltaTime) override {
         elapsed_ += deltaTime;
 
         const double t = curve_.evaluate(elapsed_ / duration_);
@@ -162,7 +162,7 @@ public:
     explicit WaitTween(double duration);
 
     void start() override;
-    void update(double deltaTime) override;
+    void update(float deltaTime) override;
     void complete() override;
     void cancel() override;
 
@@ -178,7 +178,7 @@ public:
     explicit CallbackTween(const std::function<void()>& func);
 
     void start() override;
-    void update(double deltaTime) override;
+    void update(float deltaTime) override;
     void complete() override;
     void cancel() override;
 
@@ -203,7 +203,7 @@ public:
     void join(std::unique_ptr<TweenBase> tween);
 
     void start() override;
-    void update(double deltaTime) override;
+    void update(float deltaTime) override;
     void complete() override;
     void cancel() override;
 

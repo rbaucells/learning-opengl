@@ -18,7 +18,7 @@ public:
 
 class SpriteSheetRenderer final : public RendererBase {
 public:
-    SpriteSheetRenderer(Object* owner, Vector2 gridSize, int padding, unsigned int usage, const std::string& texturePath, bool flipTexture, int textureParam, unsigned int shaderProgram, int layer);
+    SpriteSheetRenderer(Object* owner, int gridWitdh, int gridHeight, int padding, unsigned int usage, const std::string& texturePath, bool flipTexture, int textureParam, unsigned int shaderProgram, int layer);
 
     void draw(const Matrix<4, 4>& view, const Matrix<4, 4>& projection, int mode) const override;
 
@@ -32,7 +32,9 @@ private:
     std::vector<Vertex> vertices_ {};
     std::vector<unsigned int> indices_ {};
     Buffers buffers_ {};
+
     int numberOfChannels_ = 0;
+
     unsigned int shaderProgram_ = 0;
     unsigned int vao_ = 0;
     unsigned int texture_ = 0;
@@ -47,13 +49,14 @@ private:
     int numberOfColumns_ = 0;
     int numberOfRows_ = 0;
 
-    Vector2 gridSize_ = {};
-
-    int width_;
-    int height_;
-
-    int usage_ = 0;
+    int gridWitdh_ = 0;
+    int gridHeight_ = 0;
     int padding_ = 0;
+
+    int imageWidth_ = 0;
+    int imageHeight_ = 0;
+
+    unsigned int usage_ = 0;
 };
 
 class SpriteRenderer final : public RendererBase {

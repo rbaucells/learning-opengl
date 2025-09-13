@@ -12,7 +12,7 @@ void WaitTween::start() {
     elapsed_ = 0;
 }
 
-void WaitTween::update(const double deltaTime) {
+void WaitTween::update(float deltaTime) {
     elapsed_ += deltaTime;
 
     if (elapsed_ >= duration_)

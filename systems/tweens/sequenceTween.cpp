@@ -23,7 +23,7 @@ void SequenceTween::start() {
     }
 }
 
-void SequenceTween::update(const double deltaTime) {
+void SequenceTween::update(float deltaTime) {
     if (tweens_.empty()) {
         complete();
         return;

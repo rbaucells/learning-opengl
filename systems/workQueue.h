@@ -7,7 +7,7 @@ class QueueEntry {
 public:
     virtual ~QueueEntry() = default;
 
-    virtual bool run() {return true;};
+    virtual bool run(float deltaTime) {return true;};
 };
 
 class ConditionalQueueEntry final : public QueueEntry {
@@ -20,20 +20,22 @@ class ConditionalQueueEntry final : public QueueEntry {
 public:
     ConditionalQueueEntry(const Condition& condition, const Action& action);
 
-    bool run() override;
+    bool run(float deltaTime) override;
 };
 
 class TimedQueueEntry final : public QueueEntry {
     using Action = std::function<void()>;
 
     Action action_;
-    float time_ = 0.f;
+    float duration_ = 0.f;
+    float elapsed_ = 0.f;
+
+    int timesToRun_ = false;
 
 public:
-    TimedQueueEntry(const Action& action, float time);
+    TimedQueueEntry(const Action& action, float time, int timesToRun = 0);
 
-    bool run() override;
-    void decreaseTime(double deltaTime);
+    bool run(float deltaTime) override;
 };
 
 class NextFrameQueueEntry final : public QueueEntry {
@@ -42,5 +44,5 @@ class NextFrameQueueEntry final : public QueueEntry {
 
 public:
     NextFrameQueueEntry(const Action& action); // NOLINT(google-explicit-constructor)
-    bool run() override;
+    bool run(float deltaTime) override;
 };
