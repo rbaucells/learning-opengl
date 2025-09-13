@@ -156,15 +156,15 @@ void SpriteSheetRenderer::moveTo(int i) {
     // x = (W + P) * C
     // Y = (H + P) * R
 
-    const int row    = (i - 1) / numberOfColumns_;
+    // const int row = (i - 1) / numberOfColumns_;
+    const int row = (numberOfRows_ - 1) - ((i - 1) / numberOfColumns_);
     const int column = (i - 1) % numberOfColumns_;
 
-    const float leftX   = static_cast<float>(column * (gridWitdh_  + padding_)) / imageWidth_;
-    const float rightX  = static_cast<float>((column * (gridWitdh_ + padding_)) + gridWitdh_) / imageWidth_;
+    const float leftX = static_cast<float>(column * (gridWitdh_ + padding_)) / imageWidth_;
+    const float rightX = static_cast<float>((column * (gridWitdh_ + padding_)) + gridWitdh_) / imageWidth_;
 
     const float bottomY = static_cast<float>(row * (gridHeight_ + padding_)) / imageHeight_;
-    const float topY    = static_cast<float>((row * (gridHeight_ + padding_)) + gridHeight_) / imageHeight_;
-
+    const float topY = static_cast<float>((row * (gridHeight_ + padding_)) + gridHeight_) / imageHeight_;
 
     vertices_ = {
         {Vector2(static_cast<float>(-gridWitdh_) / 2, static_cast<float>(-gridHeight_) / 2), Vector2(leftX, bottomY)}, // bottom left

@@ -48,12 +48,12 @@ void RotateComponent::start() {
         if (const auto renderer = rendererPtr.lock()) {
             renderer->moveTo(i);
 
-            if (i <= 4)
+            if (i < 250)
                 ++i;
             else
                 i = 1;
         }
-    }, 0.02, 100000)));
+    }, 0.01, 100000)));
 }
 
 void RotateComponent::update(float deltaTime) {
