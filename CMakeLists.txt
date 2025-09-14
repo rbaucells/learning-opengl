@@ -3,6 +3,9 @@ project(OpenGL)
 
 set(CMAKE_CXX_STANDARD 20)
 
+find_package(OpenAL REQUIRED)
+find_package(glfw3 3.3 REQUIRED)
+
 add_executable(OpenGL components/rotateComponent.cpp components/rotateComponent.h systems/component.h math/vector2.cpp math/vector3.cpp components/camera.cpp main.cpp main.h object.cpp object.h components/camera.h dependencies/stb_image.cpp
         systems/input.h
         systems/input.cpp
@@ -28,12 +31,17 @@ add_executable(OpenGL components/rotateComponent.cpp components/rotateComponent.
         components/renderer/customRenderer.cpp
         systems/tweens/callbackTween.cpp
         components/renderer/spriteSheetRenderer.cpp
+        systems/audio/audio.h
+        systems/audio/audioDevice.cpp
+        systems/audio/sound.cpp
 )
 
 target_include_directories(OpenGL PRIVATE dependencies/include)
 target_include_directories(OpenGL PRIVATE ${CMAKE_SOURCE_DIR})
-target_link_libraries(OpenGL PRIVATE ${CMAKE_SOURCE_DIR}/dependencies/lib/glfw/libglfw3.a "-framework Cocoa" "-framework IOKit" "-framework CoreFoundation")
 target_link_libraries(OpenGL PRIVATE ${CMAKE_SOURCE_DIR}/dependencies/lib/glad/libglad.a)
+
+target_link_libraries(OpenGL PRIVATE OpenAL::OpenAL)
+target_link_libraries(OpenGL PRIVATE glfw)
 
 enable_testing()
 

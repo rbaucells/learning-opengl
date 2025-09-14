@@ -17,6 +17,7 @@
 #include "GLFW/glfw3.h"
 #include "math/vertex.h"
 #include "systems/input.h"
+#include "systems/audio/audio.h"
 
 // needed by framebuffer_size_callback() and by object.draw()
 Matrix<4, 4> projection;
@@ -184,6 +185,10 @@ int main() {
     auto lastFixedUpdateTime = std::chrono::high_resolution_clock::now();
     // ReSharper disable once CppTooWideScope
     GLFWgamepadstate lastGamepadState;
+
+    AudioDevice audioDevice;
+    audioDevice.playSound(Sound("/Users/ricardito/CLionProjects/OpenGL/res/audios/iamtheprotectorofthissystem.wav"));
+    audioDevice.playSound(Sound("/Users/ricardito/CLionProjects/OpenGL/res/audios/file_example_WAV_1MG.wav"));
 
     // main update loop
     while (!glfwWindowShouldClose(mainWindow)) {

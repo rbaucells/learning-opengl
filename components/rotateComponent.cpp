@@ -1,10 +1,7 @@
 #include "rotateComponent.h"
 
-#include "renderer/renderer.h"
 #include "../object.h"
-#include "../systems/tweens/tween.h"
-#include "glad/gl.h"
-#include "systems/input.h"
+#include "renderer/renderer.h"
 
 RotateComponent::RotateComponent(Object* owner, const float speed) : Component(owner) {
     this->speed = speed;
