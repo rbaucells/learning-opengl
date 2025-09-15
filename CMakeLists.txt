@@ -33,7 +33,8 @@ add_executable(OpenGL components/rotateComponent.cpp components/rotateComponent.
         components/renderer/customRenderer.cpp
         systems/tweens/callbackTween.cpp
         components/renderer/spriteSheetRenderer.cpp
-        systems/audio/audio.h
+        systems/texture.cpp
+        systems/texture.h
 )
 
 # add include directory

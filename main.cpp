@@ -17,7 +17,7 @@
 #include "GLFW/glfw3.h"
 #include "math/vertex.h"
 #include "systems/input.h"
-#include "systems/audio/audio.h"
+#include "systems/texture.h"
 
 // needed by framebuffer_size_callback() and by object.draw()
 Matrix<4, 4> projection;
@@ -57,7 +57,7 @@ std::string getShaderString(const std::string& filePath) {
     return ss.str();
 }
 
-unsigned int compileShader(unsigned int type, const std::string& source) {
+unsigned int compileShader(const unsigned int type, const std::string& source) {
     const unsigned int id = glCreateShader(type);
     const char* src = source.c_str();
     glShaderSource(id, 1, &src, nullptr);
@@ -160,14 +160,17 @@ int main() {
         cam->setMain();
     }
 
+    std::shared_ptr<Texture> mainTexture = std::make_shared<Texture>("/Users/ricardito/CLionProjects/OpenGL/res/textures/super-mario-transparent-background-20.png", true, GL_CLAMP);
+
     Object origin1("origin1", 0, {0, 0}, 0, {1, 1});
 
     Object origin2("origin2", 0, {0, 0}, 0, {1, 1});
 
     Object square("square", 0, {200, 0}, 0, {5, 5}, &origin1.transform);
-    square.addComponent<SpriteSheetRenderer>(69, 69, 0, GL_STATIC_DRAW, "/Users/ricardito/CLionProjects/OpenGL/res/textures/f1058a91de91f29cd65527cf97cab26b861de9b5_2_1380x896.png", true, GL_CLAMP, shader, 2);
+    // square.addComponent<SpriteSheetRenderer>(69, 69, 0, GL_STATIC_DRAW, "/Users/ricardito/CLionProjects/OpenGL/res/textures/f1058a91de91f29cd65527cf97cab26b861de9b5_2_1380x896.png", true, GL_CLAMP, shader, 2);
     // square.addComponent<SpriteRenderer>(Vector2(1000, 200), GL_STATIC_DRAW, "/Users/ricardito/CLionProjects/OpenGL/res/textures/spritesheet.png", true, GL_CLAMP, shader, 2);
     // square.addComponent<CustomRenderer>(vertices, indices, GL_STATIC_DRAW, "/Users/ricardito/CLionProjects/OpenGL/res/textures/super-mario-transparent-background-20.png", true, GL_CLAMP, shader, 2);
+    square.addComponent<CustomRenderer>(vertices, indices, GL_STATIC_DRAW, mainTexture, shader, 2);
     square.addComponent<RotateComponent>(45);
 
     // empty the buffers to make sure its drawing properly

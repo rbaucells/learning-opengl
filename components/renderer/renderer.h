@@ -5,6 +5,8 @@
 #include "../../math/matrix.h"
 #include "../../math/vertex.h"
 
+class Texture;
+
 class RendererBase : public Component {
 public:
     using Component::Component;
@@ -90,7 +92,7 @@ typedef SpriteRenderer SimpleRenderer;
 
 class CustomRenderer final : public RendererBase {
 public:
-    CustomRenderer(Object* owner, const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices, unsigned int usage, const std::string& texturePath, bool flipTexture, int textureParam, unsigned int shaderProgram, int layer);
+    CustomRenderer(Object* owner, const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices, unsigned int usage, std::shared_ptr<Texture> texture, unsigned int shaderProgram, int layer);
 
     void draw(const Matrix<4, 4>& view, const Matrix<4, 4>& projection, int mode) const override;
 
@@ -103,7 +105,6 @@ private:
     int numberOfChannels_ = 0;
     unsigned int shaderProgram_ = 0;
     unsigned int vao_ = 0;
-    unsigned int texture_ = 0;
 
     int mvpLocation_ = -1;
     int channelsLocation_ = -1;
@@ -111,6 +112,8 @@ private:
 
     unsigned int layer_ = 0;
     float alpha_ = 1.f;
+
+    std::shared_ptr<Texture> texture_;
 };
 
 // same thing
