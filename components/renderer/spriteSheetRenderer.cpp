@@ -149,7 +149,7 @@ void SpriteSheetRenderer::draw(const Matrix<4, 4>& view, const Matrix<4, 4>& pro
     glDrawElements(mode, static_cast<int>(indices_.size()), GL_UNSIGNED_INT, nullptr);
 }
 
-void SpriteSheetRenderer::moveTo(int i) {
+void SpriteSheetRenderer::moveTo(const int i) {
     // R = (n - 1) / nc
     // C = (n - 1) % nc
 

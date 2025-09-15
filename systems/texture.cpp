@@ -5,9 +5,10 @@
 #include "stb_image.h"
 #include "glad/gl.h"
 
-Texture::Texture(const std::string& filePath, const int textureParam, const bool flipVertically) {
+Texture::Texture(const std::string& filePath, const int textureWrap, const bool flipVertically) {
+    std::printf("Constructing Texture\n");
     stbi_set_flip_vertically_on_load(flipVertically);
-    data_ = stbi_load(filePath.c_str(), &width_, &height_, &numberOfChannels_, 0);
+    unsigned char* data = stbi_load(filePath.c_str(), &width_, &height_, &numberOfChannels_, 0);
 
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -15,11 +16,11 @@ Texture::Texture(const std::string& filePath, const int textureParam, const bool
     glGenTextures(1, &texture_);
     glBindTexture(GL_TEXTURE_2D, texture_);
 
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, textureParam);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, textureParam);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, textureWrap);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, textureWrap);
 
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
     int format = 0;
 
@@ -39,30 +40,24 @@ Texture::Texture(const std::string& filePath, const int textureParam, const bool
             break;
         default:
             std::cout << "Unsupported number of texture channels: " << numberOfChannels_ << std::endl;
-            stbi_image_free(data_);
+            stbi_image_free(data);
             return;
     }
 
-    glTexImage2D(GL_TEXTURE_2D, 0, format, width_, height_, 0, format, GL_UNSIGNED_BYTE, data_);
+    glTexImage2D(GL_TEXTURE_2D, 0, format, width_, height_, 0, format, GL_UNSIGNED_BYTE, data);
     glGenerateMipmap(GL_TEXTURE_2D);
 
-    stbi_image_free(data_);
+    stbi_image_free(data);
 }
 
 void Texture::bind() const {
+    // std::printf("Binding Texture\n");
     glBindTexture(GL_TEXTURE_2D, texture_);
 }
 
 void Texture::unbind() {
+    std::printf("Unbinding Texture\n");
     glBindTexture(GL_TEXTURE_2D, 0);
-}
-
-unsigned char* Texture::getData() {
-    return data_;
-}
-
-unsigned char* Texture::getData() const {
-    return data_;
 }
 
 int Texture::getNumberOfChannels() const {
@@ -78,6 +73,7 @@ int Texture::getHeight() const {
 }
 
 Texture::~Texture() {
+    std::printf("Destroying Texture\n");
     glDeleteTextures(1, &texture_);
     unbind();
 }

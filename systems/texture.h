@@ -7,13 +7,10 @@
 */
 class Texture {
 public:
-    Texture(const std::string& filePath, int textureParam, bool flipVertically = true);
+    Texture(const std::string& filePath, int textureWrap, bool flipVertically = true);
 
     void bind() const;
     static void unbind();
-
-    unsigned char* getData();
-    unsigned char* getData() const;
 
     int getNumberOfChannels() const;
 
@@ -24,8 +21,8 @@ public:
 
 private:
     unsigned int texture_ = -1;
-    unsigned char* data_ = nullptr;
 
+    // private:
     int width_ = 0;
     int height_ = 0;
 

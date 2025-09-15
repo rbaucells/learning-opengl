@@ -160,11 +160,11 @@ int main() {
         cam->setMain();
     }
 
-    std::shared_ptr<Texture> mainTexture = std::make_shared<Texture>("/Users/ricardito/CLionProjects/OpenGL/res/textures/super-mario-transparent-background-20.png", true, GL_CLAMP);
+    std::shared_ptr<Texture> mainTexture = std::make_shared<Texture>("/Users/ricardito/CLionProjects/OpenGL/res/textures/super-mario-transparent-background-20.png", GL_CLAMP, true);
 
     Object origin1("origin1", 0, {0, 0}, 0, {1, 1});
 
-    Object origin2("origin2", 0, {0, 0}, 0, {1, 1});
+    // Object origin2("origin2", 0, {0, 0}, 0, {1, 1});
 
     Object square("square", 0, {200, 0}, 0, {5, 5}, &origin1.transform);
     // square.addComponent<SpriteSheetRenderer>(69, 69, 0, GL_STATIC_DRAW, "/Users/ricardito/CLionProjects/OpenGL/res/textures/f1058a91de91f29cd65527cf97cab26b861de9b5_2_1380x896.png", true, GL_CLAMP, shader, 2);

@@ -92,7 +92,7 @@ typedef SpriteRenderer SimpleRenderer;
 
 class CustomRenderer final : public RendererBase {
 public:
-    CustomRenderer(Object* owner, const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices, unsigned int usage, std::shared_ptr<Texture> texture, unsigned int shaderProgram, int layer);
+    CustomRenderer(Object* owner, const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices, unsigned int usage, std::shared_ptr<Texture>& texture, unsigned int shaderProgram, int layer);
 
     void draw(const Matrix<4, 4>& view, const Matrix<4, 4>& projection, int mode) const override;
 
@@ -102,7 +102,7 @@ private:
     std::vector<Vertex> vertices_ {};
     std::vector<unsigned int> indices_ {};
     Buffers buffers_ {};
-    int numberOfChannels_ = 0;
+
     unsigned int shaderProgram_ = 0;
     unsigned int vao_ = 0;
 

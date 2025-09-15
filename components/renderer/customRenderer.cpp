@@ -1,16 +1,16 @@
 #include <iostream>
 #include "renderer.h"
-#include "stb_image.h"
 #include "../../object.h"
 #include "../../math/vertex.h"
 #include "../../systems/texture.h"
 #include "glad/gl.h"
 
-CustomRenderer::CustomRenderer(Object *owner, const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices, const unsigned int usage, std::shared_ptr<Texture> texture, const unsigned int shaderProgram, const int layer) : RendererBase(owner) {
+CustomRenderer::CustomRenderer(Object *owner, const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices, const unsigned int usage, std::shared_ptr<Texture>& texture, const unsigned int shaderProgram, const int layer) : RendererBase(owner) {
     this->vertices_ = vertices;
     this->indices_ = indices;
     this->shaderProgram_ = shaderProgram;
     this->layer_ = layer;
+
     this->texture_ = texture;
 
     if (const auto it = allRenderers.find(layer); it != allRenderers.end()) {
@@ -22,6 +22,7 @@ CustomRenderer::CustomRenderer(Object *owner, const std::vector<Vertex>& vertice
         allRenderers[layer] = {this};
     }
 
+    texture_->bind();
     glGenVertexArrays(1, &vao_);
     glBindVertexArray(vao_);
 
@@ -69,7 +70,7 @@ void CustomRenderer::draw(const Matrix<4, 4>& view, const Matrix<4, 4>& projecti
 
     // pass the uniform data using the saved locations
     glUniformMatrix4fv(mvpLocation_, 1, GL_FALSE, floatPointer);
-    glUniform1i(channelsLocation_, numberOfChannels_);
+    glUniform1i(channelsLocation_, texture_->getNumberOfChannels());
     glUniform1f(alphaLocation_, alpha_);
 
     // bind the texture
@@ -80,8 +81,6 @@ void CustomRenderer::draw(const Matrix<4, 4>& view, const Matrix<4, 4>& projecti
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, buffers_.indexBuffer);
     // draw call
     glDrawElements(mode, static_cast<int>(indices_.size()), GL_UNSIGNED_INT, nullptr);
-    // clean up
-    texture_->unbind();
 }
 
 CustomRenderer::~CustomRenderer() {
