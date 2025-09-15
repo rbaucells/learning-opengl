@@ -1,11 +1,13 @@
 cmake_minimum_required(VERSION 4.0)
 project(OpenGL)
 
+# using cpp 20
 set(CMAKE_CXX_STANDARD 20)
 
-find_package(OpenAL REQUIRED)
+# find glfw through cmake
 find_package(glfw3 3.3 REQUIRED)
 
+# main executable
 add_executable(OpenGL components/rotateComponent.cpp components/rotateComponent.h systems/component.h math/vector2.cpp math/vector3.cpp components/camera.cpp main.cpp main.h object.cpp object.h components/camera.h dependencies/stb_image.cpp
         systems/input.h
         systems/input.cpp
@@ -32,37 +34,41 @@ add_executable(OpenGL components/rotateComponent.cpp components/rotateComponent.
         systems/tweens/callbackTween.cpp
         components/renderer/spriteSheetRenderer.cpp
         systems/audio/audio.h
-        systems/audio/audioDevice.cpp
-        systems/audio/sound.cpp
 )
 
+# add include directory
 target_include_directories(OpenGL PRIVATE dependencies/include)
-target_include_directories(OpenGL PRIVATE ${CMAKE_SOURCE_DIR})
+
+# link with glad. cross platform compatible
 target_link_libraries(OpenGL PRIVATE ${CMAKE_SOURCE_DIR}/dependencies/lib/glad/libglad.a)
 
-target_link_libraries(OpenGL PRIVATE OpenAL::OpenAL)
+# link with glfw
 target_link_libraries(OpenGL PRIVATE glfw)
 
 enable_testing()
 
+# Matrix Tests
 add_executable(matrixTests tests/matrixTests.cpp)
 
 target_include_directories(matrixTests PRIVATE dependencies/include)
 
 add_test(NAME matrixTests COMMAND matrixTests)
 
+# Transform Tests
 add_executable(transformTests tests/transformTests.cpp transform.cpp math/vector2.cpp)
 
 target_include_directories(transformTests PRIVATE dependencies/include)
 
 add_test(NAME transformTests COMMAND transformTests)
 
+# List Tests
 add_executable(listTests tests/listTests.cpp list.h)
 
 target_include_directories(listTests PRIVATE dependencies/include)
 
 add_test(NAME listTests COMMAND listTests)
 
+# Curve Tests
 add_executable(curveTests tests/curveTests.cpp math/curve.cpp math/vector2.cpp math/curve.h math/vector2.cpp)
 
 target_include_directories(curveTests PRIVATE)

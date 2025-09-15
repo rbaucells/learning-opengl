@@ -1,10 +1,9 @@
 #pragma once
 #include <map>
 #include "../../systems/component.h"
-#include "math/buffers.h"
-#include "math/curve.h"
-#include "math/matrix.h"
-#include "math/vertex.h"
+#include "../../math/buffers.h"
+#include "../../math/matrix.h"
+#include "../../math/vertex.h"
 
 class RendererBase : public Component {
 public:

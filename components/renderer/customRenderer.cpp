@@ -3,7 +3,7 @@
 #include "stb_image.h"
 #include "../../object.h"
 #include "glad/gl.h"
-#include "math/vertex.h"
+#include "../../math/vertex.h"
 
 CustomRenderer::CustomRenderer(Object *owner, const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices, const unsigned int usage, const std::string& texturePath, const bool flipTexture, const int textureParam, const unsigned int shaderProgram, const int layer) : RendererBase(owner) {
     this->vertices_ = vertices;

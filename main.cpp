@@ -186,9 +186,9 @@ int main() {
     // ReSharper disable once CppTooWideScope
     GLFWgamepadstate lastGamepadState;
 
-    AudioDevice audioDevice;
-    audioDevice.playSound(Sound("/Users/ricardito/CLionProjects/OpenGL/res/audios/iamtheprotectorofthissystem.wav"));
-    audioDevice.playSound(Sound("/Users/ricardito/CLionProjects/OpenGL/res/audios/file_example_WAV_1MG.wav"));
+    // AudioDevice audioDevice;
+    // audioDevice.playSound(Sound("/Users/ricardito/CLionProjects/OpenGL/res/audios/iamtheprotectorofthissystem.wav"));
+    // audioDevice.playSound(Sound("/Users/ricardito/CLionProjects/OpenGL/res/audios/file_example_WAV_1MG.wav"));
 
     // main update loop
     while (!glfwWindowShouldClose(mainWindow)) {

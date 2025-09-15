@@ -45,7 +45,7 @@ void RotateComponent::start() {
         if (const auto renderer = rendererPtr.lock()) {
             renderer->moveTo(i);
 
-            if (i < 250)
+            if (i < 230)
                 ++i;
             else
                 i = 1;

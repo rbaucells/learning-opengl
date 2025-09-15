@@ -3,7 +3,7 @@
 #include "stb_image.h"
 #include "../../object.h"
 #include "glad/gl.h"
-#include "math/vertex.h"
+#include "../../math/vertex.h"
 
 SpriteSheetRenderer::SpriteSheetRenderer(Object* owner, const int gridWitdh, const int gridHeight, const int padding, unsigned int usage, const std::string& texturePath, bool flipTexture, int textureParam, unsigned int shaderProgram, int layer) : RendererBase(owner) {
     indices_ = {

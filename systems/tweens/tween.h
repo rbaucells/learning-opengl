@@ -1,7 +1,7 @@
 #pragma once
 #include <queue>
 #include "../event.h"
-#include "math/curve.h"
+#include "../../math/curve.h"
 
 /**
  * @brief Virtual base class for all tweens. Derive from it to make custom tweens

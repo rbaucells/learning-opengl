@@ -1,6 +1,6 @@
 #pragma once
 #include "../systems/component.h"
-#include "math/matrix.h"
+#include "../math/matrix.h"
 
 class Camera final : public Component {
 public:

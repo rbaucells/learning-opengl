@@ -3,7 +3,7 @@
 #include "stb_image.h"
 #include "../../object.h"
 #include "glad/gl.h"
-#include "math/vertex.h"
+#include "../../math/vertex.h"
 
 SpriteRenderer::SpriteRenderer(Object* owner, Vector2 size, unsigned int usage, const std::string& texturePath, bool flipTexture, int textureParam, unsigned int shaderProgram, int layer) : RendererBase(owner) {
     vertices_ = {
