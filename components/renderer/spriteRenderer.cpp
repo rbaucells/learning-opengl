@@ -1,11 +1,11 @@
 #include <iostream>
 #include "renderer.h"
-#include "stb_image.h"
 #include "../../object.h"
 #include "glad/gl.h"
 #include "../../math/vertex.h"
+#include "../../systems/texture.h"
 
-SpriteRenderer::SpriteRenderer(Object* owner, Vector2 size, unsigned int usage, const std::string& texturePath, bool flipTexture, int textureParam, unsigned int shaderProgram, int layer) : RendererBase(owner) {
+SpriteRenderer::SpriteRenderer(Object* owner, Vector2 size, unsigned int usage, const std::shared_ptr<Texture>& texture, unsigned int shaderProgram, int layer) : RendererBase(owner) {
     vertices_ = {
         {{-size.x / 2, -size.y / 2}, {0, 0}}, // bottom left
         {{-size.x / 2, size.y / 2}, {0, 1}}, // top left
@@ -20,6 +20,7 @@ SpriteRenderer::SpriteRenderer(Object* owner, Vector2 size, unsigned int usage, 
 
     this->shaderProgram_ = shaderProgram;
     this->layer_ = layer;
+    this->texture_ = texture;
 
     if (const auto it = allRenderers.find(layer); it != allRenderers.end()) {
         // the layer already exists
@@ -30,48 +31,7 @@ SpriteRenderer::SpriteRenderer(Object* owner, Vector2 size, unsigned int usage, 
         allRenderers[layer] = {this};
     }
 
-    int width, height;
-    stbi_set_flip_vertically_on_load(flipTexture);
-    unsigned char* data = stbi_load(texturePath.c_str(), &width, &height, &numberOfChannels_, 0);
-
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-    glGenTextures(1, &texture_);
-    glBindTexture(GL_TEXTURE_2D, texture_);
-
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, textureParam);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, textureParam);
-
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-    int format = 0;
-
-    // Use a switch statement to handle all possible channel counts
-    switch (numberOfChannels_) {
-        case 1:
-            format = GL_R;
-            break;
-        case 2:
-            format = GL_RG;
-            break;
-        case 3:
-            format = GL_RGB;
-            break;
-        case 4:
-            format = GL_RGBA;
-            break;
-        default:
-            std::cout << "Unsupported number of texture channels: " << numberOfChannels_ << std::endl;
-            stbi_image_free(data);
-            return;
-    }
-
-    glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
-    glGenerateMipmap(GL_TEXTURE_2D);
-
-    stbi_image_free(data);
+    texture_->bind();
 
     glGenVertexArrays(1, &vao_);
     glBindVertexArray(vao_);
@@ -120,11 +80,11 @@ void SpriteRenderer::draw(const Matrix<4, 4>& view, const Matrix<4, 4>& projecti
 
     // pass the uniform data using the saved locations
     glUniformMatrix4fv(mvpLocation_, 1, GL_FALSE, floatPointer);
-    glUniform1i(channelsLocation_, numberOfChannels_);
+    glUniform1i(channelsLocation_, texture_->getNumberOfChannels());
     glUniform1f(alphaLocation_, alpha_);
 
     // bind the texture
-    glBindTexture(GL_TEXTURE_2D, texture_);
+    texture_->bind();
     // bind the vertexArray
     glBindVertexArray(vao_);
     // make sure were using the index buffer
@@ -152,47 +112,6 @@ SpriteRenderer::~SpriteRenderer() {
     }
 }
 
-void SpriteRenderer::changeSpriteTexture(const std::string& texturePath, const bool flipTexture, const int textureParam) {
-    int width, height;
-    stbi_set_flip_vertically_on_load(flipTexture);
-    unsigned char* data = stbi_load(texturePath.c_str(), &width, &height, &numberOfChannels_, 0);
-
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-    glGenTextures(1, &texture_);
-    glBindTexture(GL_TEXTURE_2D, texture_);
-
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, textureParam);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, textureParam);
-
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-    int format = 0;
-
-    // Use a switch statement to handle all possible channel counts
-    switch (numberOfChannels_) {
-        case 1:
-            format = GL_R;
-            break;
-        case 2:
-            format = GL_RG;
-            break;
-        case 3:
-            format = GL_RGB;
-            break;
-        case 4:
-            format = GL_RGBA;
-            break;
-        default:
-            std::cout << "Unsupported number of texture channels: " << numberOfChannels_ << std::endl;
-            stbi_image_free(data);
-            return;
-    }
-
-    glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
-    glGenerateMipmap(GL_TEXTURE_2D);
-
-    stbi_image_free(data);
+void SpriteRenderer::changeSpriteTexture(const std::shared_ptr<Texture>& texture) {
+    this->texture_ = texture;
 }

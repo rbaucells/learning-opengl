@@ -10,16 +10,15 @@ class Texture;
 class RendererBase : public Component {
 public:
     using Component::Component;
+
     ~RendererBase() override = default;
 
     virtual void draw(const Matrix<4, 4>& view, const Matrix<4, 4>& projection, int mode) const = 0;
-
-    virtual void changeSpriteTexture(const std::string& texturePath, bool flipTexture, int textureParam) {};
 };
 
 class SpriteSheetRenderer final : public RendererBase {
 public:
-    SpriteSheetRenderer(Object* owner, int gridWitdh, int gridHeight, int padding, unsigned int usage, const std::string& texturePath, bool flipTexture, int textureParam, unsigned int shaderProgram, int layer);
+    SpriteSheetRenderer(Object* owner, int gridWitdh, int gridHeight, int padding, unsigned int usage, const std::shared_ptr<Texture>& texture, unsigned int shaderProgram, int layer);
 
     void draw(const Matrix<4, 4>& view, const Matrix<4, 4>& projection, int mode) const override;
 
@@ -27,18 +26,16 @@ public:
 
     ~SpriteSheetRenderer() override;
 
-    void changeSpriteTexture(const std::string& texturePath, bool flipTexture, int textureParam) override;
+    void changeSpriteTexture(int gridWitdh, int gridHeight, int padding, const std::shared_ptr<Texture>& texture);
 
 private:
     std::vector<Vertex> vertices_ {};
     std::vector<unsigned int> indices_ {};
     Buffers buffers_ {};
 
-    int numberOfChannels_ = 0;
-
+    std::shared_ptr<Texture> texture_;
     unsigned int shaderProgram_ = 0;
     unsigned int vao_ = 0;
-    unsigned int texture_ = 0;
 
     int mvpLocation_ = -1;
     int channelsLocation_ = -1;
@@ -62,22 +59,22 @@ private:
 
 class SpriteRenderer final : public RendererBase {
 public:
-    SpriteRenderer(Object* owner, Vector2 size, unsigned int usage, const std::string& texturePath, bool flipTexture, int textureParam, unsigned int shaderProgram, int layer);
+    SpriteRenderer(Object* owner, Vector2 size, unsigned int usage, const std::shared_ptr<Texture>& texture, unsigned int shaderProgram, int layer);
 
     void draw(const Matrix<4, 4>& view, const Matrix<4, 4>& projection, int mode) const override;
 
     ~SpriteRenderer() override;
 
-    void changeSpriteTexture(const std::string& texturePath, bool flipTexture, int textureParam) override;
+    void changeSpriteTexture(const std::shared_ptr<Texture>& texture);
 
 private:
     std::vector<Vertex> vertices_ {};
     std::vector<unsigned int> indices_ {};
     Buffers buffers_ {};
-    int numberOfChannels_ = 0;
+
     unsigned int shaderProgram_ = 0;
     unsigned int vao_ = 0;
-    unsigned int texture_ = 0;
+    std::shared_ptr<Texture> texture_;
 
     int mvpLocation_ = -1;
     int channelsLocation_ = -1;
@@ -92,7 +89,7 @@ typedef SpriteRenderer SimpleRenderer;
 
 class CustomRenderer final : public RendererBase {
 public:
-    CustomRenderer(Object* owner, const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices, unsigned int usage, std::shared_ptr<Texture>& texture, unsigned int shaderProgram, int layer);
+    CustomRenderer(Object* owner, const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices, unsigned int usage, const std::shared_ptr<Texture>& texture, unsigned int shaderProgram, int layer);
 
     void draw(const Matrix<4, 4>& view, const Matrix<4, 4>& projection, int mode) const override;
 

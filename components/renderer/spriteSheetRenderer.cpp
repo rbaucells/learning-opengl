@@ -4,15 +4,21 @@
 #include "../../object.h"
 #include "glad/gl.h"
 #include "../../math/vertex.h"
+#include "../../systems/texture.h"
 
-SpriteSheetRenderer::SpriteSheetRenderer(Object* owner, const int gridWitdh, const int gridHeight, const int padding, unsigned int usage, const std::string& texturePath, bool flipTexture, int textureParam, unsigned int shaderProgram, int layer) : RendererBase(owner) {
+SpriteSheetRenderer::SpriteSheetRenderer(Object* owner, const int gridWitdh, const int gridHeight, const int padding, unsigned int usage, const std::shared_ptr<Texture>& texture, unsigned int shaderProgram, int layer) : RendererBase(owner) {
     indices_ = {
         0, 1, 2,
         1, 3, 2
     };
 
+    this->texture_ = texture;
     this->gridWitdh_ = gridWitdh;
     this->gridHeight_ = gridHeight;
+
+    this->imageHeight_ = texture_->getHeight();
+    this->imageWidth_ = texture_->getWidth();
+
     this->usage_ = usage;
     this->padding_ = padding;
 
@@ -28,52 +34,11 @@ SpriteSheetRenderer::SpriteSheetRenderer(Object* owner, const int gridWitdh, con
         allRenderers[layer] = {this};
     }
 
-    stbi_set_flip_vertically_on_load(flipTexture);
-    unsigned char* data = stbi_load(texturePath.c_str(), &imageWidth_, &imageHeight_, &numberOfChannels_, 0);
-
-
     // simple division while rounding down to ensure no cropped out things
-    numberOfColumns_ = imageWidth_ / gridWitdh_;
-    numberOfRows_ = imageHeight_ / gridHeight_;
+    this->numberOfColumns_ = imageWidth_ / gridWitdh_;
+    this->numberOfRows_ = imageHeight_ / gridHeight_;
 
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-    glGenTextures(1, &texture_);
-    glBindTexture(GL_TEXTURE_2D, texture_);
-
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, textureParam);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, textureParam);
-
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-    int format = 0;
-
-    // Use a switch statement to handle all possible channel counts
-    switch (numberOfChannels_) {
-        case 1:
-            format = GL_R;
-            break;
-        case 2:
-            format = GL_RG;
-            break;
-        case 3:
-            format = GL_RGB;
-            break;
-        case 4:
-            format = GL_RGBA;
-            break;
-        default:
-            std::cout << "Unsupported number of texture channels: " << numberOfChannels_ << std::endl;
-            stbi_image_free(data);
-            return;
-    }
-
-    glTexImage2D(GL_TEXTURE_2D, 0, format, imageWidth_, imageHeight_, 0, format, GL_UNSIGNED_BYTE, data);
-    glGenerateMipmap(GL_TEXTURE_2D);
-
-    stbi_image_free(data);
+    texture_->bind();
 
     glGenVertexArrays(1, &vao_);
     glBindVertexArray(vao_);
@@ -136,11 +101,11 @@ void SpriteSheetRenderer::draw(const Matrix<4, 4>& view, const Matrix<4, 4>& pro
 
     // pass the uniform data using the saved locations
     glUniformMatrix4fv(mvpLocation_, 1, GL_FALSE, floatPointer);
-    glUniform1i(channelsLocation_, numberOfChannels_);
+    glUniform1i(channelsLocation_, texture_->getNumberOfChannels());
     glUniform1f(alphaLocation_, alpha_);
 
     // bind the texture
-    glBindTexture(GL_TEXTURE_2D, texture_);
+    texture_->bind();
     // bind the vertexArray
     glBindVertexArray(vao_);
     // make sure were using the index buffer
@@ -200,47 +165,15 @@ SpriteSheetRenderer::~SpriteSheetRenderer() {
     }
 }
 
-void SpriteSheetRenderer::changeSpriteTexture(const std::string& texturePath, const bool flipTexture, const int textureParam) {
-    int width, height;
-    stbi_set_flip_vertically_on_load(flipTexture);
-    unsigned char* data = stbi_load(texturePath.c_str(), &width, &height, &numberOfChannels_, 0);
+void SpriteSheetRenderer::changeSpriteTexture(const int gridWitdh, const int gridHeight, const int padding, const std::shared_ptr<Texture>& texture) {
+    this->texture_ = texture;
+    this->gridHeight_ = gridHeight;
+    this->gridWitdh_ = gridWitdh;
+    this->padding_ = padding;
 
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    this->imageWidth_ = texture_->getWidth();
+    this->imageHeight_ = texture_->getHeight();
 
-    glGenTextures(1, &texture_);
-    glBindTexture(GL_TEXTURE_2D, texture_);
-
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, textureParam);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, textureParam);
-
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-    int format = 0;
-
-    // Use a switch statement to handle all possible channel counts
-    switch (numberOfChannels_) {
-        case 1:
-            format = GL_R;
-            break;
-        case 2:
-            format = GL_RG;
-            break;
-        case 3:
-            format = GL_RGB;
-            break;
-        case 4:
-            format = GL_RGBA;
-            break;
-        default:
-            std::cout << "Unsupported number of texture channels: " << numberOfChannels_ << std::endl;
-            stbi_image_free(data);
-            return;
-    }
-
-    glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
-    glGenerateMipmap(GL_TEXTURE_2D);
-
-    stbi_image_free(data);
+    this->numberOfColumns_ = imageWidth_ / gridWitdh_;
+    this->numberOfRows_ = imageHeight_ / gridHeight_;
 }

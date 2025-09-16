@@ -5,7 +5,7 @@
 #include "../../systems/texture.h"
 #include "glad/gl.h"
 
-CustomRenderer::CustomRenderer(Object *owner, const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices, const unsigned int usage, std::shared_ptr<Texture>& texture, const unsigned int shaderProgram, const int layer) : RendererBase(owner) {
+CustomRenderer::CustomRenderer(Object *owner, const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices, const unsigned int usage, const std::shared_ptr<Texture>& texture, const unsigned int shaderProgram, const int layer) : RendererBase(owner) {
     this->vertices_ = vertices;
     this->indices_ = indices;
     this->shaderProgram_ = shaderProgram;
@@ -22,7 +22,6 @@ CustomRenderer::CustomRenderer(Object *owner, const std::vector<Vertex>& vertice
         allRenderers[layer] = {this};
     }
 
-    texture_->bind();
     glGenVertexArrays(1, &vao_);
     glBindVertexArray(vao_);
 

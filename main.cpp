@@ -161,16 +161,16 @@ int main() {
     }
 
     std::shared_ptr<Texture> mainTexture = std::make_shared<Texture>("/Users/ricardito/CLionProjects/OpenGL/res/textures/super-mario-transparent-background-20.png", GL_CLAMP, true);
+    std::shared_ptr<Texture> spriteSheetTexture = std::make_shared<Texture>("/Users/ricardito/CLionProjects/OpenGL/res/textures/f1058a91de91f29cd65527cf97cab26b861de9b5_2_1380x896.png", GL_CLAMP, true);
 
     Object origin1("origin1", 0, {0, 0}, 0, {1, 1});
 
     // Object origin2("origin2", 0, {0, 0}, 0, {1, 1});
 
-    Object square("square", 0, {200, 0}, 0, {5, 5}, &origin1.transform);
-    // square.addComponent<SpriteSheetRenderer>(69, 69, 0, GL_STATIC_DRAW, "/Users/ricardito/CLionProjects/OpenGL/res/textures/f1058a91de91f29cd65527cf97cab26b861de9b5_2_1380x896.png", true, GL_CLAMP, shader, 2);
-    // square.addComponent<SpriteRenderer>(Vector2(1000, 200), GL_STATIC_DRAW, "/Users/ricardito/CLionProjects/OpenGL/res/textures/spritesheet.png", true, GL_CLAMP, shader, 2);
-    // square.addComponent<CustomRenderer>(vertices, indices, GL_STATIC_DRAW, "/Users/ricardito/CLionProjects/OpenGL/res/textures/super-mario-transparent-background-20.png", true, GL_CLAMP, shader, 2);
-    square.addComponent<CustomRenderer>(vertices, indices, GL_STATIC_DRAW, mainTexture, shader, 2);
+    Object square("square", 0, {0, 0}, 0, {5, 5}, &origin1.transform);
+    square.addComponent<SpriteSheetRenderer>(69, 69, 0, GL_STATIC_DRAW, spriteSheetTexture, shader, 2);
+    // square.addComponent<SpriteRenderer>(Vector2(320, 426), GL_STATIC_DRAW, mainTexture, shader, 2);
+    // square.addComponent<CustomRenderer>(vertices, indices, GL_STATIC_DRAW, mainTexture, shader, 2);
     square.addComponent<RotateComponent>(45);
 
     // empty the buffers to make sure its drawing properly
@@ -188,10 +188,6 @@ int main() {
     auto lastFixedUpdateTime = std::chrono::high_resolution_clock::now();
     // ReSharper disable once CppTooWideScope
     GLFWgamepadstate lastGamepadState;
-
-    // AudioDevice audioDevice;
-    // audioDevice.playSound(Sound("/Users/ricardito/CLionProjects/OpenGL/res/audios/iamtheprotectorofthissystem.wav"));
-    // audioDevice.playSound(Sound("/Users/ricardito/CLionProjects/OpenGL/res/audios/file_example_WAV_1MG.wav"));
 
     // main update loop
     while (!glfwWindowShouldClose(mainWindow)) {
@@ -253,8 +249,8 @@ int main() {
         updateEvent.invoke(deltaTime);
         lateUpdateEvent.invoke(deltaTime);
 
-        Matrix<4, 4> cameraViewMatrix = Camera::mainCamera->getViewMatrix();
         // iterate through all the renderers in reverse. AKA: from back to front
+        Matrix<4, 4> cameraViewMatrix = Camera::mainCamera->getViewMatrix();
         for (auto& renderersInLayer : std::ranges::reverse_view(allRenderers)) {
             for (const auto& renderer : renderersInLayer.second) {
                 renderer->draw(cameraViewMatrix, projection, GL_TRIANGLES);
