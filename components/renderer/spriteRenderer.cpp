@@ -78,22 +78,16 @@ void SpriteRenderer::draw(const Matrix<4, 4>& view, const Matrix<4, 4>& projecti
     // combine the matrices into a single MVP matrix
     Matrix<4, 4> mvp = projection * (view * model);
 
-    const GLfloat* floatPointer = static_cast<const GLfloat*>(mvp);
-
-    // make sure were using the shader
-    shader_->bind();
-
-    // shader_->setUniformValue(glUniformMatrix4fv, mvpLocation_, 1, GL_FALSE, floatPointer);
-    // shader_->setUniformValue(glUniform1i, channelsLocation_, texture_->getNumberOfChannels());
-    // shader_->setUniformValue(glUniform1f, alphaLocation_, alpha_);
+    const auto* floatPointer = static_cast<const GLfloat*>(mvp);
 
     // pass the uniform data using the saved locations
-    glUniformMatrix4fv(mvpLocation_, 1, GL_FALSE, floatPointer);
-    glUniform1i(channelsLocation_, texture_->getNumberOfChannels());
-    glUniform1f(alphaLocation_, alpha_);
+    shader_->setUniformValue(glUniformMatrix4fv, mvpLocation_, 1, GL_FALSE, floatPointer);
+    shader_->setUniformValue(glUniform1i, channelsLocation_, texture_->getNumberOfChannels());
+    shader_->setUniformValue(glUniform1f, alphaLocation_, alpha_);
 
     // bind the texture
     texture_->bind();
+
     // bind the vertexArray
     glBindVertexArray(vao_);
     // make sure were using the index buffer

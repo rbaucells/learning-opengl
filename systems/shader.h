@@ -9,10 +9,17 @@ public:
     [[nodiscard]] int getUniformLocation(const std::string& name) const;
     [[nodiscard]] int getProgram() const;
 
-    template<typename... ARGS>
-    void setUniformValue(void (*setUniformFunc)(ARGS...), ARGS&&... args) const {
+    /**
+     * @brief Meant to be used with gl uniform functions
+     * @tparam FUNC The type of function pointer
+     * @tparam ARGS What types are the arguments
+     * @param func The opengl uniform function to call
+     * @param args The arguments passed into the funtion
+     */
+    template<typename FUNC, typename... ARGS>
+    void setUniformValue(FUNC func, ARGS... args) const {
         bind();
-        setUniformFunc(std::forward<ARGS>(args)...);
+        func(std::forward<ARGS>(args)...);
     }
 
     void bind() const;

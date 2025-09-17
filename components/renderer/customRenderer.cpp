@@ -69,9 +69,9 @@ void CustomRenderer::draw(const Matrix<4, 4>& view, const Matrix<4, 4>& projecti
     shader_->bind();
 
     // pass the uniform data using the saved locations
-    glUniformMatrix4fv(mvpLocation_, 1, GL_FALSE, floatPointer);
-    glUniform1i(channelsLocation_, texture_->getNumberOfChannels());
-    glUniform1f(alphaLocation_, alpha_);
+    shader_->setUniformValue(glUniformMatrix4fv, mvpLocation_, 1, GL_FALSE, floatPointer);
+    shader_->setUniformValue(glUniform1i, channelsLocation_, texture_->getNumberOfChannels());
+    shader_->setUniformValue(glUniform1f, alphaLocation_, alpha_);
 
     // bind the texture
     texture_->bind();
