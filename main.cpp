@@ -17,6 +17,7 @@
 #include "GLFW/glfw3.h"
 #include "math/vertex.h"
 #include "systems/input.h"
+#include "systems/shader.h"
 #include "systems/texture.h"
 
 // needed by framebuffer_size_callback() and by object.draw()
@@ -43,59 +44,6 @@ void framebufferSizeCallback(GLFWwindow* window, const int width, const int heig
     projection = Matrix<4, 4>::ortho(-static_cast<float>(width) / 2.0f, static_cast<float>(width) / 2.0f, -static_cast<float>(height) / 2.0f, static_cast<float>(height) / 2.0f, 0, 1);
 }
 
-// shading
-std::string getShaderString(const std::string& filePath) {
-    std::fstream fileStream(filePath);
-
-    std::string line;
-    std::stringstream ss;
-
-    while (getline(fileStream, line)) {
-        ss << line << '\n';
-    }
-
-    return ss.str();
-}
-
-unsigned int compileShader(const unsigned int type, const std::string& source) {
-    const unsigned int id = glCreateShader(type);
-    const char* src = source.c_str();
-    glShaderSource(id, 1, &src, nullptr);
-    glCompileShader(id);
-
-    int result;
-    glGetShaderiv(id, GL_COMPILE_STATUS, &result);
-
-    if (result == GL_FALSE) {
-        int lenght;
-        glGetShaderiv(id, GL_INFO_LOG_LENGTH, &lenght);
-        char message[lenght];
-        glGetShaderInfoLog(id, lenght, &lenght, message);
-        std::cout << "Failed to compile shader! \n" << message << std::endl;
-        glDeleteShader(id);
-        return 0;
-    }
-
-    return id;
-}
-
-unsigned int createShader(const std::string& vertexShader, const std::string& fragmentShader) {
-    unsigned int program = glCreateProgram();
-    unsigned int vertexShaderId = compileShader(GL_VERTEX_SHADER, vertexShader);
-    unsigned int fragmentShaderId = compileShader(GL_FRAGMENT_SHADER, fragmentShader);
-
-    glAttachShader(program, vertexShaderId);
-    glAttachShader(program, fragmentShaderId);
-    glLinkProgram(program);
-    glValidateProgram(program);
-
-    // we can delete the shaders because they are already attached to our program
-    glDeleteShader(vertexShaderId);
-    glDeleteShader(fragmentShaderId);
-
-    return program;
-}
-
 int main() {
     // when we get an glfwError, lmk
     glfwSetErrorCallback(errorCallback);
@@ -104,17 +52,18 @@ int main() {
         std::printf("glfw initialization failed");
         exit(0);
     }
-
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
     mainWindow = glfwCreateWindow(screenWidth, screenHeight, "learn-opengl", nullptr, nullptr);
+
     if (!mainWindow) {
         std::printf("window creation failed");
         exit(0);
     }
+
     // lmk when something changes
     glfwSetWindowCloseCallback(mainWindow, closeCallback);
     glfwSetKeyCallback(mainWindow, key_callback);
@@ -130,16 +79,6 @@ int main() {
         printf("Failed to initialize OpenGL context\n");
         exit(0);
     }
-
-    glViewport(0, 0, screenWidth, screenHeight);
-
-    // get the strings from the shader files
-    auto const vertexShader = getShaderString("/Users/ricardito/CLionProjects/OpenGL/res/shaders/vertex.shader");
-    auto const fragmentShader = getShaderString("/Users/ricardito/CLionProjects/OpenGL/res/shaders/fragment.shader");
-    // compile the shaders
-    unsigned int shader = createShader(vertexShader, fragmentShader);
-    // yes im gonna use them
-    glUseProgram(shader);
 
     std::vector<Vertex> vertices = {
         {{212.5, 108}, {1, 1}}, // top right
@@ -160,17 +99,19 @@ int main() {
         cam->setMain();
     }
 
-    std::shared_ptr<Texture> mainTexture = std::make_shared<Texture>("/Users/ricardito/CLionProjects/OpenGL/res/textures/super-mario-transparent-background-20.png", GL_CLAMP, true);
-    std::shared_ptr<Texture> spriteSheetTexture = std::make_shared<Texture>("/Users/ricardito/CLionProjects/OpenGL/res/textures/f1058a91de91f29cd65527cf97cab26b861de9b5_2_1380x896.png", GL_CLAMP, true);
+    std::shared_ptr<Shader> shader = std::make_shared<Shader>("/Users/ricardito/Projects/learning-opengl/res/shaders/vertex.shader", "/Users/ricardito/Projects/learning-opengl/res/shaders/fragment.shader");
 
+    std::shared_ptr<Texture> mainTexture = std::make_shared<Texture>("/Users/ricardito/Projects/learning-opengl/res/textures/super-mario-transparent-background-20.png", GL_CLAMP, true);
+    std::shared_ptr<Texture> spriteSheetTexture = std::make_shared<Texture>("/Users/ricardito/Projects/learning-opengl/res/textures/f1058a91de91f29cd65527cf97cab26b861de9b5_2_1380x896.png", GL_CLAMP, true);
+    // std::shared_ptr<Texture> spriteSheetTexture = std::make_shared<Texture>("/Users/ricardito/Projects/learning-opengl/res/textures/fonts/squiggly-wiggly-white.png", GL_CLAMP, true);
     Object origin1("origin1", 0, {0, 0}, 0, {1, 1});
 
     // Object origin2("origin2", 0, {0, 0}, 0, {1, 1});
 
-    Object square("square", 0, {0, 0}, 0, {5, 5}, &origin1.transform);
-    square.addComponent<SpriteSheetRenderer>(69, 69, 0, GL_STATIC_DRAW, spriteSheetTexture, shader, 2);
+    Object square("square", 0, {0, 0}, 0, {15, 15}, &origin1.transform);
+    // square.addComponent<SpriteSheetRenderer>(69, 69, 0, GL_STATIC_DRAW, spriteSheetTexture, shader, 2);
     // square.addComponent<SpriteRenderer>(Vector2(320, 426), GL_STATIC_DRAW, mainTexture, shader, 2);
-    // square.addComponent<CustomRenderer>(vertices, indices, GL_STATIC_DRAW, mainTexture, shader, 2);
+    square.addComponent<CustomRenderer>(vertices, indices, GL_STATIC_DRAW, mainTexture, shader, 2);
     square.addComponent<RotateComponent>(45);
 
     // empty the buffers to make sure its drawing properly
@@ -186,6 +127,7 @@ int main() {
     auto lastLoopTime = std::chrono::high_resolution_clock::now();
     float accumulator = 0.0;
     auto lastFixedUpdateTime = std::chrono::high_resolution_clock::now();
+
     // ReSharper disable once CppTooWideScope
     GLFWgamepadstate lastGamepadState;
 
@@ -278,7 +220,6 @@ int main() {
     }
 
     // clean uo things
-    glDeleteProgram(shader);
     glfwDestroyWindow(mainWindow);
     glfwTerminate();
     // and exit

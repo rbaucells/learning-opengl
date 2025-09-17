@@ -38,22 +38,34 @@ void RotateComponent::start() {
     //
     // sequence->start();
 
-    queue.push_back(std::move(std::make_unique<TimedQueueEntry>([this]() {
-        static int i = 0;
-        const auto rendererPtr = object->getComponent<SpriteSheetRenderer>();
-
-        if (const auto renderer = rendererPtr.lock()) {
-            renderer->moveTo(i);
-
-            if (i < 230)
-                ++i;
-            else
-                i = 1;
-        }
-    }, 0.01, 100000)));
+    // queue.push_back(std::move(std::make_unique<TimedQueueEntry>([this]() {
+    //     static int i = 0;
+    //     const auto rendererPtr = object->getComponent<SpriteSheetRenderer>();
+    //
+    //     if (const auto renderer = rendererPtr.lock()) {
+    //         renderer->moveTo(i);
+    //
+    //         if (i < 230)
+    //             ++i;
+    //         else
+    //             i = 1;
+    //     }
+    // }, 1, 100000)));
 }
 
-void RotateComponent::update(float deltaTime) {}
+void RotateComponent::update(float deltaTime) {
+    static int i = 0;
+    const auto rendererPtr = object->getComponent<SpriteSheetRenderer>();
+
+    if (const auto renderer = rendererPtr.lock()) {
+        renderer->moveTo(i);
+
+        if (i < 230)
+            ++i;
+        else
+            i = 1;
+    }
+}
 
 void RotateComponent::awake() {
     // std::printf("Awake \n");

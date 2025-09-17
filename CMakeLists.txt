@@ -35,6 +35,11 @@ add_executable(OpenGL components/rotateComponent.cpp components/rotateComponent.
         components/renderer/spriteSheetRenderer.cpp
         systems/texture.cpp
         systems/texture.h
+        systems/text.cpp
+        systems/text.h
+        math/Color.h
+        systems/shader.cpp
+        systems/shader.h
 )
 
 # add include directory

@@ -2,13 +2,14 @@
 #include "renderer.h"
 #include "../../object.h"
 #include "../../math/vertex.h"
+#include "../../systems/shader.h"
 #include "../../systems/texture.h"
 #include "glad/gl.h"
 
-CustomRenderer::CustomRenderer(Object *owner, const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices, const unsigned int usage, const std::shared_ptr<Texture>& texture, const unsigned int shaderProgram, const int layer) : RendererBase(owner) {
+CustomRenderer::CustomRenderer(Object *owner, const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices, const unsigned int usage, const std::shared_ptr<Texture>& texture, const std::shared_ptr<Shader>& shader, const int layer) : RendererBase(owner) {
     this->vertices_ = vertices;
     this->indices_ = indices;
-    this->shaderProgram_ = shaderProgram;
+    this->shader_ = shader;
     this->layer_ = layer;
 
     this->texture_ = texture;
@@ -50,9 +51,9 @@ CustomRenderer::CustomRenderer(Object *owner, const std::vector<Vertex>& vertice
     buffers_ = {vertexBuffer, indexBuffer};
 
     // cache uniform locations to avoid lookups in draw
-    mvpLocation_ = glGetUniformLocation(shaderProgram, "mvp");
-    channelsLocation_ = glGetUniformLocation(shaderProgram, "channels");
-    alphaLocation_ = glGetUniformLocation(shaderProgram, "alpha");
+    mvpLocation_ = glGetUniformLocation(shader_->getProgram(), "mvp");
+    channelsLocation_ = glGetUniformLocation(shader_->getProgram(), "channels");
+    alphaLocation_ = glGetUniformLocation(shader_->getProgram(), "alpha");
 }
 
 void CustomRenderer::draw(const Matrix<4, 4>& view, const Matrix<4, 4>& projection, const int mode) const {
@@ -65,7 +66,7 @@ void CustomRenderer::draw(const Matrix<4, 4>& view, const Matrix<4, 4>& projecti
     const GLfloat* floatPointer = static_cast<const GLfloat*>(mvp);
 
     // make sure were using the shader
-    glUseProgram(shaderProgram_);
+    shader_->bind();
 
     // pass the uniform data using the saved locations
     glUniformMatrix4fv(mvpLocation_, 1, GL_FALSE, floatPointer);

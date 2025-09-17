@@ -5,6 +5,7 @@
 #include "../../math/matrix.h"
 #include "../../math/vertex.h"
 
+class Shader;
 class Texture;
 
 class RendererBase : public Component {
@@ -18,7 +19,7 @@ public:
 
 class SpriteSheetRenderer final : public RendererBase {
 public:
-    SpriteSheetRenderer(Object* owner, int gridWitdh, int gridHeight, int padding, unsigned int usage, const std::shared_ptr<Texture>& texture, unsigned int shaderProgram, int layer);
+    SpriteSheetRenderer(Object* owner, int gridWitdh, int gridHeight, int padding, unsigned int usage, const std::shared_ptr<Texture>& texture, const std::shared_ptr<Shader>& shader, int layer);
 
     void draw(const Matrix<4, 4>& view, const Matrix<4, 4>& projection, int mode) const override;
 
@@ -34,7 +35,6 @@ private:
     Buffers buffers_ {};
 
     std::shared_ptr<Texture> texture_;
-    unsigned int shaderProgram_ = 0;
     unsigned int vao_ = 0;
 
     int mvpLocation_ = -1;
@@ -55,11 +55,13 @@ private:
     int imageHeight_ = 0;
 
     unsigned int usage_ = 0;
+
+    std::shared_ptr<Shader> shader_;
 };
 
 class SpriteRenderer final : public RendererBase {
 public:
-    SpriteRenderer(Object* owner, Vector2 size, unsigned int usage, const std::shared_ptr<Texture>& texture, unsigned int shaderProgram, int layer);
+    SpriteRenderer(Object* owner, Vector2 size, unsigned int usage, const std::shared_ptr<Texture>& texture, const std::shared_ptr<Shader>& shader, int layer);
 
     void draw(const Matrix<4, 4>& view, const Matrix<4, 4>& projection, int mode) const override;
 
@@ -72,7 +74,7 @@ private:
     std::vector<unsigned int> indices_ {};
     Buffers buffers_ {};
 
-    unsigned int shaderProgram_ = 0;
+    std::shared_ptr<Shader> shader_;
     unsigned int vao_ = 0;
     std::shared_ptr<Texture> texture_;
 
@@ -89,7 +91,7 @@ typedef SpriteRenderer SimpleRenderer;
 
 class CustomRenderer final : public RendererBase {
 public:
-    CustomRenderer(Object* owner, const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices, unsigned int usage, const std::shared_ptr<Texture>& texture, unsigned int shaderProgram, int layer);
+    CustomRenderer(Object* owner, const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices, unsigned int usage, const std::shared_ptr<Texture>& texture, const std::shared_ptr<Shader>& shader, int layer);
 
     void draw(const Matrix<4, 4>& view, const Matrix<4, 4>& projection, int mode) const override;
 
@@ -100,7 +102,7 @@ private:
     std::vector<unsigned int> indices_ {};
     Buffers buffers_ {};
 
-    unsigned int shaderProgram_ = 0;
+    std::shared_ptr<Shader> shader_;
     unsigned int vao_ = 0;
 
     int mvpLocation_ = -1;

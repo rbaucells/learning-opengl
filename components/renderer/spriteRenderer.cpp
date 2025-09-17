@@ -3,9 +3,10 @@
 #include "../../object.h"
 #include "glad/gl.h"
 #include "../../math/vertex.h"
+#include "../../systems/shader.h"
 #include "../../systems/texture.h"
 
-SpriteRenderer::SpriteRenderer(Object* owner, Vector2 size, unsigned int usage, const std::shared_ptr<Texture>& texture, unsigned int shaderProgram, int layer) : RendererBase(owner) {
+SpriteRenderer::SpriteRenderer(Object* owner, Vector2 size, unsigned int usage, const std::shared_ptr<Texture>& texture, const std::shared_ptr<Shader>& shader, int layer) : RendererBase(owner) {
     vertices_ = {
         {{-size.x / 2, -size.y / 2}, {0, 0}}, // bottom left
         {{-size.x / 2, size.y / 2}, {0, 1}}, // top left
@@ -18,7 +19,7 @@ SpriteRenderer::SpriteRenderer(Object* owner, Vector2 size, unsigned int usage, 
         1, 3, 2
     };
 
-    this->shaderProgram_ = shaderProgram;
+    this->shader_ = shader;
     this->layer_ = layer;
     this->texture_ = texture;
 
@@ -61,9 +62,13 @@ SpriteRenderer::SpriteRenderer(Object* owner, Vector2 size, unsigned int usage, 
     buffers_ = {vertexBuffer, indexBuffer};
 
     // cache uniform locations to avoid lookups in draw
-    mvpLocation_ = glGetUniformLocation(shaderProgram, "mvp");
-    channelsLocation_ = glGetUniformLocation(shaderProgram, "channels");
-    alphaLocation_ = glGetUniformLocation(shaderProgram, "alpha");
+    // mvpLocation_ = glGetUniformLocation(shader_->getProgram(), "mvp");
+    // channelsLocation_ = glGetUniformLocation(shader_->getProgram(), "channels");
+    // alphaLocation_ = glGetUniformLocation(shader_->getProgram(), "alpha");
+
+    mvpLocation_ = shader->getUniformLocation("mvp");
+    channelsLocation_ = shader->getUniformLocation("channels");
+    alphaLocation_ = shader->getUniformLocation("alpha");
 }
 
 void SpriteRenderer::draw(const Matrix<4, 4>& view, const Matrix<4, 4>& projection, const int mode) const {
@@ -76,7 +81,11 @@ void SpriteRenderer::draw(const Matrix<4, 4>& view, const Matrix<4, 4>& projecti
     const GLfloat* floatPointer = static_cast<const GLfloat*>(mvp);
 
     // make sure were using the shader
-    glUseProgram(shaderProgram_);
+    shader_->bind();
+
+    // shader_->setUniformValue(glUniformMatrix4fv, mvpLocation_, 1, GL_FALSE, floatPointer);
+    // shader_->setUniformValue(glUniform1i, channelsLocation_, texture_->getNumberOfChannels());
+    // shader_->setUniformValue(glUniform1f, alphaLocation_, alpha_);
 
     // pass the uniform data using the saved locations
     glUniformMatrix4fv(mvpLocation_, 1, GL_FALSE, floatPointer);
@@ -103,7 +112,6 @@ SpriteRenderer::~SpriteRenderer() {
         auto& renderers = it->second;
 
         std::erase(renderers, this);
-
 
         // if there are no renderers, delete the vector from the map
         if (renderers.empty()) {

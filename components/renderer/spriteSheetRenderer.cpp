@@ -1,12 +1,12 @@
 #include <iostream>
 #include "renderer.h"
-#include "stb_image.h"
 #include "../../object.h"
 #include "glad/gl.h"
 #include "../../math/vertex.h"
+#include "../../systems/shader.h"
 #include "../../systems/texture.h"
 
-SpriteSheetRenderer::SpriteSheetRenderer(Object* owner, const int gridWitdh, const int gridHeight, const int padding, unsigned int usage, const std::shared_ptr<Texture>& texture, unsigned int shaderProgram, int layer) : RendererBase(owner) {
+SpriteSheetRenderer::SpriteSheetRenderer(Object* owner, const int gridWitdh, const int gridHeight, const int padding, unsigned int usage, const std::shared_ptr<Texture>& texture, const std::shared_ptr<Shader>& shader, int layer) : RendererBase(owner) {
     indices_ = {
         0, 1, 2,
         1, 3, 2
@@ -22,7 +22,7 @@ SpriteSheetRenderer::SpriteSheetRenderer(Object* owner, const int gridWitdh, con
     this->usage_ = usage;
     this->padding_ = padding;
 
-    this->shaderProgram_ = shaderProgram;
+    this->shader_ = shader;
     this->layer_ = layer;
 
     if (const auto it = allRenderers.find(layer); it != allRenderers.end()) {
@@ -82,9 +82,9 @@ SpriteSheetRenderer::SpriteSheetRenderer(Object* owner, const int gridWitdh, con
     buffers_ = {vertexBuffer, indexBuffer};
 
     // cache uniform locations to avoid lookups in draw
-    mvpLocation_ = glGetUniformLocation(shaderProgram, "mvp");
-    channelsLocation_ = glGetUniformLocation(shaderProgram, "channels");
-    alphaLocation_ = glGetUniformLocation(shaderProgram, "alpha");
+    mvpLocation_ = glGetUniformLocation(shader_->getProgram(), "mvp");
+    channelsLocation_ = glGetUniformLocation(shader_->getProgram(), "channels");
+    alphaLocation_ = glGetUniformLocation(shader_->getProgram(), "alpha");
 }
 
 void SpriteSheetRenderer::draw(const Matrix<4, 4>& view, const Matrix<4, 4>& projection, const int mode) const {
@@ -94,11 +94,10 @@ void SpriteSheetRenderer::draw(const Matrix<4, 4>& view, const Matrix<4, 4>& pro
     // combine the matrices into a single MVP matrix
     Matrix<4, 4> mvp = projection * (view * model);
 
-    const GLfloat* floatPointer = static_cast<const GLfloat*>(mvp);
+    const auto* floatPointer = static_cast<const GLfloat*>(mvp);
 
     // make sure were using the shader
-    glUseProgram(shaderProgram_);
-
+    shader_->bind();
     // pass the uniform data using the saved locations
     glUniformMatrix4fv(mvpLocation_, 1, GL_FALSE, floatPointer);
     glUniform1i(channelsLocation_, texture_->getNumberOfChannels());
