@@ -40,6 +40,8 @@ add_executable(OpenGL components/rotateComponent.cpp components/rotateComponent.
         math/Color.h
         systems/shader.cpp
         systems/shader.h
+        systems/window.cpp
+        systems/window.h
 )
 
 # add include directory

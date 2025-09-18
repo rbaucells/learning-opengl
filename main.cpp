@@ -19,6 +19,7 @@
 #include "systems/input.h"
 #include "systems/shader.h"
 #include "systems/texture.h"
+#include "systems/window.h"
 
 // needed by framebuffer_size_callback() and by object.draw()
 Matrix<4, 4> projection;
@@ -44,6 +45,10 @@ void framebufferSizeCallback(GLFWwindow* window, const int width, const int heig
     projection = Matrix<4, 4>::ortho(-static_cast<float>(width) / 2.0f, static_cast<float>(width) / 2.0f, -static_cast<float>(height) / 2.0f, static_cast<float>(height) / 2.0f, 0, 1);
 }
 
+void initializeObjects();
+void destroyObjects();
+void drawCalls();
+
 int main() {
     // when we get an glfwError, lmk
     glfwSetErrorCallback(errorCallback);
@@ -57,23 +62,34 @@ int main() {
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-    mainWindow = glfwCreateWindow(screenWidth, screenHeight, "learn-opengl", nullptr, nullptr);
+    Window window(screenWidth, screenHeight, "learn-opengl");
 
-    if (!mainWindow) {
-        std::printf("window creation failed");
-        exit(0);
-    }
+    window.callWindowFunction(glfwSetWindowCloseCallback, closeCallback);
+    window.callWindowFunction(glfwSetKeyCallback, key_callback);
+    window.callWindowFunction(glfwSetCursorPosCallback, cursor_move_callback);
+    window.callWindowFunction(glfwSetMouseButtonCallback, mouse_button_callback);
+    window.callWindowFunction(glfwSetScrollCallback, scroll_callback);
+    window.callWindowFunction(glfwSetFramebufferSizeCallback, framebufferSizeCallback);
 
-    // lmk when something changes
-    glfwSetWindowCloseCallback(mainWindow, closeCallback);
-    glfwSetKeyCallback(mainWindow, key_callback);
-    glfwSetCursorPosCallback(mainWindow, cursor_move_callback);
-    glfwSetMouseButtonCallback(mainWindow, mouse_button_callback);
-    glfwSetScrollCallback(mainWindow, scroll_callback);
-    glfwSetFramebufferSizeCallback(mainWindow, framebufferSizeCallback);
+    window.makeCurrent();
 
-    // were gonna use this window rn
-    glfwMakeContextCurrent(mainWindow);
+    // mainWindow = glfwCreateWindow(screenWidth, screenHeight, "learn-opengl", nullptr, nullptr);
+    //
+    // if (!mainWindow) {
+    //     std::printf("window creation failed");
+    //     exit(0);
+    // }
+    //
+    // // lmk when something changes
+    // glfwSetWindowCloseCallback(mainWindow, closeCallback);
+    // glfwSetKeyCallback(mainWindow, key_callback);
+    // glfwSetCursorPosCallback(mainWindow, cursor_move_callback);
+    // glfwSetMouseButtonCallback(mainWindow, mouse_button_callback);
+    // glfwSetScrollCallback(mainWindow, scroll_callback);
+    // glfwSetFramebufferSizeCallback(mainWindow, framebufferSizeCallback);
+    //
+    // // were gonna use this window rn
+    // glfwMakeContextCurrent(mainWindow);
 
     if (gladLoadGL(glfwGetProcAddress) == 0) {
         printf("Failed to initialize OpenGL context\n");
@@ -121,7 +137,7 @@ int main() {
     glBindVertexArray(0);
 
     // update the window size initialiy
-    framebufferSizeCallback(mainWindow, screenWidth, screenHeight);
+    window.callWindowFunction(framebufferSizeCallback, screenWidth, screenHeight);
 
     // variables for inside main loop to last between loops
     auto lastLoopTime = std::chrono::high_resolution_clock::now();
@@ -132,43 +148,14 @@ int main() {
     GLFWgamepadstate lastGamepadState;
 
     // main update loop
-    while (!glfwWindowShouldClose(mainWindow)) {
+    while (!Window::mainWindow->shouldClose()) {
         auto startOfLoopTime = std::chrono::high_resolution_clock::now();
         // calculate deltaTime
         std::chrono::duration<float> timeSinceLastUpdate = startOfLoopTime - lastLoopTime;
         float deltaTime = timeSinceLastUpdate.count();
         lastLoopTime = std::chrono::high_resolution_clock::now();
 
-        // if there are some components left to be "started", start em and remove them from the queueueue
-        if (!componentsToInitialize.empty()) {
-            for (auto it = componentsToInitialize.begin(); it != componentsToInitialize.end();) {
-                if (auto comp = it->lock()) {
-                    comp->awake();
-                    ++it;
-                }
-                else {
-                    it = componentsToInitialize.erase(it);
-                }
-            }
-
-            // if the object is supposed to be active, call the onEnable
-            for (const auto& component : componentsToInitialize) {
-                if (auto comp = component.lock()) {
-                    if (comp->object->getActive()) {
-                        comp->onEnable();
-                    }
-                }
-            }
-
-            // start
-            for (const auto& component : componentsToInitialize) {
-                if (auto comp = component.lock()) {
-                    comp->start();
-                }
-            }
-
-            componentsToInitialize.clear();
-        }
+        initializeObjects();
 
         GLFWgamepadstate currentGamepadState;
         glfwGetGamepadState(GLFW_JOYSTICK_1, &currentGamepadState);
@@ -191,22 +178,11 @@ int main() {
         updateEvent.invoke(deltaTime);
         lateUpdateEvent.invoke(deltaTime);
 
-        // iterate through all the renderers in reverse. AKA: from back to front
-        Matrix<4, 4> cameraViewMatrix = Camera::mainCamera->getViewMatrix();
-        for (auto& renderersInLayer : std::ranges::reverse_view(allRenderers)) {
-            for (const auto& renderer : renderersInLayer.second) {
-                renderer->draw(cameraViewMatrix, projection, GL_TRIANGLES);
-            }
-        }
+        drawCalls();
 
-        for (Object* object : waitingLineOfDeath) {
-            object->destroyImmediately();
-            // delete object; <- put this when objects moved to heap
-        }
+        destroyObjects();
 
-        waitingLineOfDeath.clear();
-
-        glfwSwapBuffers(mainWindow);
+        Window::mainWindow->callWindowFunction(glfwSwapBuffers);
         glfwPollEvents();
 
         // framerate capping
@@ -219,9 +195,63 @@ int main() {
             std::this_thread::sleep_for(std::chrono::duration<float, std::milli>(timeToSleepMs));
     }
 
-    // clean uo things
-    glfwDestroyWindow(mainWindow);
+    // clean up things
     glfwTerminate();
     // and exit
     exit(EXIT_SUCCESS);
+}
+
+void initializeObjects() {
+    std::printf("Starting objects \n");
+    // if there are some components left to be "started", start em and remove them from the queueueue
+    if (!componentsToInitialize.empty()) {
+        for (auto it = componentsToInitialize.begin(); it != componentsToInitialize.end();) {
+            if (const auto comp = it->lock()) {
+                comp->awake();
+                ++it;
+            }
+            else {
+                it = componentsToInitialize.erase(it);
+            }
+        }
+
+        // if the object is supposed to be active, call the onEnable
+        for (const auto& component : componentsToInitialize) {
+            if (auto comp = component.lock()) {
+                if (comp->object->getActive()) {
+                    comp->onEnable();
+                }
+            }
+        }
+
+        // start
+        for (const auto& component : componentsToInitialize) {
+            if (auto comp = component.lock()) {
+                comp->start();
+            }
+        }
+
+        componentsToInitialize.clear();
+    }
+}
+
+void destroyObjects() {
+    std::printf("Destroying objects \n");
+    for (Object* object : waitingLineOfDeath) {
+        object->destroyImmediately();
+        // delete object; <- put this when objects moved to heap
+    }
+
+    waitingLineOfDeath.clear();
+}
+
+void drawCalls() {
+    std::printf("Drawing objects \n");
+    // iterate through all the renderers in reverse. AKA: from back to front
+    Matrix<4, 4> cameraViewMatrix = Camera::mainCamera->getViewMatrix();
+    for (auto& renderersInLayer : std::ranges::reverse_view(allRenderers)) {
+        for (const auto& renderer : renderersInLayer.second) {
+            renderer->draw(cameraViewMatrix, projection, GL_TRIANGLES);
+        }
+    }
 }

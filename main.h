@@ -11,7 +11,7 @@ class Component;
 inline int screenWidth = 1920;
 inline int screenHeight = 1080;
 
-inline GLFWwindow *mainWindow;
+// inline GLFWwindow *mainWindow;
 
 inline std::vector<std::weak_ptr<Component>> componentsToInitialize {};
 
