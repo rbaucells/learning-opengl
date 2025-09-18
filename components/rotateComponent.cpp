@@ -1,6 +1,7 @@
 #include "rotateComponent.h"
 
 #include "../object.h"
+#include "../systems/audio/audio.h"
 #include "renderer/renderer.h"
 
 RotateComponent::RotateComponent(Object* owner, const float speed) : Component(owner) {
@@ -51,6 +52,12 @@ void RotateComponent::start() {
     //             i = 1;
     //     }
     // }, 1, 100000)));
+
+    auto sourceWeak = object->getComponent<AudioSource>();
+
+    if (auto source = sourceWeak.lock()) {
+        source->play();
+    }
 }
 
 void RotateComponent::update(float deltaTime) {

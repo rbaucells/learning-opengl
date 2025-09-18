@@ -7,6 +7,9 @@ set(CMAKE_CXX_STANDARD 20)
 # find glfw through cmake
 find_package(glfw3 3.3 REQUIRED)
 
+find_package(OpenAL REQUIRED PATHS "/usr/local/Cellar/openal-soft/1.24.3/lib/cmake" NO_DEFAULT_PATH)
+#find_package(OpenAL REQUIRED)
+
 # main executable
 add_executable(OpenGL components/rotateComponent.cpp components/rotateComponent.h systems/component.h math/vector2.cpp math/vector3.cpp components/camera.cpp main.cpp main.h object.cpp object.h components/camera.h dependencies/stb_image.cpp
         systems/input.h
@@ -33,19 +36,25 @@ add_executable(OpenGL components/rotateComponent.cpp components/rotateComponent.
         components/renderer/customRenderer.cpp
         systems/tweens/callbackTween.cpp
         components/renderer/spriteSheetRenderer.cpp
-        systems/texture.cpp
-        systems/texture.h
-        systems/text.cpp
-        systems/text.h
+        "systems/opengl wrappers/texture.cpp"
+        "systems/opengl wrappers/texture.h"
         math/Color.h
-        systems/shader.cpp
-        systems/shader.h
-        systems/window.cpp
-        systems/window.h
+        "systems/opengl wrappers/shader.cpp"
+        "systems/opengl wrappers/shader.h"
+        "systems/opengl wrappers/window.cpp"
+        "systems/opengl wrappers/window.h"
+        systems/audio/audio.h
+        systems/audio/sound.cpp
+        systems/audio/audioListener.cpp
+        systems/audio/audioSource.cpp
+        systems/audio/audioListener.cpp
+        systems/audio/audioSource.cpp
 )
 
 # add include directory
 target_include_directories(OpenGL PRIVATE dependencies/include)
+
+target_link_libraries(OpenGL PRIVATE OpenAL::OpenAL)
 
 # link with glad. cross platform compatible
 target_link_libraries(OpenGL PRIVATE ${CMAKE_SOURCE_DIR}/dependencies/lib/glad/libglad.a)

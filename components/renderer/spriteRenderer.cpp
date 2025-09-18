@@ -3,8 +3,8 @@
 #include "../../object.h"
 #include "glad/gl.h"
 #include "../../math/vertex.h"
-#include "../../systems/shader.h"
-#include "../../systems/texture.h"
+#include "../../systems/opengl wrappers/shader.h"
+#include "../../systems/opengl wrappers/texture.h"
 
 SpriteRenderer::SpriteRenderer(Object* owner, Vector2 size, unsigned int usage, const std::shared_ptr<Texture>& texture, const std::shared_ptr<Shader>& shader, int layer) : RendererBase(owner) {
     vertices_ = {
@@ -71,7 +71,7 @@ SpriteRenderer::SpriteRenderer(Object* owner, Vector2 size, unsigned int usage, 
     alphaLocation_ = shader->getUniformLocation("alpha");
 }
 
-void SpriteRenderer::draw(const Matrix<4, 4>& view, const Matrix<4, 4>& projection, const int mode) const {
+void SpriteRenderer::draw(const Matrix<4, 4>& view, const Matrix<4, 4>& projection) const {
     // create the model matrix from the transform
     const Matrix<4, 4> model = object->transform.localToWorldMatrix();
 
@@ -93,7 +93,11 @@ void SpriteRenderer::draw(const Matrix<4, 4>& view, const Matrix<4, 4>& projecti
     // make sure were using the index buffer
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, buffers_.indexBuffer);
     // draw call
-    glDrawElements(mode, static_cast<int>(indices_.size()), GL_UNSIGNED_INT, nullptr);
+    glDrawElements(drawMode_, static_cast<int>(indices_.size()), GL_UNSIGNED_INT, nullptr);
+}
+
+void SpriteRenderer::setDrawMode(const int mode) {
+    drawMode_ = mode;
 }
 
 SpriteRenderer::~SpriteRenderer() {

@@ -2,8 +2,8 @@
 #include "renderer.h"
 #include "../../object.h"
 #include "../../math/vertex.h"
-#include "../../systems/shader.h"
-#include "../../systems/texture.h"
+#include "../../systems/opengl wrappers/shader.h"
+#include "../../systems/opengl wrappers/texture.h"
 #include "glad/gl.h"
 
 CustomRenderer::CustomRenderer(Object *owner, const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices, const unsigned int usage, const std::shared_ptr<Texture>& texture, const std::shared_ptr<Shader>& shader, const int layer) : RendererBase(owner) {
@@ -56,14 +56,14 @@ CustomRenderer::CustomRenderer(Object *owner, const std::vector<Vertex>& vertice
     alphaLocation_ = glGetUniformLocation(shader_->getProgram(), "alpha");
 }
 
-void CustomRenderer::draw(const Matrix<4, 4>& view, const Matrix<4, 4>& projection, const int mode) const {
+void CustomRenderer::draw(const Matrix<4, 4>& view, const Matrix<4, 4>& projection) const {
     // create the model matrix from the transform
     const Matrix<4, 4> model = object->transform.localToWorldMatrix();
 
     // combine the matrices into a single MVP matrix
     Matrix<4, 4> mvp = projection * (view * model);
 
-    const GLfloat* floatPointer = static_cast<const GLfloat*>(mvp);
+    const auto* floatPointer = static_cast<const GLfloat*>(mvp);
 
     // make sure were using the shader
     shader_->bind();
@@ -80,7 +80,11 @@ void CustomRenderer::draw(const Matrix<4, 4>& view, const Matrix<4, 4>& projecti
     // make sure were using the index buffer
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, buffers_.indexBuffer);
     // draw call
-    glDrawElements(mode, static_cast<int>(indices_.size()), GL_UNSIGNED_INT, nullptr);
+    glDrawElements(drawMode_, static_cast<int>(indices_.size()), GL_UNSIGNED_INT, nullptr);
+}
+
+void CustomRenderer::setDrawMode(const int mode) {
+    drawMode_ = mode;
 }
 
 CustomRenderer::~CustomRenderer() {

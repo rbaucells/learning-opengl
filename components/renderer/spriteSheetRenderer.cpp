@@ -3,8 +3,8 @@
 #include "../../object.h"
 #include "glad/gl.h"
 #include "../../math/vertex.h"
-#include "../../systems/shader.h"
-#include "../../systems/texture.h"
+#include "../../systems/opengl wrappers/shader.h"
+#include "../../systems/opengl wrappers/texture.h"
 
 SpriteSheetRenderer::SpriteSheetRenderer(Object* owner, const int gridWitdh, const int gridHeight, const int padding, unsigned int usage, const std::shared_ptr<Texture>& texture, const std::shared_ptr<Shader>& shader, int layer) : RendererBase(owner) {
     indices_ = {
@@ -87,7 +87,7 @@ SpriteSheetRenderer::SpriteSheetRenderer(Object* owner, const int gridWitdh, con
     alphaLocation_ = glGetUniformLocation(shader_->getProgram(), "alpha");
 }
 
-void SpriteSheetRenderer::draw(const Matrix<4, 4>& view, const Matrix<4, 4>& projection, const int mode) const {
+void SpriteSheetRenderer::draw(const Matrix<4, 4>& view, const Matrix<4, 4>& projection) const {
     // create the model matrix from the transform
     const Matrix<4, 4> model = object->transform.localToWorldMatrix();
 
@@ -110,7 +110,7 @@ void SpriteSheetRenderer::draw(const Matrix<4, 4>& view, const Matrix<4, 4>& pro
     // make sure were using the index buffer
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, buffers_.indexBuffer);
     // draw call
-    glDrawElements(mode, static_cast<int>(indices_.size()), GL_UNSIGNED_INT, nullptr);
+    glDrawElements(drawMode_, static_cast<int>(indices_.size()), GL_UNSIGNED_INT, nullptr);
 }
 
 void SpriteSheetRenderer::moveTo(const int i) {
@@ -143,6 +143,10 @@ void SpriteSheetRenderer::moveTo(const int i) {
     glBindBuffer(GL_ARRAY_BUFFER, buffers_.vertexBuffer);
     // define all the data to use. Use STATIC for objects that are defined once and reused, use DYNAMIC for objects that are redefined multiple times and reused
     glBufferData(GL_ARRAY_BUFFER, vertices_.size() * sizeof(Vertex), vertices_.data(), usage_);
+}
+
+void SpriteSheetRenderer::setDrawMode(const int mode) {
+    drawMode_ = mode;
 }
 
 SpriteSheetRenderer::~SpriteSheetRenderer() {

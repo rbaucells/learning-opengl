@@ -4,7 +4,6 @@
 #include <fstream>
 #include <iostream>
 #include <ranges>
-#include <sstream>
 #include <string>
 #include <thread>
 
@@ -17,9 +16,10 @@
 #include "GLFW/glfw3.h"
 #include "math/vertex.h"
 #include "systems/input.h"
-#include "systems/shader.h"
-#include "systems/texture.h"
-#include "systems/window.h"
+#include "systems/audio/audio.h"
+#include "systems/opengl wrappers/shader.h"
+#include "systems/opengl wrappers/texture.h"
+#include "systems/opengl wrappers/window.h"
 
 // needed by framebuffer_size_callback() and by object.draw()
 Matrix<4, 4> projection;
@@ -30,7 +30,7 @@ void errorCallback(const int error, const char* description) {
 }
 
 void debugErrorCallback(GLenum source, GLenum type, GLuint id, const GLenum severity, const GLsizei length, const GLchar* message, const void* userParam) {
-    std::string messageString(message, length);
+    const std::string messageString(message, length);
     std::cout << severity << ": OpenGL error: %s\n" << messageString.c_str() << std::endl;
 };
 
@@ -45,6 +45,7 @@ void framebufferSizeCallback(GLFWwindow* window, const int width, const int heig
     projection = Matrix<4, 4>::ortho(-static_cast<float>(width) / 2.0f, static_cast<float>(width) / 2.0f, -static_cast<float>(height) / 2.0f, static_cast<float>(height) / 2.0f, 0, 1);
 }
 
+// declarations
 void initializeObjects();
 void destroyObjects();
 void drawCalls();
@@ -73,24 +74,6 @@ int main() {
 
     window.makeCurrent();
 
-    // mainWindow = glfwCreateWindow(screenWidth, screenHeight, "learn-opengl", nullptr, nullptr);
-    //
-    // if (!mainWindow) {
-    //     std::printf("window creation failed");
-    //     exit(0);
-    // }
-    //
-    // // lmk when something changes
-    // glfwSetWindowCloseCallback(mainWindow, closeCallback);
-    // glfwSetKeyCallback(mainWindow, key_callback);
-    // glfwSetCursorPosCallback(mainWindow, cursor_move_callback);
-    // glfwSetMouseButtonCallback(mainWindow, mouse_button_callback);
-    // glfwSetScrollCallback(mainWindow, scroll_callback);
-    // glfwSetFramebufferSizeCallback(mainWindow, framebufferSizeCallback);
-    //
-    // // were gonna use this window rn
-    // glfwMakeContextCurrent(mainWindow);
-
     if (gladLoadGL(glfwGetProcAddress) == 0) {
         printf("Failed to initialize OpenGL context\n");
         exit(0);
@@ -110,6 +93,7 @@ int main() {
 
     Object camera("mainCamera", 69, {0, 0}, 0, {1, 1});
     auto cameraComponent = camera.addComponent<Camera>();
+    auto listenerComponent = camera.addComponent<AudioListner>();
 
     if (auto cam = cameraComponent.lock()) {
         cam->setMain();
@@ -129,6 +113,7 @@ int main() {
     square.addComponent<SpriteRenderer>(Vector2(320, 426), GL_STATIC_DRAW, mainTexture, shader, 2);
     // square.addComponent<CustomRenderer>(vertices, indices, GL_STATIC_DRAW, mainTexture, shader, 2);
     square.addComponent<RotateComponent>(45);
+    square.addComponent<AudioSource>("/Users/ricardito/Projects/learning-opengl/res/audios/file_example_WAV_1MG.wav");
 
     // empty the buffers to make sure its drawing properly
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
@@ -138,6 +123,9 @@ int main() {
 
     // update the window size initialiy
     window.callWindowFunction(framebufferSizeCallback, screenWidth, screenHeight);
+
+    // AudioListner device;
+    // device.playSound(Sound("/Users/ricardito/Projects/learning-opengl/res/audios/file_example_WAV_1MG.wav"));
 
     // variables for inside main loop to last between loops
     auto lastLoopTime = std::chrono::high_resolution_clock::now();
@@ -202,7 +190,6 @@ int main() {
 }
 
 void initializeObjects() {
-    std::printf("Starting objects \n");
     // if there are some components left to be "started", start em and remove them from the queueueue
     if (!componentsToInitialize.empty()) {
         for (auto it = componentsToInitialize.begin(); it != componentsToInitialize.end();) {
@@ -236,7 +223,6 @@ void initializeObjects() {
 }
 
 void destroyObjects() {
-    std::printf("Destroying objects \n");
     for (Object* object : waitingLineOfDeath) {
         object->destroyImmediately();
         // delete object; <- put this when objects moved to heap
@@ -246,12 +232,11 @@ void destroyObjects() {
 }
 
 void drawCalls() {
-    std::printf("Drawing objects \n");
     // iterate through all the renderers in reverse. AKA: from back to front
     Matrix<4, 4> cameraViewMatrix = Camera::mainCamera->getViewMatrix();
     for (auto& renderersInLayer : std::ranges::reverse_view(allRenderers)) {
         for (const auto& renderer : renderersInLayer.second) {
-            renderer->draw(cameraViewMatrix, projection, GL_TRIANGLES);
+            renderer->draw(cameraViewMatrix, projection);
         }
     }
 }
