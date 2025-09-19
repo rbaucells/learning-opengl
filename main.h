@@ -8,10 +8,8 @@ struct GLFWwindow;
 class Component;
 
 // variables
-inline int screenWidth = 1920;
-inline int screenHeight = 1080;
-
-// inline GLFWwindow *mainWindow;
+inline int screenHeight = 480;
+inline int screenWidth = 600;
 
 inline std::vector<std::weak_ptr<Component>> componentsToInitialize {};
 

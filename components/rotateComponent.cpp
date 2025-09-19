@@ -53,9 +53,11 @@ void RotateComponent::start() {
     //     }
     // }, 1, 100000)));
 
-    auto sourceWeak = object->getComponent<AudioSource>();
+    const auto sourceWeak = object->getComponent<AudioSource>();
 
-    if (auto source = sourceWeak.lock()) {
+    if (const auto source = sourceWeak.lock()) {
+        source->volume = 1;
+        source->pitch = 1; // also does speed ig
         source->play();
     }
 }

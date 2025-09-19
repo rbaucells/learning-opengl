@@ -3,18 +3,19 @@
 
 #include "../../object.h"
 
-AudioListner* AudioListner::audioDevice = nullptr;
+AudioListener* AudioListener::mainListener = nullptr;
 /**
  * @warning PLS DONT MAKE MULTIPLE AUDIO LISTENERS
  * @param owner Owner
  */
-AudioListner::AudioListner(Object* owner) : Component(owner) {
+AudioListener::AudioListener(Object* owner) : Component(owner) {
     std::printf("Creating Audio Listener\n");
-    if (!audioDevice)
-        audioDevice = this;
+
+    if (!mainListener)
+        mainListener = this;
     else {
         // VERY DANGEROUS, WILL DELETE THIS CLASS INSTANCE, PLS DONT MAKE MULTIPLE AUDIOLISTENERS
-        object->removeComponent<AudioListner>();
+        object->removeComponent<AudioListener>();
         return;
     }
 
@@ -23,6 +24,10 @@ AudioListner::AudioListner(Object* owner) : Component(owner) {
     }
     else {
         device_ = device;
+    }
+
+    if (!alcIsExtensionPresent(device_, "ALC_EXT_EFX")) {
+        std::cerr << "EFX not supported by this device\n";
     }
 
     if (ALCcontext* context = alcCreateContext(device_, nullptr); context == nullptr)
@@ -36,17 +41,33 @@ AudioListner::AudioListner(Object* owner) : Component(owner) {
     }
 }
 
-void AudioListner::update(const float deltaTime) {
-    setListnerPos();
+void AudioListener::update(const float deltaTime) {
+    setListenerPos();
+    setListenerVelocity(deltaTime);
     queryErrors();
 }
 
-void AudioListner::setListnerPos() const {
-    Vector2 globalPos = object->transform.getGlobalPosition();
-    alListener3f(AL_POSITION, globalPos.x, globalPos.y, 0);
+void AudioListener::setDistanceModel(const ALenum model) {
+    alDistanceModel(model);
 }
 
-AudioListner::~AudioListner() {
+void AudioListener::setVolume(const float volume) {
+    alListenerf(AL_GAIN, volume);
+}
+
+void AudioListener::setListenerOrientation(const Vector3& forward, const Vector3& up) {
+    const float vectorTuple[6] = {
+        forward.x, forward.y, forward.z,
+        up.x, up.y, up.z
+    };
+
+    // this copies the data so vectorTuple is safe to delete
+    alListenerfv(AL_ORIENTATION, vectorTuple);
+}
+
+
+
+AudioListener::~AudioListener() {
     std::printf("Destroyed AudioListener\n");
     if (!alcMakeContextCurrent(nullptr)) {
         std::cerr << "Setting context current failed \n";
@@ -62,7 +83,7 @@ AudioListner::~AudioListner() {
 /**
  * To be called in update loop
  */
-void AudioListner::queryErrors() const {
+void AudioListener::queryErrors() const {
     switch (const auto errorCode = alGetError()) {
         case AL_NO_ERROR:
             break;
@@ -109,3 +130,17 @@ void AudioListner::queryErrors() const {
             break;
     }
 }
+
+void AudioListener::setListenerPos() const {
+    Vector2 globalPos = object->transform.getGlobalPosition();
+    alListener3f(AL_POSITION, globalPos.x, globalPos.y, 0);
+}
+
+void AudioListener::setListenerVelocity(const float deltaTime) {
+    const Vector2 globalPos = object->transform.getGlobalPosition();
+    const Vector2 velocity = (globalPos - lastPos_) / deltaTime;
+    lastPos_ = globalPos;
+
+    alListener3f(AL_VELOCITY, velocity.x, velocity.y, 0);
+}
+

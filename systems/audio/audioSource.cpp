@@ -2,6 +2,7 @@
 
 #include "audio.h"
 #include "../../object.h"
+#include <AL/al.h>
 
 AudioSource::AudioSource(Object* owner, const std::string& filePath) : Component(owner), sound_(filePath) {
     std::printf("Constructing AudioSource\n");
@@ -19,15 +20,14 @@ AudioSource::AudioSource(Object* owner, const std::string& filePath) : Component
     // mono or stereo
     // 8 or 16 bit
     ALenum format = 0;
-
     // get format
-    if (channels == 1 && bitsPerSample)
+    if (channels == 1 && bitsPerSample == 8)
         format = AL_FORMAT_MONO8;
-    else if (channels == 1 && bitsPerSample)
+    else if (channels == 1 && bitsPerSample == 16)
         format = AL_FORMAT_MONO16;
-    else if (channels == 2 && bitsPerSample)
+    else if (channels == 2 && bitsPerSample == 8)
         format = AL_FORMAT_STEREO8;
-    else if (channels == 2 && bitsPerSample)
+    else if (channels == 2 && bitsPerSample == 16)
         format = AL_FORMAT_STEREO16;
     else {
         std::cerr
@@ -41,24 +41,38 @@ AudioSource::AudioSource(Object* owner, const std::string& filePath) : Component
     alBufferData(buffer_, format, data, size, sampleRate);
 }
 
-void AudioSource::play(const std::vector<AudioEffect>& effects) const {
-    for (AudioEffect effect : effects) {
-        // do alSource... for each effect
-    }
-
-    alSourcef(source_, AL_PITCH, 1);
-    alSourcef(source_, AL_GAIN, 1.0f);
-    alSourcei(source_, AL_LOOPING, AL_FALSE);
+/**
+ * @brief Plays the audio with any effects and pitch/volume
+ */
+void AudioSource::play() const {
+    alSourcef(source_, AL_PITCH, pitch_);
+    alSourcef(source_, AL_GAIN, volume_);
+    alSourcei(source_, AL_LOOPING, looping_);
 
     // tell it where the info is
     alSourcei(source_, AL_BUFFER, buffer_);
 
-    // for directional audio
-    auto [x, y] = object->transform.getGlobalPosition();
-    alSource3f(source_, AL_POSITION, x, y, 0);
+    setSourcePos();
 
     // play
     alSourcePlay(source_);
+}
+
+void AudioSource::stop() const {
+    alSourceStop(source_);
+}
+
+
+void AudioSource::rewind() const {
+    alSourceRewind(source_);
+}
+
+void AudioSource::pause() const {
+    alSourcePause(source_);
+}
+
+void AudioSource::setPlaybackTime(const float time) const {
+    alSourcef(source_, AL_SEC_OFFSET, time);
 }
 
 bool AudioSource::isPlaying() const {
@@ -71,6 +85,11 @@ bool AudioSource::isPlaying() const {
     return false;
 }
 
+void AudioSource::update(const float deltaTime) {
+    if (isPlaying())
+        setSourcePos();
+}
+
 AudioSource::~AudioSource() {
     std::printf("Destroying AudioSource\n");
     // clean up time
@@ -78,3 +97,8 @@ AudioSource::~AudioSource() {
     alDeleteBuffers(1, &buffer_);
 }
 
+void AudioSource::setSourcePos() const {
+    // for directional audio
+    auto [x, y] = object->transform.getGlobalPosition();
+    alSource3f(source_, AL_POSITION, x, y, 0);
+}

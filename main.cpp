@@ -58,6 +58,7 @@ int main() {
         std::printf("glfw initialization failed");
         exit(0);
     }
+
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
@@ -93,7 +94,7 @@ int main() {
 
     Object camera("mainCamera", 69, {0, 0}, 0, {1, 1});
     auto cameraComponent = camera.addComponent<Camera>();
-    auto listenerComponent = camera.addComponent<AudioListner>();
+    auto listenerComponent = camera.addComponent<AudioListener>();
 
     if (auto cam = cameraComponent.lock()) {
         cam->setMain();
@@ -123,9 +124,6 @@ int main() {
 
     // update the window size initialiy
     window.callWindowFunction(framebufferSizeCallback, screenWidth, screenHeight);
-
-    // AudioListner device;
-    // device.playSound(Sound("/Users/ricardito/Projects/learning-opengl/res/audios/file_example_WAV_1MG.wav"));
 
     // variables for inside main loop to last between loops
     auto lastLoopTime = std::chrono::high_resolution_clock::now();
@@ -233,7 +231,7 @@ void destroyObjects() {
 
 void drawCalls() {
     // iterate through all the renderers in reverse. AKA: from back to front
-    Matrix<4, 4> cameraViewMatrix = Camera::mainCamera->getViewMatrix();
+    const Matrix<4, 4> cameraViewMatrix = Camera::mainCamera->getViewMatrix();
     for (auto& renderersInLayer : std::ranges::reverse_view(allRenderers)) {
         for (const auto& renderer : renderersInLayer.second) {
             renderer->draw(cameraViewMatrix, projection);

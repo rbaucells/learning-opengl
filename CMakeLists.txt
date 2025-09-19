@@ -49,6 +49,7 @@ add_executable(OpenGL components/rotateComponent.cpp components/rotateComponent.
         systems/audio/audioSource.cpp
         systems/audio/audioListener.cpp
         systems/audio/audioSource.cpp
+        systems/audio/audioEffect.cpp
 )
 
 # add include directory
