@@ -36,49 +36,51 @@ private:
     static WavHeader loadWavFileHeader(std::ifstream& file);
 };
 
-class AudioEffect {
-public:
-    ALuint getEffect() const {
-        return effect_;
-    }
+struct AudioEffect {
+    virtual void applyEffect(ALuint effectId) const = 0;
 
-    virtual ~AudioEffect() {
-        if (effect_ != 0) {
-            alDeleteEffects(1, &effect_);
-        }
-    }
+    [[nodiscard]] constexpr virtual ALenum getEffectType() const = 0;
 
-protected:
-    explicit AudioEffect(const ALenum effectType) {
-        alGenEffects(1, &effect_);
-        alEffecti(effect_, AL_EFFECT_TYPE, effectType);
-    }
-
-    ALuint effect_;
+    virtual ~AudioEffect() = default;
 };
 
-class FrequencyShifterEffect final : public AudioEffect {
-public:
+struct FrequencyShifterEffect final : public AudioEffect {
     enum Direction {
-        down,
-        up,
-        off
+        down = AL_FREQUENCY_SHIFTER_DIRECTION_DOWN,
+        up = AL_FREQUENCY_SHIFTER_DIRECTION_UP,
+        off = AL_FREQUENCY_SHIFTER_DIRECTION_OFF
     };
-    FrequencyShifterEffect() : AudioEffect(AL_EFFECT_FREQUENCY_SHIFTER) {}
 
-    void setFrequency(const float frequencyHz) const {
-        alEffectf(effect_, AL_FREQUENCY_SHIFTER_FREQUENCY, frequencyHz);
+    void applyEffect(ALuint effectId) const override;
+
+    [[nodiscard]] constexpr ALenum getEffectType() const override {
+        return AL_EFFECT_FREQUENCY_SHIFTER;
     }
 
-    void setLeftDirection(const Direction direction) const {
-        alEffecti(effect_, AL_FREQUENCY_SHIFTER_LEFT_DIRECTION, direction);
-    }
-
-    void setRightDirection(const Direction direction) const {
-        alEffecti(effect_, AL_FREQUENCY_SHIFTER_RIGHT_DIRECTION, direction);
-    }
+    // default params
+    float frequencyHz = 0;
+    Direction leftDirection = down;
+    Direction rightDirection = down;
 };
 
+struct AudioFilter {
+    virtual void applyFilter(ALuint filterId) const = 0;
+
+    [[nodiscard]] constexpr virtual ALenum getFilterType() const = 0;
+
+    virtual ~AudioFilter() = default;
+};
+
+struct LowPassFilter final : public AudioFilter {
+    void applyFilter(ALuint filterId) const override;
+
+    [[nodiscard]] constexpr ALenum getFilterType() const override {
+        return AL_FILTER_LOWPASS;
+    }
+
+    float gain = 1;
+    float gainHf = 1;
+};
 
 class AudioSource final : public Component {
 public:
@@ -88,6 +90,9 @@ public:
     void stop() const;
     void rewind() const;
     void pause() const;
+
+    void addEffectAndFilter(const AudioEffect* audioEffect, const AudioFilter* audioFilter = nullptr);
+    void setDirectFilter(const AudioFilter* audioFilter);
 
     /**
      * @brief Sets the volume of this audio source
@@ -105,11 +110,11 @@ public:
         pitch_ = pitch;
     }
 
-    float getVolume() const {
+    [[nodiscard]] float getVolume() const {
         return volume_;
     }
 
-    float getPitch() const {
+    [[nodiscard]] float getPitch() const {
         return pitch_;
     }
 
@@ -117,7 +122,7 @@ public:
         looping_ = looping;
     }
 
-    bool getLooping() const {
+    [[nodiscard]] bool getLooping() const {
         return looping_;
     }
 
@@ -137,11 +142,19 @@ private:
 
     void setSourcePos() const;
 
-private:
     ALuint source_ = 0;
     ALuint buffer_ = 0;
 
     Sound sound_;
+
+    struct EffectAndFilter {
+        ALuint effectId;
+        ALuint filterId;
+        ALuint auxEffectId;
+    };
+
+    std::vector<EffectAndFilter> effectsAndFilters_;
+    ALuint directFilter_;
 };
 
 class AudioListener final : public Component {

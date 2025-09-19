@@ -56,8 +56,13 @@ void RotateComponent::start() {
     const auto sourceWeak = object->getComponent<AudioSource>();
 
     if (const auto source = sourceWeak.lock()) {
-        source->volume = 1;
-        source->pitch = 1; // also does speed ig
+        FrequencyShifterEffect effect;
+
+        effect.frequencyHz = 100;
+        effect.leftDirection = FrequencyShifterEffect::down;
+        effect.rightDirection = FrequencyShifterEffect::down;
+
+        source->addEffectAndFilter(&effect);
         source->play();
     }
 }

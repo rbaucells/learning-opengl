@@ -50,6 +50,8 @@ add_executable(OpenGL components/rotateComponent.cpp components/rotateComponent.
         systems/audio/audioListener.cpp
         systems/audio/audioSource.cpp
         systems/audio/audioEffect.cpp
+        systems/audio/effects/frequencyShifterEffect.cpp
+        systems/audio/filters/lowPassFilter.cpp
 )
 
 # add include directory

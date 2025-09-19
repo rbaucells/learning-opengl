@@ -62,7 +62,6 @@ void AudioSource::stop() const {
     alSourceStop(source_);
 }
 
-
 void AudioSource::rewind() const {
     alSourceRewind(source_);
 }
@@ -101,4 +100,55 @@ void AudioSource::setSourcePos() const {
     // for directional audio
     auto [x, y] = object->transform.getGlobalPosition();
     alSource3f(source_, AL_POSITION, x, y, 0);
+}
+
+void AudioSource::addEffectAndFilter(const AudioEffect* audioEffect, const AudioFilter* audioFilter) {
+    assert(audioEffect);
+    // make an effect
+    ALuint effectId;
+    alGenEffects(1, &effectId);
+    // and apply the parameters
+    audioEffect->applyEffect(effectId);
+
+    if (audioFilter) { // if the filter exists we define it like normal
+        // make a filter
+        ALuint filterId;
+        alGenFilters(1, &filterId);
+        // and apply the parameters
+        audioFilter->applyFilter(filterId);
+
+        // make a slot for the effect and filter
+        ALuint auxEffectId;
+        alGenAuxiliaryEffectSlots(1, &auxEffectId);
+        // bind the effect
+        alAuxiliaryEffectSloti(auxEffectId, AL_EFFECTSLOT_EFFECT, effectId);
+        // bind the filter
+        alSource3i(source_, AL_AUXILIARY_SEND_FILTER, auxEffectId, 0, filterId);
+
+        effectsAndFilters_.push_back({effectId, filterId, auxEffectId});
+    }
+    else { // the filter is nullptr so we just pass AL_FILTER_NULL
+        // make a slot for the effect and filter
+        ALuint auxEffectId;
+        alGenAuxiliaryEffectSlots(1, &auxEffectId);
+        // bind the effect
+        alAuxiliaryEffectSloti(auxEffectId, AL_EFFECTSLOT_EFFECT, effectId);
+        // bind the filter
+        alSource3i(source_, AL_AUXILIARY_SEND_FILTER, auxEffectId, 0, AL_FILTER_NULL);
+
+        effectsAndFilters_.push_back({effectId, AL_FILTER_NULL, auxEffectId});
+    }
+}
+
+void AudioSource::setDirectFilter(const AudioFilter* audioFilter) {
+    if (!audioFilter) {
+        alSourcei(source_, AL_DIRECT_FILTER, AL_FILTER_NULL);
+        return;
+    }
+
+    if (!directFilter_)
+        alGenFilters(1, &directFilter_);
+
+    audioFilter->applyFilter(directFilter_);
+    alSourcei(source_, AL_DIRECT_FILTER, directFilter_);
 }
