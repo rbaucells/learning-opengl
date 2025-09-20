@@ -43,15 +43,32 @@ add_executable(OpenGL components/rotateComponent.cpp components/rotateComponent.
         "systems/opengl wrappers/shader.h"
         "systems/opengl wrappers/window.cpp"
         "systems/opengl wrappers/window.h"
-        systems/audio/audio.h
         systems/audio/sound.cpp
         systems/audio/audioListener.cpp
         systems/audio/audioSource.cpp
         systems/audio/audioListener.cpp
         systems/audio/audioSource.cpp
-        systems/audio/audioEffect.cpp
-        systems/audio/effects/frequencyShifterEffect.cpp
+        systems/audio/effects/frequencyShifter.cpp
         systems/audio/filters/lowPassFilter.cpp
+        systems/audio/sound.h
+        systems/audio/effects/audioEffect.h
+        systems/audio/filters/audioFilter.h
+        systems/audio/audioSource.h
+        systems/audio/audioListener.h
+        systems/audio/effects/eaxReverb.cpp
+        systems/audio/effects/reverb.cpp
+        systems/audio/effects/chorus.cpp
+        systems/audio/effects/distortion.cpp
+        systems/audio/effects/echo.cpp
+        systems/audio/effects/flanger.cpp
+        systems/audio/effects/vocalMorpher.cpp
+        systems/audio/effects/pitchShifter.cpp
+        systems/audio/effects/ringModulator.cpp
+        systems/audio/effects/autowah.cpp
+        systems/audio/effects/compressor.cpp
+        systems/audio/effects/equalizer.cpp
+        systems/audio/filters/highPassFilter.cpp
+        systems/audio/filters/bandPassFilter.cpp
 )
 
 # add include directory

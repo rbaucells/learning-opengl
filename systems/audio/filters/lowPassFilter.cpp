@@ -1,6 +1,6 @@
-#include "../audio.h"
+#include "audioFilter.h"
 
-void LowPassFilter::applyFilter(const ALuint filterId) const {
+void LowPass::applyFilter(const ALuint filterId) const {
     alFilteri(filterId, AL_FILTER_TYPE, getFilterType());
 
     alFilterf(filterId, AL_LOWPASS_GAIN, gain);

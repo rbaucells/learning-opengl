@@ -1,8 +1,12 @@
+#include "audioSource.h"
+
 #include <iostream>
 
-#include "audio.h"
 #include "../../object.h"
 #include <AL/al.h>
+
+#include "effects/audioEffect.h"
+#include "filters/audioFilter.h"
 
 AudioSource::AudioSource(Object* owner, const std::string& filePath) : Component(owner), sound_(filePath) {
     std::printf("Constructing AudioSource\n");

@@ -16,10 +16,11 @@
 #include "GLFW/glfw3.h"
 #include "math/vertex.h"
 #include "systems/input.h"
-#include "systems/audio/audio.h"
 #include "systems/opengl wrappers/shader.h"
 #include "systems/opengl wrappers/texture.h"
 #include "systems/opengl wrappers/window.h"
+#include "systems/audio/audioListener.h"
+#include "systems/audio/audioSource.h"
 
 // needed by framebuffer_size_callback() and by object.draw()
 Matrix<4, 4> projection;

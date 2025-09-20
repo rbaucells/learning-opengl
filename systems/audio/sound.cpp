@@ -1,7 +1,7 @@
+#include "sound.h"
+
 #include <fstream>
 #include <iostream>
-
-#include "audio.h"
 
 Sound::Sound(const std::string& filePath) {
     std::ifstream in(filePath);

@@ -1,7 +1,8 @@
 #include "rotateComponent.h"
 
 #include "../object.h"
-#include "../systems/audio/audio.h"
+#include "../systems/audio/effects/audioEffect.h"
+#include "../systems/audio/audioSource.h"
 #include "renderer/renderer.h"
 
 RotateComponent::RotateComponent(Object* owner, const float speed) : Component(owner) {
@@ -53,14 +54,10 @@ void RotateComponent::start() {
     //     }
     // }, 1, 100000)));
 
-    const auto sourceWeak = object->getComponent<AudioSource>();
+    const auto sourceWeakPtr = object->getComponent<AudioSource>();
 
-    if (const auto source = sourceWeak.lock()) {
-        FrequencyShifterEffect effect;
-
-        effect.frequencyHz = 100;
-        effect.leftDirection = FrequencyShifterEffect::down;
-        effect.rightDirection = FrequencyShifterEffect::down;
+    if (const auto source = sourceWeakPtr.lock()) {
+        const VocalMorpher effect;
 
         source->addEffectAndFilter(&effect);
         source->play();
