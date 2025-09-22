@@ -15,16 +15,16 @@ Shader::Shader(const std::string& vertex, const std::string& fragment) {
     bind();
 }
 
-void Shader::bind() const {
-    glUseProgram(programId_);
-}
-
 int Shader::getUniformLocation(const std::string& name) const {
     return glGetUniformLocation(programId_, name.c_str());
 }
 
 int Shader::getProgram() const {
     return programId_;
+}
+
+void Shader::bind() const {
+    glUseProgram(programId_);
 }
 
 Shader::~Shader() {

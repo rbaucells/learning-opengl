@@ -55,6 +55,10 @@ void Window::swapBuffers() const {
     glfwSwapBuffers(window_);
 }
 
+bool Window::getShouldClose() const {
+    return glfwWindowShouldClose(window_);
+}
+
 void Window::setCurrentWindowSize(const int width, const int height) {
     glfwSetWindowSize(window_, width, height);
     updateWindowSize(nullptr, width, height);
@@ -71,10 +75,6 @@ void Window::setCurrentWindowWidth(const int width) {
 void Window::setCoordinateSystemHeight(const float height) {
     coordinateSystemHeight_ = height;
     updateWindowSize(nullptr, curWindowWidth_, curWindowHeight_);
-}
-
-bool Window::getShouldClose() const {
-    return glfwWindowShouldClose(window_);
 }
 
 Window::~Window() {

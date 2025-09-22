@@ -6,7 +6,7 @@
 #include "../../systems/opengl wrappers/shader.h"
 #include "../../systems/opengl wrappers/texture.h"
 
-SpriteRenderer::SpriteRenderer(Object* owner, Vector2 size, unsigned int usage, const std::shared_ptr<Texture>& texture, const std::shared_ptr<Shader>& shader, int layer) : RendererBase(owner) {
+SpriteRenderer::SpriteRenderer(Object* owner, const Vector2 size, const unsigned int usage, const std::shared_ptr<Texture>& texture, const std::shared_ptr<Shader>& shader, const int layer) : RendererBase(owner) {
     vertices_ = {
         {{-size.x / 2, -size.y / 2}, {0, 0}}, // bottom left
         {{-size.x / 2, size.y / 2}, {0, 1}}, // top left
@@ -61,14 +61,13 @@ SpriteRenderer::SpriteRenderer(Object* owner, Vector2 size, unsigned int usage, 
 
     buffers_ = {vertexBuffer, indexBuffer};
 
-    // cache uniform locations to avoid lookups in draw
-    // mvpLocation_ = glGetUniformLocation(shader_->getProgram(), "mvp");
-    // channelsLocation_ = glGetUniformLocation(shader_->getProgram(), "channels");
-    // alphaLocation_ = glGetUniformLocation(shader_->getProgram(), "alpha");
-
     mvpLocation_ = shader->getUniformLocation("mvp");
     channelsLocation_ = shader->getUniformLocation("channels");
     alphaLocation_ = shader->getUniformLocation("alpha");
+}
+
+SpriteRenderer::SpriteRenderer(Object* owner, const unsigned int usage, const std::shared_ptr<Texture>& texture, const std::shared_ptr<Shader>& shader, const int layer, const float pixelsPerUnit) : SpriteRenderer(owner, {static_cast<float>(texture->getWidth()) / pixelsPerUnit, static_cast<float>(texture->getHeight()) / pixelsPerUnit}, usage, texture, shader, layer) {
+
 }
 
 void SpriteRenderer::draw(const Matrix<4, 4>& view, const Matrix<4, 4>& projection) const {

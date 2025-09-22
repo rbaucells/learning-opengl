@@ -67,6 +67,7 @@ private:
 class SpriteRenderer final : public RendererBase {
 public:
     SpriteRenderer(Object* owner, Vector2 size, unsigned int usage, const std::shared_ptr<Texture>& texture, const std::shared_ptr<Shader>& shader, int layer);
+    SpriteRenderer(Object* owner, unsigned int usage, const std::shared_ptr<Texture>& texture, const std::shared_ptr<Shader>& shader, int layer, float pixelsPerUnit = 100);
 
     void draw(const Matrix<4, 4>& view, const Matrix<4, 4>& projection) const override;
 

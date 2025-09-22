@@ -99,7 +99,7 @@ int main() {
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-    Window window(1000,"learn-opengl");
+    Window window(5,"learn-opengl");
 
     if (gladLoadGL(glfwGetProcAddress) == 0) {
         printf("Failed to initialize OpenGL context\n");
@@ -142,7 +142,8 @@ int main() {
     Object square("square", 0, {0, 0}, 0, {1, 1}, &origin1.transform);
 
     // square.addComponent<SpriteSheetRenderer>(69, 69, 0, GL_STATIC_DRAW, spriteSheetTexture, shader, 2);
-    square.addComponent<SpriteRenderer>(Vector2(320, 426), GL_STATIC_DRAW, mainTexture, shader, 2);
+    // square.addComponent<SpriteRenderer>(Vector2(32, 42.6), GL_STATIC_DRAW, mainTexture, shader, 2);
+    square.addComponent<SpriteRenderer>(GL_STATIC_DRAW, mainTexture, shader, 2, 100);
     // square.addComponent<CustomRenderer>(vertices, indices, GL_STATIC_DRAW, mainTexture, shader, 2);
 
     square.addComponent<ComponentExample>(45);

@@ -6,6 +6,10 @@
 
 #include "../systems/opengl wrappers/window.h"
 
+void ComponentExample::awake() {
+    // std::printf("Awake \n");
+}
+
 void ComponentExample::start() {
     std::printf("Start \n");
 
@@ -42,6 +46,10 @@ void ComponentExample::start() {
     // addTween(tween);
 }
 
+void ComponentExample::onEnable() {
+    // std::printf("onEnable \n");
+}
+
 void ComponentExample::update(float deltaTime) {
     // static int i = 0;
     // const auto rendererPtr = object->getComponent<SpriteSheetRenderer>();
@@ -56,16 +64,7 @@ void ComponentExample::update(float deltaTime) {
     // }
 
     // Window::mainWindow->setCurrentWindowWidth(Window::mainWindow->getCurrentWindowWidth() - (5 * deltaTime));
-
-    Window::mainWindow->setCoordinateSystemHeight(Window::mainWindow->getCoordinateSystemHeight() - 1);
-}
-
-void ComponentExample::awake() {
-    // std::printf("Awake \n");
-}
-
-void ComponentExample::onEnable() {
-    // std::printf("onEnable \n");
+    Window::mainWindow->setCoordinateSystemHeight(Window::mainWindow->getCoordinateSystemHeight() - 0.01f);
 }
 
 void ComponentExample::lateUpdate(float deltaTime) {
