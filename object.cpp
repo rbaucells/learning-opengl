@@ -1,6 +1,6 @@
 #include "systems/component.h"
 #include "object.h"
-#include "main.h"
+#include "settings.h"
 
 #include <vector>
 

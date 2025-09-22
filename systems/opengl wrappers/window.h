@@ -1,41 +1,72 @@
 #pragma once
 #include <string>
 #include <GLFW/glfw3.h>
+#include "../../math/matrix.h"
+
+inline constexpr int WINDOW_WIDTH = 1280;
+inline constexpr int WINDOW_HEIGHT = 720;
 
 class Window {
 public:
     static Window* mainWindow;
 
-    /**
-     * @param width In pixels
-     * @param height In pixels
-     * @param title Title text
-     * @param monitor Do you want to show it on a specific monitor, nullptr means default
-     * @param share Used for context sharing
-     */
-    Window(int width, int height, const std::string& title, GLFWmonitor* monitor = nullptr, GLFWwindow* share = nullptr);
+    Window(float size, const std::string& title, GLFWmonitor* monitor = nullptr, GLFWwindow* share = nullptr);
 
-    /**
-     * @brief Sets mainWindow and sets opengl context
-     */
-    void makeCurrent();
+    void reCalculateProjectionMatrix();
+    Matrix<4,4> getProjectionMatrix() const;
 
-    /**
-     * @brief Useful for setting callbakcs, resizing, etc.
-     * @note Automatically puts the GLFWwindow* window param
-     * @tparam FUNC What type of glfw function would you like to call
-     * @tparam ARGS The types of arguments passed
-     * @param func The function to call
-     * @param args The arguments to use, see remarks
-     */
-    template<typename FUNC, typename... ARGS>
-    void callWindowFunction(FUNC func, ARGS ... args) {
-        func(window_, args...);
+    void swapBuffers() const;
+
+    [[nodiscard]] bool getShouldClose() const;
+
+    // getters
+    int getCurrentWindowWidth() const {
+        return curWindowWidth_;
     }
 
-    bool shouldClose() const;
+    int getCurrentWindowHeight() const {
+        return curWindowHeight_;
+    }
+
+    float getCoordinateSystemHeight() const {
+        return coordinateSystemHeight_;
+    }
+
+    float getCoordinateSystemWidth() const {
+        return coordinateSystemWidth_;
+    }
+
+    // setters
+    void setCurrentWindowSize(int width, int height);
+
+    void setCurrentWindowHeight(int height);
+    void setCurrentWindowWidth(int width);
+
+    void setCoordinateSystemHeight(float height);
 
     ~Window();
+
 private:
+    struct AspectRatio {
+        int width, height;
+    };
+
     GLFWwindow* window_;
+
+    // callbacks
+    static void updateWindowSize(GLFWwindow* glfwWindow, int width, int height);
+    static void closeCallback(GLFWwindow* window);
+
+    Matrix<4,4> projection_;
+
+    // set default window size
+    int curWindowWidth_ = WINDOW_WIDTH;
+    int curWindowHeight_ = WINDOW_HEIGHT;
+    AspectRatio curWindowAspectRatio_ = {WINDOW_WIDTH, WINDOW_HEIGHT};
+
+    // can be set by user
+    float coordinateSystemHeight_;
+
+    // calculated from coordinateSystemHeight_. Cannot be set by user
+    float coordinateSystemWidth_;
 };

@@ -79,10 +79,10 @@ void AudioSource::setPlaybackTime(const float time) const {
 }
 
 bool AudioSource::isPlaying() const {
-    ALint state;
-    alGetSourcei(source_, AL_SOURCE_STATE, &state);
+    static ALint running;
+    alGetSourcei(source_, AL_SOURCE_STATE, &running);
 
-    if (state == AL_PLAYING) {
+    if (running == AL_PLAYING) {
         return true;
     }
 
@@ -106,6 +106,9 @@ AudioSource::~AudioSource() {
 void AudioSource::setSourcePos() const {
     // for directional audio
     auto [x, y] = object->transform.getGlobalPosition();
+
+    std::cout << "Got Global Position: " << x << ", " << y << std::endl;
+
     alSource3f(source_, AL_POSITION, x, y, 0);
 }
 

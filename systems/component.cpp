@@ -6,21 +6,21 @@ Component::Component(Object* owner) {
 };
 
 void Component::manageQueue(float deltaTime) {
-    for (auto it = queue.begin(); it != queue.end(); ) {
+    for (auto it = queue_.begin(); it != queue_.end(); ) {
         if ((*it)->run(deltaTime))
-            it = queue.erase(it);
+            it = queue_.erase(it);
         else
             ++it;
     }
 }
 
 void Component::manageTweens(float deltaTime) {
-    for (auto it = tweens.begin(); it != tweens.end(); ) {
+    for (auto it = tweens_.begin(); it != tweens_.end(); ) {
         (*it)->update(deltaTime);
 
         if ((*it)->shouldDelete()) {
             std::printf("Deleting tween \n");
-            it = tweens.erase(it);
+            it = tweens_.erase(it);
         }
         else {
             ++it;

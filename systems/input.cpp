@@ -1,18 +1,18 @@
 #include "input.h"
 
-#include "../main.h"
+#include "../settings.h"
 #include "../object.h"
 
 #include "GLFW/glfw3.h"
 
-void cursor_move_callback(GLFWwindow *window, double xpos, double ypos) {
+void cursorMoveCallback(GLFWwindow *window, double xpos, double ypos) {
     const auto x = static_cast<float>(xpos);
     const auto y = static_cast<float>(ypos);
     mouse_moved_event.invoke({x, y});
 }
 
-void mouse_button_callback(GLFWwindow *window, int button, int action, int mods) {
-    bool pressed = action == GLFW_PRESS;
+void mouseButtonCallback(GLFWwindow *window, int button, int action, int mods) {
+    const bool pressed = action == GLFW_PRESS;
     switch (button) {
         case GLFW_MOUSE_BUTTON_LEFT:
             left_click_event.invoke(pressed);
@@ -28,14 +28,14 @@ void mouse_button_callback(GLFWwindow *window, int button, int action, int mods)
     }
 }
 
-void scroll_callback(GLFWwindow *window, double xoffset, double yoffset) {
+void scrollCallback(GLFWwindow *window, double xoffset, double yoffset) {
     const auto x = static_cast<float>(xoffset);
     const auto y = static_cast<float>(yoffset);
     scroll_x_event.invoke(x);
     scroll_y_event.invoke(y);
 }
 
-void key_callback(GLFWwindow *window, int key, int scancode, int action, int mods) {
+void keyCallback(GLFWwindow *window, int key, int scancode, int action, int mods) {
     if (action == GLFW_REPEAT) {
         return;
     }

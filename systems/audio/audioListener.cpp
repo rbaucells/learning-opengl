@@ -15,7 +15,7 @@ AudioListener::AudioListener(Object* owner) : Component(owner) {
     if (!mainListener)
         mainListener = this;
     else {
-        // VERY DANGEROUS, WILL DELETE THIS CLASS INSTANCE, PLS DONT MAKE MULTIPLE AUDIOLISTENERS
+        // VERY DANGEROUS, WILL DELETE THIS CLASS INSTANCE WHILE ITS RUNNING, PLS DONT MAKE MULTIPLE AUDIOLISTENERS
         object->removeComponent<AudioListener>();
         return;
     }

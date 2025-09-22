@@ -1,4 +1,4 @@
-#include "main.h"
+#include "settings.h"
 
 #include <complex>
 #include <fstream>
@@ -21,9 +21,6 @@
 #include "systems/opengl wrappers/window.h"
 #include "systems/audio/audioListener.h"
 #include "systems/audio/audioSource.h"
-
-// needed by framebuffer_size_callback() and by object.draw()
-Matrix<4, 4> projection;
 
 // callbacks
 void errorCallback(const int error, const char* description) {
@@ -49,17 +46,6 @@ void debugErrorCallback(GLenum source, GLenum type, GLuint id, const GLenum seve
             break;
     }
 };
-
-void closeCallback(GLFWwindow* window) {
-    std::printf("user closing window");
-}
-
-void framebufferSizeCallback(GLFWwindow* window, const int width, const int height) {
-    screenWidth = width;
-    screenHeight = height;
-    glViewport(0, 0, width, height);
-    projection = Matrix<4, 4>::ortho(-static_cast<float>(width) / 2.0f, static_cast<float>(width) / 2.0f, -static_cast<float>(height) / 2.0f, static_cast<float>(height) / 2.0f, 0, 1);
-}
 
 // declarations
 void initializeObjects();
@@ -113,21 +99,14 @@ int main() {
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-    Window window(screenWidth, screenHeight, "learn-opengl");
-
-    window.callWindowFunction(glfwSetWindowCloseCallback, closeCallback);
-    window.callWindowFunction(glfwSetKeyCallback, key_callback);
-    window.callWindowFunction(glfwSetCursorPosCallback, cursor_move_callback);
-    window.callWindowFunction(glfwSetMouseButtonCallback, mouse_button_callback);
-    window.callWindowFunction(glfwSetScrollCallback, scroll_callback);
-    window.callWindowFunction(glfwSetFramebufferSizeCallback, framebufferSizeCallback);
-
-    window.makeCurrent();
+    Window window(1000,"learn-opengl");
 
     if (gladLoadGL(glfwGetProcAddress) == 0) {
         printf("Failed to initialize OpenGL context\n");
         exit(1);
     }
+
+    window.reCalculateProjectionMatrix();
 
     std::cout << "OpenGL Version: " << glGetString(GL_VERSION) << std::endl;
 
@@ -145,7 +124,7 @@ int main() {
 
     Object camera("mainCamera", 69, {0, 0}, 0, {1, 1});
     auto cameraComponent = camera.addComponent<Camera>();
-    auto listenerComponent = camera.addComponent<AudioListener>();
+    // auto listenerComponent = camera.addComponent<AudioListener>();
 
     if (auto cam = cameraComponent.lock()) {
         cam->setMain();
@@ -167,16 +146,13 @@ int main() {
     // square.addComponent<CustomRenderer>(vertices, indices, GL_STATIC_DRAW, mainTexture, shader, 2);
 
     square.addComponent<ComponentExample>(45);
-    square.addComponent<AudioSource>("/Users/ricardito/Projects/learning-opengl/res/audios/file_example_WAV_1MG.wav");
+    // square.addComponent<AudioSource>("/Users/ricardito/Projects/learning-opengl/res/audios/Chorus.wav");
 
     // empty the buffers to make sure its drawing properly
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindTexture(GL_TEXTURE0, 0);
     glBindVertexArray(0);
-
-    // update the window size initialiy
-    window.callWindowFunction(framebufferSizeCallback, screenWidth, screenHeight);
 
     // variables for inside main loop to last between loops
     auto lastLoopTime = std::chrono::high_resolution_clock::now();
@@ -187,7 +163,7 @@ int main() {
     GLFWgamepadstate lastGamepadState;
 
     // main update loop
-    while (!Window::mainWindow->shouldClose()) {
+    while (!Window::mainWindow->getShouldClose()) {
         auto startOfLoopTime = std::chrono::high_resolution_clock::now();
         // calculate deltaTime
         std::chrono::duration<float> timeSinceLastUpdate = startOfLoopTime - lastLoopTime;
@@ -221,7 +197,7 @@ int main() {
 
         destroyObjects();
 
-        Window::mainWindow->callWindowFunction(glfwSwapBuffers);
+        window.swapBuffers();
         glfwPollEvents();
 
         // framerate capping
@@ -252,9 +228,10 @@ void destroyObjects() {
 void drawCalls() {
     // iterate through all the renderers in reverse. AKA: from back to front
     const Matrix<4, 4> cameraViewMatrix = Camera::mainCamera->getViewMatrix();
+    const Matrix<4,4> projectionViewMatrix = Window::mainWindow->getProjectionMatrix();
     for (auto& renderersInLayer : std::ranges::reverse_view(allRenderers)) {
         for (const auto& renderer : renderersInLayer.second) {
-            renderer->draw(cameraViewMatrix, projection);
+            renderer->draw(cameraViewMatrix, projectionViewMatrix);
         }
     }
 }

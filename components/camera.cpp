@@ -10,12 +10,12 @@ void Camera::setMain() {
 }
 
 Matrix<4, 4> Camera::getViewMatrix() {
-    if (auto localToWorldMatrix = calculateCameraLocalToWorld(); lastLocalToWorldMatrix != localToWorldMatrix) {
-        lastLocalToWorldMatrix = localToWorldMatrix;
-        viewMatrix = localToWorldMatrix;
+    if (auto localToWorldMatrix = calculateCameraLocalToWorld(); lastLocalToWorldMatrix_ != localToWorldMatrix) {
+        lastLocalToWorldMatrix_ = localToWorldMatrix;
+        viewMatrix_ = localToWorldMatrix;
     }
 
-    return viewMatrix;
+    return viewMatrix_;
 }
 
 Camera* Camera::mainCamera = nullptr;

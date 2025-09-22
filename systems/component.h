@@ -1,15 +1,15 @@
 #pragma once
 #include <vector>
 #include "workQueue.h"
+#include "tweens/tween.h"
 
 // forward declaration
-class TweenBase;
 class Object;
 
 class Component {
 protected:
-    std::vector<std::unique_ptr<QueueEntry>> queue;
-    std::vector<std::unique_ptr<TweenBase>> tweens;
+    std::vector<std::unique_ptr<QueueEntry>> queue_;
+    std::vector<std::unique_ptr<TweenBase>> tweens_;
 
 public:
     explicit Component(Object* owner);
@@ -35,7 +35,7 @@ public:
     template<typename TWEEN_TYPE>
     TWEEN_TYPE* addTween(std::unique_ptr<TWEEN_TYPE>& tween) {
         TWEEN_TYPE* rawPtr = tween.get();
-        tweens.push_back(std::move(tween));
+        tweens_.push_back(std::move(tween));
         return rawPtr;
     }
 
@@ -43,3 +43,5 @@ public:
     // and because component doesnt own object
     Object* object = nullptr;
 };
+
+inline std::vector<std::weak_ptr<Component>> componentsToInitialize {};

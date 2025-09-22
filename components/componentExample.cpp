@@ -1,9 +1,10 @@
 #include "componentExample.h"
 
 #include "../object.h"
-#include "../systems/audio/effects/audioEffect.h"
 #include "../systems/audio/audioSource.h"
 #include "renderer/renderer.h"
+
+#include "../systems/opengl wrappers/window.h"
 
 void ComponentExample::start() {
     std::printf("Start \n");
@@ -29,16 +30,16 @@ void ComponentExample::start() {
     // sequence->start();
 
     // start playing the audio
-    const auto sourceWeakPtr = object->getComponent<AudioSource>();
-
-    if (const auto source = sourceWeakPtr.lock()) {
-        // source->setLooping(true);
-        source->play();
-    }
-
-    auto tween = object->transform.globalPosTween({-1000, 0}, {1000, 0}, 6, Curve::linear);
-
-    addTween(tween);
+    // const auto sourceWeakPtr = object->getComponent<AudioSource>();
+    //
+    // if (const auto source = sourceWeakPtr.lock()) {
+    //     // source->setLooping(true);
+    //     source->play();
+    // }
+    //
+    // auto tween = object->transform.globalPosTween({-1000, 0}, {1000, 0}, 6, Curve::linear);
+    //
+    // addTween(tween);
 }
 
 void ComponentExample::update(float deltaTime) {
@@ -53,6 +54,10 @@ void ComponentExample::update(float deltaTime) {
     //     else
     //         i = 1;
     // }
+
+    // Window::mainWindow->setCurrentWindowWidth(Window::mainWindow->getCurrentWindowWidth() - (5 * deltaTime));
+
+    Window::mainWindow->setCoordinateSystemHeight(Window::mainWindow->getCoordinateSystemHeight() - 1);
 }
 
 void ComponentExample::awake() {

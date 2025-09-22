@@ -2,7 +2,7 @@
 #include <map>
 #include <memory>
 #include <vector>
-#include "main.h"
+#include "settings.h"
 #include "transform.h"
 #include "systems/component.h"
 

@@ -51,10 +51,10 @@ struct InputContext {
 
 void invokeInput(const InputContext &context);
 
-void cursor_move_callback(GLFWwindow *window, double xpos, double ypos);
-void mouse_button_callback(GLFWwindow *window, int button, int action, int mods);
-void scroll_callback(GLFWwindow *window, double xoffset, double yoffset);
-void key_callback(GLFWwindow *window, int key, int scancode, int action, int mods);
+void cursorMoveCallback(GLFWwindow *window, double xpos, double ypos);
+void mouseButtonCallback(GLFWwindow *window, int button, int action, int mods);
+void scrollCallback(GLFWwindow *window, double xoffset, double yoffset);
+void keyCallback(GLFWwindow *window, int key, int scancode, int action, int mods);
 
 void processGamepadEvents(const GLFWgamepadstate &current, const GLFWgamepadstate &last);
 
