@@ -82,15 +82,18 @@ bool AudioSource::isPlaying() const {
     ALint state;
     alGetSourcei(source_, AL_SOURCE_STATE, &state);
 
-    if (state == AL_PLAYING)
+    if (state == AL_PLAYING) {
         return true;
+    }
 
     return false;
 }
 
 void AudioSource::update(const float deltaTime) {
-    if (isPlaying())
+    if (isPlaying()) {
         setSourcePos();
+        setSourceVelocity(deltaTime);
+    }
 }
 
 AudioSource::~AudioSource() {
@@ -104,6 +107,14 @@ void AudioSource::setSourcePos() const {
     // for directional audio
     auto [x, y] = object->transform.getGlobalPosition();
     alSource3f(source_, AL_POSITION, x, y, 0);
+}
+
+void AudioSource::setSourceVelocity(const float deltaTime) {
+    const Vector2 globalPos = object->transform.getGlobalPosition();
+    const Vector2 velocity = (globalPos - lastPos_) / deltaTime;
+    lastPos_ = globalPos;
+
+    alSource3f(source_, AL_VELOCITY, velocity.x, velocity.y, 0);
 }
 
 void AudioSource::addEffectAndFilter(const AudioEffect* audioEffect, const AudioFilter* audioFilter) {

@@ -5,6 +5,7 @@
 #include "sound.h"
 
 #include "../component.h"
+#include "../../math/vector2.h"
 
 struct AudioFilter;
 struct AudioEffect;
@@ -69,6 +70,9 @@ private:
     bool looping_ = AL_FALSE;
 
     void setSourcePos() const;
+    void setSourceVelocity(float deltaTime);
+
+    Vector2 lastPos_;
 
     ALuint source_ = 0;
     ALuint buffer_ = 0;

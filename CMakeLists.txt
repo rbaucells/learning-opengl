@@ -11,7 +11,7 @@ find_package(OpenAL REQUIRED PATHS "/usr/local/Cellar/openal-soft/1.24.3/lib/cma
 #find_package(OpenAL REQUIRED)
 
 # main executable
-add_executable(OpenGL components/rotateComponent.cpp components/rotateComponent.h systems/component.h math/vector2.cpp math/vector3.cpp components/camera.cpp main.cpp main.h object.cpp object.h components/camera.h dependencies/stb_image.cpp
+add_executable(OpenGL components/ComponentExample.cpp components/ComponentExample.h systems/component.h math/vector2.cpp math/vector3.cpp components/camera.cpp main.cpp main.h object.cpp object.h components/camera.h dependencies/stb_image.cpp
         systems/input.h
         systems/input.cpp
         systems/event.h

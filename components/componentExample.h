@@ -1,17 +1,20 @@
 #pragma once
 #include "../systems/component.h"
 
-class RotateComponent final : public Component {
+class ComponentExample final : public Component {
 private:
-    float speed;
+    float speed_;
 public:
-    explicit RotateComponent(Object* owner, float speed);
-    void start() override;
-    void update(float deltaTime) override;
+    explicit ComponentExample(Object* owner, float speed) : Component(owner), speed_(speed) {};
+
     void awake() override;
+    void start() override;
     void onEnable() override;
+
+    void update(float deltaTime) override;
     void lateUpdate(float deltaTime) override;
     void fixedUpdate(float fixedDeltaTime) override;
+
     void onDisable() override;
     void onDestroy() override;
 };

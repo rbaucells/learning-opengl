@@ -10,7 +10,7 @@
 #include "list.h"
 #include "object.h"
 #include "components/camera.h"
-#include "components/rotateComponent.h"
+#include "components/componentExample.h"
 #include "components/renderer/renderer.h"
 #include "glad/gl.h"
 #include "GLFW/glfw3.h"
@@ -31,8 +31,23 @@ void errorCallback(const int error, const char* description) {
 }
 
 void debugErrorCallback(GLenum source, GLenum type, GLuint id, const GLenum severity, const GLsizei length, const GLchar* message, const void* userParam) {
-    const std::string messageString(message, length);
-    std::cout << severity << ": OpenGL error: %s\n" << messageString.c_str() << std::endl;
+    switch (severity) {
+        case GL_DEBUG_SEVERITY_HIGH:
+            std::cerr << "HIGH: Debug message (" << id << "): " << message << std::endl;
+            __builtin_trap();
+            break;
+        case GL_DEBUG_SEVERITY_MEDIUM:
+            std::cerr << "MEDIUM: Debug message (" << id << "): " << message << std::endl;
+            __builtin_trap();
+            break;
+        case GL_DEBUG_SEVERITY_LOW:
+            std::cerr << "LOW: Debug message (" << id << "): " << message << std::endl;
+            __builtin_trap();
+            break;
+        default:
+            std::cerr << "Debug message (" << id << "): " << message << std::endl;
+            break;
+    }
 };
 
 void closeCallback(GLFWwindow* window) {
@@ -51,6 +66,39 @@ void initializeObjects();
 void destroyObjects();
 void drawCalls();
 
+void initializeObjects() {
+    // if there are some components left to be "started", start em and remove them from the queueueue
+    if (!componentsToInitialize.empty()) {
+        for (auto it = componentsToInitialize.begin(); it != componentsToInitialize.end();) {
+            if (const auto comp = it->lock()) {
+                comp->awake();
+                ++it;
+            }
+            else {
+                it = componentsToInitialize.erase(it);
+            }
+        }
+
+        // if the object is supposed to be active, call the onEnable
+        for (const auto& component : componentsToInitialize) {
+            if (auto comp = component.lock()) {
+                if (comp->object->getActive()) {
+                    comp->onEnable();
+                }
+            }
+        }
+
+        // start
+        for (const auto& component : componentsToInitialize) {
+            if (auto comp = component.lock()) {
+                comp->start();
+            }
+        }
+
+        componentsToInitialize.clear();
+    }
+}
+
 int main() {
     // when we get an glfwError, lmk
     glfwSetErrorCallback(errorCallback);
@@ -60,8 +108,8 @@ int main() {
         exit(0);
     }
 
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
@@ -78,8 +126,10 @@ int main() {
 
     if (gladLoadGL(glfwGetProcAddress) == 0) {
         printf("Failed to initialize OpenGL context\n");
-        exit(0);
+        exit(1);
     }
+
+    std::cout << "OpenGL Version: " << glGetString(GL_VERSION) << std::endl;
 
     std::vector<Vertex> vertices = {
         {{212.5, 108}, {1, 1}}, // top right
@@ -110,11 +160,13 @@ int main() {
 
     // Object origin2("origin2", 0, {0, 0}, 0, {1, 1});
 
-    Object square("square", 0, {0, 0}, 0, {15, 15}, &origin1.transform);
+    Object square("square", 0, {0, 0}, 0, {1, 1}, &origin1.transform);
+
     // square.addComponent<SpriteSheetRenderer>(69, 69, 0, GL_STATIC_DRAW, spriteSheetTexture, shader, 2);
     square.addComponent<SpriteRenderer>(Vector2(320, 426), GL_STATIC_DRAW, mainTexture, shader, 2);
     // square.addComponent<CustomRenderer>(vertices, indices, GL_STATIC_DRAW, mainTexture, shader, 2);
-    square.addComponent<RotateComponent>(45);
+
+    square.addComponent<ComponentExample>(45);
     square.addComponent<AudioSource>("/Users/ricardito/Projects/learning-opengl/res/audios/file_example_WAV_1MG.wav");
 
     // empty the buffers to make sure its drawing properly
@@ -186,39 +238,6 @@ int main() {
     glfwTerminate();
     // and exit
     exit(EXIT_SUCCESS);
-}
-
-void initializeObjects() {
-    // if there are some components left to be "started", start em and remove them from the queueueue
-    if (!componentsToInitialize.empty()) {
-        for (auto it = componentsToInitialize.begin(); it != componentsToInitialize.end();) {
-            if (const auto comp = it->lock()) {
-                comp->awake();
-                ++it;
-            }
-            else {
-                it = componentsToInitialize.erase(it);
-            }
-        }
-
-        // if the object is supposed to be active, call the onEnable
-        for (const auto& component : componentsToInitialize) {
-            if (auto comp = component.lock()) {
-                if (comp->object->getActive()) {
-                    comp->onEnable();
-                }
-            }
-        }
-
-        // start
-        for (const auto& component : componentsToInitialize) {
-            if (auto comp = component.lock()) {
-                comp->start();
-            }
-        }
-
-        componentsToInitialize.clear();
-    }
 }
 
 void destroyObjects() {

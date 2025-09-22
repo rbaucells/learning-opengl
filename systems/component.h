@@ -33,7 +33,7 @@ public:
     virtual void onDestroy() {}
 
     template<typename TWEEN_TYPE>
-    TWEEN_TYPE* addTween(std::unique_ptr<TWEEN_TYPE> tween) {
+    TWEEN_TYPE* addTween(std::unique_ptr<TWEEN_TYPE>& tween) {
         TWEEN_TYPE* rawPtr = tween.get();
         tweens.push_back(std::move(tween));
         return rawPtr;

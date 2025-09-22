@@ -11,8 +11,8 @@ class Object;
 
 class Transform final : public Component {
     // both raw pointers are fine because non owning
-    Transform *parent = nullptr;
-    std::vector<Transform *> children;
+    Transform *parent_ = nullptr;
+    std::vector<Transform *> children_;
 
 public:
     Transform(Object *owner, Vector2 pos, float rot, Vector2 scale, Transform *parent);

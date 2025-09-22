@@ -28,6 +28,7 @@ private:
     ALCcontext* context_;
 
     void queryErrors() const;
+
     void setListenerPos() const;
     void setListenerVelocity(float deltaTime);
 };

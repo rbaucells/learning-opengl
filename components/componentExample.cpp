@@ -1,15 +1,11 @@
-#include "rotateComponent.h"
+#include "componentExample.h"
 
 #include "../object.h"
 #include "../systems/audio/effects/audioEffect.h"
 #include "../systems/audio/audioSource.h"
 #include "renderer/renderer.h"
 
-RotateComponent::RotateComponent(Object* owner, const float speed) : Component(owner) {
-    this->speed = speed;
-}
-
-void RotateComponent::start() {
+void ComponentExample::start() {
     std::printf("Start \n");
 
     // Normal Sequenctial Tweens
@@ -28,76 +24,57 @@ void RotateComponent::start() {
     //
     // sequence->add(object->transform.localPosTween({500, -300}, 3, Curve::sineIn));
     // sequence->join(object->transform.localRotationTween(90, 5, Curve::expoOut));
-    // sequence->add(std::make_unique<CallbackTween>([this]() {
-    //     std::printf("This is a callback \n");
-    //
-    //     const auto renderer = this->object->getComponent<RendererBase>();
-    //
-    //     if (const auto rendererPtr = renderer.lock())
-    //         rendererPtr->changeSpriteTexture("/Users/ricardito/CLionProjects/OpenGL/res/textures/anotherDvd.png", false, GL_REPEAT);
-    // }));
     // sequence->add(object->transform.localScaleTween({2, 1.7}, 2, Curve::quartInOut));
     //
     // sequence->start();
 
-    // queue.push_back(std::move(std::make_unique<TimedQueueEntry>([this]() {
-    //     static int i = 0;
-    //     const auto rendererPtr = object->getComponent<SpriteSheetRenderer>();
-    //
-    //     if (const auto renderer = rendererPtr.lock()) {
-    //         renderer->moveTo(i);
-    //
-    //         if (i < 230)
-    //             ++i;
-    //         else
-    //             i = 1;
-    //     }
-    // }, 1, 100000)));
-
+    // start playing the audio
     const auto sourceWeakPtr = object->getComponent<AudioSource>();
 
     if (const auto source = sourceWeakPtr.lock()) {
-        const VocalMorpher effect;
-
-        source->addEffectAndFilter(&effect);
+        // source->setLooping(true);
         source->play();
     }
+
+    auto tween = object->transform.globalPosTween({-1000, 0}, {1000, 0}, 6, Curve::linear);
+
+    addTween(tween);
 }
 
-void RotateComponent::update(float deltaTime) {
-    static int i = 0;
-    const auto rendererPtr = object->getComponent<SpriteSheetRenderer>();
-
-    if (const auto renderer = rendererPtr.lock()) {
-        renderer->moveTo(i);
-
-        if (i < 230)
-            ++i;
-        else
-            i = 1;
-    }
+void ComponentExample::update(float deltaTime) {
+    // static int i = 0;
+    // const auto rendererPtr = object->getComponent<SpriteSheetRenderer>();
+    //
+    // if (const auto renderer = rendererPtr.lock()) {
+    //     renderer->moveTo(i);
+    //
+    //     if (i < 230)
+    //         ++i;
+    //     else
+    //         i = 1;
+    // }
 }
 
-void RotateComponent::awake() {
+void ComponentExample::awake() {
     // std::printf("Awake \n");
 }
 
-void RotateComponent::onEnable() {
+void ComponentExample::onEnable() {
     // std::printf("onEnable \n");
 }
 
-void RotateComponent::lateUpdate(float deltaTime) {
+void ComponentExample::lateUpdate(float deltaTime) {
     // std::printf("lateUpdate \n");
 }
 
-void RotateComponent::fixedUpdate(float fixedDeltaTime) {
+void ComponentExample::fixedUpdate(float fixedDeltaTime) {
     // std::printf("fixedUpdate \n");
 }
 
-void RotateComponent::onDisable() {
+void ComponentExample::onDisable() {
     // std::printf("onDisable \n");
 }
 
-void RotateComponent::onDestroy() {
+void ComponentExample::onDestroy() {
     // std::printf("onDestroy \n");
 }
