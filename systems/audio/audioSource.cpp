@@ -107,7 +107,7 @@ void AudioSource::setSourcePos() const {
     // for directional audio
     auto [x, y] = object->transform.getGlobalPosition();
 
-    std::cout << "Got Global Position: " << x << ", " << y << std::endl;
+    // std::cout << "Got Global Position: " << x << ", " << y << std::endl;
 
     alSource3f(source_, AL_POSITION, x, y, 0);
 }

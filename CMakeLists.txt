@@ -69,6 +69,8 @@ add_executable(OpenGL components/ComponentExample.cpp components/ComponentExampl
         systems/audio/effects/equalizer.cpp
         systems/audio/filters/highPassFilter.cpp
         systems/audio/filters/bandPassFilter.cpp
+        math/bounds.h
+        components/renderer/rendererBase.cpp
 )
 
 # add include directory

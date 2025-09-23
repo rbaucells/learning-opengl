@@ -34,15 +34,28 @@ void ComponentExample::start() {
     // sequence->start();
 
     // start playing the audio
-    // const auto sourceWeakPtr = object->getComponent<AudioSource>();
-    //
-    // if (const auto source = sourceWeakPtr.lock()) {
-    //     // source->setLooping(true);
-    //     source->play();
-    // }
-    //
-    // auto tween = object->transform.globalPosTween({-1000, 0}, {1000, 0}, 6, Curve::linear);
-    //
+    const auto sourceWeakPtr = object->getComponent<AudioSource>();
+
+    if (const auto source = sourceWeakPtr.lock()) {
+        // source->setLooping(true);
+        source->play();
+    }
+
+    const auto rendererWeakPtr = object->getComponent<CustomRenderer>();
+
+    if (const auto renderer = rendererWeakPtr.lock()) {
+        const auto [size, center, min, max] = renderer->getBounds();
+
+        printf("Renderer Bounds Center: {%f, %f}\n", center.x, center.y);
+
+        printf("Renderer Bounds Min: {%f, %f}\n", min.x, min.y);
+        printf("Renderer Bounds Max: {%f, %f}\n", max.x, max.y);
+
+        printf("Renderer Bounds Size: {%f, %f}\n", size.x, size.y);
+    }
+
+    // auto tween = object->transform.globalPosTween({-10, 0}, {10 , 0}, 6, Curve::linear);
+
     // addTween(tween);
 }
 
@@ -64,7 +77,7 @@ void ComponentExample::update(float deltaTime) {
     // }
 
     // Window::mainWindow->setCurrentWindowWidth(Window::mainWindow->getCurrentWindowWidth() - (5 * deltaTime));
-    Window::mainWindow->setCoordinateSystemHeight(Window::mainWindow->getCoordinateSystemHeight() - 0.01f);
+    // Window::mainWindow->setCoordinateSystemHeight(Window::mainWindow->getCoordinateSystemHeight() - 0.5 * deltaTime);
 }
 
 void ComponentExample::lateUpdate(float deltaTime) {

@@ -21,6 +21,8 @@ help me learn complicated things in game dev and game engine design
   - UI system
   - Physics and colliders
   - Text fonts and animations
+  - Anti-aliasing
+  - Particle System
 
 ## Naming Scheme
   - PascalCase for classes, structs, typedef/using, namespaces, enums
@@ -36,3 +38,5 @@ help me learn complicated things in game dev and game engine design
   - I really like giving the user (dev) lots of control
 
 ## Building
+  - Built using Cmake and apple clang
+  - On mac install GLFW and openal-soft through homebrew, glad is included inside the project

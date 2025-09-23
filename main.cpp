@@ -10,7 +10,6 @@
 #include "list.h"
 #include "object.h"
 #include "components/camera.h"
-#include "components/componentExample.h"
 #include "components/renderer/renderer.h"
 #include "glad/gl.h"
 #include "GLFW/glfw3.h"
@@ -20,7 +19,6 @@
 #include "systems/opengl wrappers/texture.h"
 #include "systems/opengl wrappers/window.h"
 #include "systems/audio/audioListener.h"
-#include "systems/audio/audioSource.h"
 
 // callbacks
 void errorCallback(const int error, const char* description) {
@@ -99,7 +97,7 @@ int main() {
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-    Window window(5,"learn-opengl");
+    Window window(5, "learn-opengl");
 
     if (gladLoadGL(glfwGetProcAddress) == 0) {
         printf("Failed to initialize OpenGL context\n");
@@ -108,13 +106,21 @@ int main() {
 
     window.reCalculateProjectionMatrix();
 
-    std::cout << "OpenGL Version: " << glGetString(GL_VERSION) << std::endl;
+    // shaders
+    std::shared_ptr<Shader> mainShader = std::make_shared<Shader>("/Users/ricardito/Projects/learning-opengl/res/shaders/mainVertex.shader", "/Users/ricardito/Projects/learning-opengl/res/shaders/mainFragment.shader");
+
+    // textures
+    std::shared_ptr<Texture> mainTexture = std::make_shared<Texture>("/Users/ricardito/Projects/learning-opengl/res/textures/box.jpg", GL_CLAMP, true);
+
+    Object camera("mainCamera", 69, {0, 0}, 0, {1, 1});
+    auto cameraComponent = camera.addComponent<Camera>();
+    auto listenerComponent = camera.addComponent<AudioListener>();
 
     std::vector<Vertex> vertices = {
-        {{212.5, 108}, {1, 1}}, // top right
-        {{-212.5, 108}, {0, 1}}, // top left
-        {{-212.5, -108}, {0, 0}}, // bottom left
-        {{212.5, -108}, {1, 0}} // bottom right
+        {{2, 2}, {1, 1}}, // top right
+        {{-2, 2}, {0, 1}}, // top left
+        {{-2, -2}, {0, 0}}, // bottom left
+        {{2, -2}, {1, 0}} // bottom right
     };
 
     std::vector<unsigned int> indices = {
@@ -122,32 +128,8 @@ int main() {
         2, 3, 0
     };
 
-    Object camera("mainCamera", 69, {0, 0}, 0, {1, 1});
-    auto cameraComponent = camera.addComponent<Camera>();
-    // auto listenerComponent = camera.addComponent<AudioListener>();
-
-    if (auto cam = cameraComponent.lock()) {
-        cam->setMain();
-    }
-
-    std::shared_ptr<Shader> shader = std::make_shared<Shader>("/Users/ricardito/Projects/learning-opengl/res/shaders/vertex.shader", "/Users/ricardito/Projects/learning-opengl/res/shaders/fragment.shader");
-
-    std::shared_ptr<Texture> mainTexture = std::make_shared<Texture>("/Users/ricardito/Projects/learning-opengl/res/textures/super-mario-transparent-background-20.png", GL_CLAMP, true);
-    std::shared_ptr<Texture> spriteSheetTexture = std::make_shared<Texture>("/Users/ricardito/Projects/learning-opengl/res/textures/f1058a91de91f29cd65527cf97cab26b861de9b5_2_1380x896.png", GL_CLAMP, true);
-    // std::shared_ptr<Texture> spriteSheetTexture = std::make_shared<Texture>("/Users/ricardito/Projects/learning-opengl/res/textures/fonts/squiggly-wiggly-white.png", GL_CLAMP, true);
-    Object origin1("origin1", 0, {0, 0}, 0, {1, 1});
-
-    // Object origin2("origin2", 0, {0, 0}, 0, {1, 1});
-
-    Object square("square", 0, {0, 0}, 0, {1, 1}, &origin1.transform);
-
-    // square.addComponent<SpriteSheetRenderer>(69, 69, 0, GL_STATIC_DRAW, spriteSheetTexture, shader, 2);
-    // square.addComponent<SpriteRenderer>(Vector2(32, 42.6), GL_STATIC_DRAW, mainTexture, shader, 2);
-    square.addComponent<SpriteRenderer>(GL_STATIC_DRAW, mainTexture, shader, 2, 100);
-    // square.addComponent<CustomRenderer>(vertices, indices, GL_STATIC_DRAW, mainTexture, shader, 2);
-
-    square.addComponent<ComponentExample>(45);
-    // square.addComponent<AudioSource>("/Users/ricardito/Projects/learning-opengl/res/audios/Chorus.wav");
+    Object square("square", 0, {0, 0}, 0, {1, 1});
+    square.addComponent<CustomRenderer>(vertices, indices, mainTexture, mainShader, 0);
 
     // empty the buffers to make sure its drawing properly
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
@@ -229,7 +211,7 @@ void destroyObjects() {
 void drawCalls() {
     // iterate through all the renderers in reverse. AKA: from back to front
     const Matrix<4, 4> cameraViewMatrix = Camera::mainCamera->getViewMatrix();
-    const Matrix<4,4> projectionViewMatrix = Window::mainWindow->getProjectionMatrix();
+    const Matrix<4, 4> projectionViewMatrix = Window::mainWindow->getProjectionMatrix();
     for (auto& renderersInLayer : std::ranges::reverse_view(allRenderers)) {
         for (const auto& renderer : renderersInLayer.second) {
             renderer->draw(cameraViewMatrix, projectionViewMatrix);

@@ -6,32 +6,23 @@
 #include "../../systems/opengl wrappers/texture.h"
 #include "glad/gl.h"
 
-CustomRenderer::CustomRenderer(Object *owner, const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices, const unsigned int usage, const std::shared_ptr<Texture>& texture, const std::shared_ptr<Shader>& shader, const int layer) : RendererBase(owner) {
+CustomRenderer::CustomRenderer(Object* owner, const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices, const std::shared_ptr<Texture>& texture, const std::shared_ptr<Shader>& shader, const int renderingLayer, const Usage usage, const DrawMode drawMode) : RendererBase(owner) {
     this->vertices_ = vertices;
     this->indices_ = indices;
     this->shader_ = shader;
-    this->layer_ = layer;
+    this->renderingLayer_ = renderingLayer;
 
     this->texture_ = texture;
 
-    if (const auto it = allRenderers.find(layer); it != allRenderers.end()) {
-        // the layer already exists
-        it->second.push_back(this);
-    }
-    else {
-        // the layer doesnt exist
-        allRenderers[layer] = {this};
-    }
+    addToAllRenderers(renderingLayer);
 
-    glGenVertexArrays(1, &vao_);
-    glBindVertexArray(vao_);
+    glGenVertexArrays(1, &vertexArrayObject_);
+    glBindVertexArray(vertexArrayObject_);
 
-    // buffer id
-    unsigned int vertexBuffer;
     // generate 1 buffer and assign the id into uint buffer ^
-    glGenBuffers(1, &vertexBuffer);
+    glGenBuffers(1, &vertexBuffer_);
     // I am going to work with this buffer. select it
-    glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
+    glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer_);
     // define all the data to use. Use STATIC for objects that are defined once and reused, use DYNAMIC for objects that are redefined multiple times and reused
     glBufferData(GL_ARRAY_BUFFER, vertices_.size() * sizeof(Vertex), vertices_.data(), usage);
     // define the position vertexAttribute
@@ -43,12 +34,9 @@ CustomRenderer::CustomRenderer(Object *owner, const std::vector<Vertex>& vertice
     // enable the texture attribute
     glEnableVertexAttribArray(1);
 
-    unsigned int indexBuffer;
-    glGenBuffers(1, &indexBuffer);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer);
+    glGenBuffers(1, &indexBuffer_);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer_);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices_.size() * sizeof(unsigned int), indices_.data(), usage);
-
-    buffers_ = {vertexBuffer, indexBuffer};
 
     // cache uniform locations to avoid lookups in draw
     mvpLocation_ = glGetUniformLocation(shader_->getProgram(), "mvp");
@@ -71,36 +59,64 @@ void CustomRenderer::draw(const Matrix<4, 4>& view, const Matrix<4, 4>& projecti
     // pass the uniform data using the saved locations
     shader_->setUniformValue(glUniformMatrix4fv, mvpLocation_, 1, GL_FALSE, floatPointer);
     shader_->setUniformValue(glUniform1i, channelsLocation_, texture_->getNumberOfChannels());
-    shader_->setUniformValue(glUniform1f, alphaLocation_, alpha_);
+    shader_->setUniformValue(glUniform1f, alphaLocation_, alpha);
 
     // bind the texture
     texture_->bind();
     // bind the vertexArray
-    glBindVertexArray(vao_);
+    glBindVertexArray(vertexArrayObject_);
     // make sure were using the index buffer
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, buffers_.indexBuffer);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer_);
     // draw call
-    glDrawElements(drawMode_, static_cast<int>(indices_.size()), GL_UNSIGNED_INT, nullptr);
+    glDrawElements(drawMode, static_cast<int>(indices_.size()), GL_UNSIGNED_INT, nullptr);
 }
 
-void CustomRenderer::setDrawMode(const int mode) {
-    drawMode_ = mode;
+Bounds CustomRenderer::getBounds() const {
+    Bounds bounds = {};
+
+    Vertex maxX;
+    Vertex minX;
+
+    Vertex maxY;
+    Vertex minY;
+
+    for (const auto& [position, uv] : vertices_) {
+        if (position.x > maxX.position.x) {
+            maxX.position.x = position.x;
+        }
+        else if (position.x < minX.position.x) {
+            minX.position.x = position.x;
+        }
+
+        if (position.y > maxY.position.y) {
+            maxY.position.y = position.y;
+        }
+        else if (position.y < minY.position.y) {
+            minY.position.y = position.y;
+        }
+    }
+
+    bounds.center = object->transform.getGlobalPosition();
+
+    bounds.max = {maxX.position.x / 2.f, maxY.position.y / 2.f};
+    bounds.min = {minX.position.x / 2.f, minY.position.y / 2.f};
+
+    bounds.size = bounds.max - bounds.min;
+
+    return bounds;
+}
+
+int CustomRenderer::getRenderLayer() const {
+    return renderingLayer_;
+}
+
+void CustomRenderer::setRenderLayer(const int layer) {
+    this->renderingLayer_ = layer;
+
+    removeFromAllRenderers();
+    addToAllRenderers(renderingLayer_);
 }
 
 CustomRenderer::~CustomRenderer() {
-    // get iterator for layer in map
-    auto it = allRenderers.find(layer_);
-
-    // if the layer already exists
-    if (it != allRenderers.end()) {
-        // get reference to the vector of renderers for that layer
-        auto& renderers = it->second;
-
-        std::erase(renderers, this);
-
-        // if there are no renderers, delete the vector from the map
-        if (renderers.empty()) {
-            allRenderers.erase(it);
-        }
-    }
+    removeFromAllRenderers();
 }

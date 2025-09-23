@@ -1,6 +1,11 @@
 #include "camera.h"
 #include "../object.h"
 
+Camera::Camera(Object* owner, const bool main) : Component(owner) {
+    if (main)
+        setMain();
+}
+
 void Camera::awake() {
     getViewMatrix();
 }

@@ -24,7 +24,6 @@ public:
     virtual void update(float deltaTime) {}
     virtual void lateUpdate(float deltaTime) {}
     virtual void fixedUpdate(float fixedDeltaTime) {}
-
     void manageQueue(float deltaTime);
     void manageTweens(float deltaTime);
 
@@ -34,6 +33,13 @@ public:
 
     template<typename TWEEN_TYPE>
     TWEEN_TYPE* addTween(std::unique_ptr<TWEEN_TYPE>& tween) {
+        TWEEN_TYPE* rawPtr = tween.get();
+        tweens_.push_back(std::move(tween));
+        return rawPtr;
+    }
+
+    template<typename TWEEN_TYPE>
+    TWEEN_TYPE* addTween(std::unique_ptr<TWEEN_TYPE> tween) {
         TWEEN_TYPE* rawPtr = tween.get();
         tweens_.push_back(std::move(tween));
         return rawPtr;

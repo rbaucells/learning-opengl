@@ -8,7 +8,7 @@ public:
         float width, height;
     };
 
-    using Component::Component;
+    Camera(Object* owner, bool main = true);
     void awake() override;
     void setMain();
     Matrix<4, 4> getViewMatrix();
