@@ -1,35 +1,44 @@
 #include "tween.h"
 
-WaitTween::WaitTween(const double duration) {
-    duration_ = duration;
+WaitTween::WaitTween(const float duration) {
+    this->duration_ = duration;
 }
 
 void WaitTween::start() {
-    running_ = true;
-    completed_ = false;
     onStart.invoke();
 
+    done_ = false;
     elapsed_ = 0;
 }
 
-void WaitTween::update(float deltaTime) {
+bool WaitTween::update(const float deltaTime) {
+    // natural completion
+    if (elapsed_ >= duration_ && !naturallyCompleted_) {
+        naturallyCompleted_ = true;
+        onComplete.invoke();
+    }
+
+    // means we either (were force completed, or were force cancelled)
+    if (done_)
+        return true;
+
+
+    // if we finished naturally and AUTO_KILL is on we will kill ourself else if we finished naturally and if AUTO_KILL
+    // is off then we wont kill ourself until manually completed
+    if (naturallyCompleted_)
+        return AUTO_KILL;
+
     elapsed_ += deltaTime;
 
-    if (elapsed_ >= duration_)
-        complete();
+    return false;
 }
 
-void WaitTween::complete() {
-    completed_ = true;
+void WaitTween::forceComplete() {
     onComplete.invoke();
+    done_ = true;
 }
 
-void WaitTween::cancel() {
-    canceled_ = true;
+void WaitTween::forceCancel() {
     onCancel.invoke();
+    done_ = true;
 }
-
-bool WaitTween::shouldDelete() {
-    return elapsed_ >= duration_;
-}
-

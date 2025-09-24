@@ -10,6 +10,7 @@
 #include "list.h"
 #include "object.h"
 #include "components/camera.h"
+#include "components/componentExample.h"
 #include "components/renderer/renderer.h"
 #include "glad/gl.h"
 #include "GLFW/glfw3.h"
@@ -130,6 +131,7 @@ int main() {
 
     Object square("square", 0, {0, 0}, 0, {1, 1});
     square.addComponent<CustomRenderer>(vertices, indices, mainTexture, mainShader, 0);
+    square.addComponent<ComponentExample>();
 
     // empty the buffers to make sure its drawing properly
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);

@@ -5,8 +5,8 @@ Component::Component(Object* owner) {
     this->object = owner;
 };
 
-void Component::manageQueue(float deltaTime) {
-    for (auto it = queue_.begin(); it != queue_.end(); ) {
+void Component::manageQueue(const float deltaTime) {
+    for (auto it = queue_.begin(); it != queue_.end();) {
         if ((*it)->run(deltaTime))
             it = queue_.erase(it);
         else
@@ -14,16 +14,13 @@ void Component::manageQueue(float deltaTime) {
     }
 }
 
-void Component::manageTweens(float deltaTime) {
-    for (auto it = tweens_.begin(); it != tweens_.end(); ) {
-        (*it)->update(deltaTime);
-
-        if ((*it)->shouldDelete()) {
-            std::printf("Deleting tween \n");
+void Component::manageTweens(const float deltaTime) {
+    for (auto it = tweens_.begin(); it != tweens_.end();) {
+        if ((*it)->update(deltaTime)) {
             it = tweens_.erase(it);
+            printf("Erased Tween\n");
         }
-        else {
+        else
             ++it;
-        }
     }
 }

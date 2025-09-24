@@ -3,85 +3,76 @@
 #include "../event.h"
 #include "../../math/curve.h"
 
-/**
- * @brief Virtual base class for all tweens. Derive from it to make custom tweens
- *
- * start() <- called to start the tween
- *
- * update(double deltaTime) <- called on every frame by owning component
- *
- * complete() <- forces the tween to complete. insta moving the interpolated value to end
- *
- * cancel() <- cancels the tween, leaving the interpolated value as-is
- *
- * Events <- called onStart, onComplete, and onCancel
- */
+// if AUTO_KILL is true, then when a tween has completed naturally its time it starts to return true to shouldDelete()
+// if AUTO_KILL is false, then when a tween has completed naturally it just chills, it does call complete but doesnt return true to shouldDelete() until it is manually complete() or cancel().
+constexpr bool AUTO_KILL = true;
+
 class TweenBase {
 public:
+    virtual void start() = 0;
+    virtual bool update(float deltaTime) = 0;
+    virtual void forceComplete() = 0;
+    virtual void forceCancel() = 0;
+
     virtual ~TweenBase() = default;
 
-    virtual void start() = 0;
-    virtual void update(float deltaTime) = 0;
-    virtual void complete() = 0;
-    virtual void cancel() = 0;
-
-    virtual bool shouldDelete() = 0;
-
     Event<> onStart;
-    Event<> onComplete;
     Event<> onCancel;
-
-protected:
-    bool completed_ = false;
-    bool running_ = false;
-    bool canceled_ = false;
+    Event<> onComplete;
 };
 
-/**
- * @brief Interpolates target by settings its value. Derives from TweenBase
- * @tparam T The type of thing to be interpolated
- * @note template param T must be able to do arithmatic operations (+, -, and * a float)
- */
 template<typename T>
 class Tween final : public TweenBase {
 public:
     Tween(T* target, const T& start, const T& end, const double duration, const Curve& curve = Curve::linear) {
-        target_ = target;
-        start_ = start;
-        end_ = end;
-        duration_ = duration;
-        curve_ = curve;
+        this->target_ = target;
+        this->start_ = start;
+        this->end_ = end;
+        this->duration_ = duration;
+        this->curve_ = curve;
     }
 
     void start() override {
-        *target_ = start_;
         onStart.invoke();
+        *target_ = start_;
+        done_ = false;
+        elapsed_ = 0;
     }
 
-    void update(const float deltaTime) override {
+    bool update(const float deltaTime) override {
+        // natural completion
+        if (elapsed_ >= duration_ && !naturallyCompleted_) {
+            naturallyCompleted_ = true;
+            onComplete.invoke();
+        }
+
+        // means we either (were force completed, or were force cancelled)
+        if (done_)
+            return true;
+
+
+        // if we finished naturally and AUTO_KILL is on we will kill ourself else if we finished naturally and if AUTO_KILL
+        // is off then we wont kill ourself until manually completed
+        if (naturallyCompleted_)
+            return AUTO_KILL;
+
         elapsed_ += deltaTime;
 
-        const double t = curve_.evaluate(elapsed_ / duration_);
+        const float t = curve_.evaluate(elapsed_ / duration_);
         *target_ = start_ + (end_ - start_) * t;
 
-        if (elapsed_ > duration_) {
-            complete();
-        }
+        return false;
     }
 
-    void complete() override {
+    void forceComplete() override {
+        done_ = true;
         *target_ = end_;
-        completed_ = true;
         onComplete.invoke();
     }
 
-    void cancel() override {
-        canceled_ = true;
+    void forceCancel() override {
+        done_ = true;
         onCancel.invoke();
-    }
-
-    bool shouldDelete() override {
-        return canceled_ || completed_;
     }
 
 private:
@@ -89,56 +80,68 @@ private:
     T start_;
     T end_;
 
-    double duration_ = 0.f;
-    double elapsed_ = 0.f;
+    float duration_ = 0;
+    float elapsed_ = 0;
 
     Curve curve_;
+
+    bool done_ = false;
+    bool naturallyCompleted_ = false;
 };
 
-/**
- * @brief Interpolates target by calling targetFunc with the new value as a parameter. Derives from TweenBase
- * @tparam T The type of thing to be interpolated
- */
 template<typename T>
 class FunctionalTween final : public TweenBase {
 public:
     FunctionalTween(const std::function<void(T)>& targetFunc, const T& start, const T& end, const double duration, const Curve& curve = Curve::linear) {
-        targetFunc_ = targetFunc;
-        start_ = start;
-        end_ = end;
-        duration_ = duration;
-        curve_ = curve;
+        this->targetFunc_ = targetFunc;
+        this->start_ = start;
+        this->end_ = end;
+        this->duration_ = duration;
+        this->curve_ = curve;
     }
 
     void start() override {
-        targetFunc_(start_);
         onStart.invoke();
+
+        targetFunc_(start_);
+        done_ = false;
+        elapsed_ = 0;
     }
 
-    void update(const float deltaTime) override {
+    bool update(const float deltaTime) override {
+        // natural completion
+        if (elapsed_ >= duration_ && !naturallyCompleted_) {
+            naturallyCompleted_ = true;
+            onComplete.invoke();
+        }
+
+        // means we either (were force completed, or were force cancelled)
+        if (done_)
+            return true;
+
+
+        // if we finished naturally and AUTO_KILL is on we will kill ourself else if we finished naturally and if AUTO_KILL
+        // is off then we wont kill ourself until manually completed
+        if (naturallyCompleted_)
+            return AUTO_KILL;
+
         elapsed_ += deltaTime;
 
-        const double t = curve_.evaluate(elapsed_ / duration_);
+        const float t = curve_.evaluate(elapsed_ / duration_);
         targetFunc_(start_ + (end_ - start_) * t);
 
-        if (elapsed_ > duration_) {
-            complete();
-        }
+        return false;
     }
 
-    void complete() override {
-        targetFunc_(end_);
-        completed_ = true;
+    void forceComplete() override {
         onComplete.invoke();
+        targetFunc_(end_);
+        done_ = true;
     }
 
-    void cancel() override {
-        canceled_ = true;
+    void forceCancel() override {
         onCancel.invoke();
-    }
-
-    bool shouldDelete() override {
-        return canceled_ || completed_;
+        done_ = true;
     }
 
 private:
@@ -146,31 +149,30 @@ private:
     T start_;
     T end_;
 
-    double duration_ = 0.f;
-    double elapsed_ = 0.f;
+    float duration_ = 0;
+    float elapsed_ = 0;
 
     Curve curve_;
+
+    bool done_ = false;
+    bool naturallyCompleted_ = false;
 };
 
-/**
- * @brief An empty tween primarly used in sequences to add a delay
- *
- * implements from TweenBase
- */
-class WaitTween : public TweenBase {
+class WaitTween final : public TweenBase {
 public:
-    explicit WaitTween(double duration);
+    explicit WaitTween(float duration);
 
     void start() override;
-    void update(float deltaTime) override;
-    void complete() override;
-    void cancel() override;
-
-    bool shouldDelete() override;
+    bool update(float deltaTime) override;
+    void forceComplete() override;
+    void forceCancel() override;
 
 private:
-    double duration_ = 0.f;
-    double elapsed_ = 0.f;
+    float duration_ = 0;
+    float elapsed_ = 0;
+
+    bool done_ = false;
+    bool naturallyCompleted_ = false;
 };
 
 class CallbackTween final : public TweenBase {
@@ -178,34 +180,27 @@ public:
     explicit CallbackTween(const std::function<void()>& func);
 
     void start() override;
-    void update(float deltaTime) override;
-    void complete() override;
-    void cancel() override;
+    bool update(float deltaTime) override;
+    void forceComplete() override;
+    void forceCancel() override;
 
-    bool shouldDelete() override {
-        return true;
-    }
 private:
     std::function<void()> func_;
 };
 
-/**
- * @brief Tween that manages other tweens in a sequence
- * To add it to a component you do addTween(std::make_unique<SequenceTween>())
- * then do operations on the returned pointer
- */
 class SequenceTween final : public TweenBase {
-private:
-    std::queue<std::vector<std::unique_ptr<TweenBase>>> tweens_;
-
 public:
     void add(std::unique_ptr<TweenBase> tween);
     void join(std::unique_ptr<TweenBase> tween);
 
     void start() override;
-    void update(float deltaTime) override;
-    void complete() override;
-    void cancel() override;
+    bool update(float deltaTime) override;
+    void forceComplete() override;
+    void forceCancel() override;
 
-    bool shouldDelete() override;
+private:
+    std::queue<std::vector<std::unique_ptr<TweenBase>>> tweens_;
+
+    bool done_ = false;
+    bool naturallyCompleted_ = false;
 };

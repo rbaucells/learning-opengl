@@ -5,21 +5,18 @@ CallbackTween::CallbackTween(const std::function<void()>& func) {
 }
 
 void CallbackTween::start() {
-    running_ = true;
-    completed_ = false;
     onStart.invoke();
 }
 
-void CallbackTween::update(float deltaTime) {
+bool CallbackTween::update(float deltaTime) {
     func_();
+    return true;
 }
 
-void CallbackTween::complete() {
-    completed_ = true;
+void CallbackTween::forceComplete() {
     onComplete.invoke();
 }
 
-void CallbackTween::cancel() {
-    canceled_ = true;
+void CallbackTween::forceCancel() {
     onCancel.invoke();
 }

@@ -8,31 +8,38 @@ void SequenceTween::add(std::unique_ptr<TweenBase> tween) {
 void SequenceTween::join(std::unique_ptr<TweenBase> tween) {
     if (tweens_.empty())
         tweens_.emplace();
+
     tweens_.back().push_back(std::move(tween));
 }
 
 void SequenceTween::start() {
-    running_ = true;
-    completed_ = false;
     onStart.invoke();
-
-    if (!tweens_.empty()) {
-        for (const auto& tween : tweens_.front()) {
-            tween->start();
-        }
+    for (const auto& tween : tweens_.front()) {
+        tween->start();
     }
+
+    done_ = false;
 }
 
-void SequenceTween::update(float deltaTime) {
-    if (tweens_.empty()) {
-        complete();
-        return;
+bool SequenceTween::update(const float deltaTime) {
+    // natural completion
+    if (tweens_.empty() && !naturallyCompleted_) {
+        naturallyCompleted_ = true;
+        onComplete.invoke();
     }
 
-    for (auto it = tweens_.front().begin(); it != tweens_.front().end(); ) {
-        (*it)->update(deltaTime);
+    // means we either (were force completed, or were force cancelled)
+    if (done_)
+        return true;
 
-        if ((*it)->shouldDelete())
+
+    // if we finished naturally and AUTO_KILL is on we will kill ourself else if we finished naturally and if AUTO_KILL
+    // is off then we wont kill ourself until manually completed
+    if (naturallyCompleted_)
+        return AUTO_KILL;
+
+    for (auto it = tweens_.front().begin(); it != tweens_.front().end();) {
+        if ((*it)->update(deltaTime))
             it = tweens_.front().erase(it);
         else
             ++it;
@@ -42,36 +49,33 @@ void SequenceTween::update(float deltaTime) {
     if (tweens_.front().empty()) {
         tweens_.pop();
     }
+
+    return false;
 }
 
-void SequenceTween::complete() {
-    completed_ = true;
-    running_ = false;
+void SequenceTween::forceComplete() {
     onComplete.invoke();
-
     // force complete all the tweens inside
     while (!tweens_.empty()) {
         for (const auto& tween : tweens_.front()) {
-            tween->complete();
+            tween->forceComplete();
             tweens_.pop();
         }
     }
+
+    done_ = true;
 }
 
-void SequenceTween::cancel() {
-    canceled_ = true;
-    running_ = false;
+void SequenceTween::forceCancel() {
     onCancel.invoke();
 
-    // cancel all the tweens inside
+    // force cancel all the tweens inside
     while (!tweens_.empty()) {
-        for (auto& tween : tweens_.front()) {
-            tween->cancel();
+        for (const auto& tween : tweens_.front()) {
+            tween->forceCancel();
             tweens_.pop();
         }
     }
-}
 
-bool SequenceTween::shouldDelete() {
-    return canceled_ || completed_ || !running_;
+    done_ = true;
 }

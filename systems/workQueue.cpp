@@ -14,10 +14,10 @@ bool ConditionalQueueEntry::run(float deltaTime) {
     return false;
 }
 
-TimedQueueEntry::TimedQueueEntry(const Action& action, const float time, const int timesToRun) {
+TimedQueueEntry::TimedQueueEntry(const std::function<void()>& action, const float time, const int repetitions) {
     this->action_ = action;
     this->duration_ = time;
-    this->timesToRun_ = timesToRun;
+    this->timesToRun_ = repetitions;
 }
 
 bool TimedQueueEntry::run(const float deltaTime) {

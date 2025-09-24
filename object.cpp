@@ -35,14 +35,14 @@ void Object::update(const float deltaTime) {
     if (!activated_)
         return;
 
-    for (const auto &component: components_) {
-        component->manageTweens(deltaTime);
-    }
-
     transform.manageTweens(deltaTime);
 
     for (const auto &component: components_) {
         component->update(deltaTime);
+    }
+
+    for (const auto &component: components_) {
+        component->manageTweens(deltaTime);
     }
 
     for (const auto &component: components_) {

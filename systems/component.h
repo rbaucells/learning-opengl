@@ -3,6 +3,9 @@
 #include "workQueue.h"
 #include "tweens/tween.h"
 
+template<typename TWEEN_TYPE>
+concept derives_from_tween_base = std::is_base_of_v<TweenBase, TWEEN_TYPE>;
+
 // forward declaration
 class Object;
 
@@ -31,16 +34,10 @@ public:
     virtual void onDisable() {}
     virtual void onDestroy() {}
 
-    template<typename TWEEN_TYPE>
+    template<derives_from_tween_base TWEEN_TYPE>
     TWEEN_TYPE* addTween(std::unique_ptr<TWEEN_TYPE>& tween) {
         TWEEN_TYPE* rawPtr = tween.get();
-        tweens_.push_back(std::move(tween));
-        return rawPtr;
-    }
-
-    template<typename TWEEN_TYPE>
-    TWEEN_TYPE* addTween(std::unique_ptr<TWEEN_TYPE> tween) {
-        TWEEN_TYPE* rawPtr = tween.get();
+        tween->start();
         tweens_.push_back(std::move(tween));
         return rawPtr;
     }

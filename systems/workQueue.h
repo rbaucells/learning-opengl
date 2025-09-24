@@ -24,18 +24,16 @@ public:
 };
 
 class TimedQueueEntry final : public QueueEntry {
-    using Action = std::function<void()>;
+public:
+    TimedQueueEntry(const std::function<void()>& action, float time, int repetitions = 0);
 
-    Action action_;
+    bool run(float deltaTime) override;
+private:
+    std::function<void()> action_;
     float duration_ = 0.f;
     float elapsed_ = 0.f;
 
-    int timesToRun_ = false;
-
-public:
-    TimedQueueEntry(const Action& action, float time, int timesToRun = 0);
-
-    bool run(float deltaTime) override;
+    int timesToRun_ = 0;
 };
 
 class NextFrameQueueEntry final : public QueueEntry {
