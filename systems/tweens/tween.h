@@ -24,7 +24,7 @@ public:
 template<typename T>
 class Tween final : public TweenBase {
 public:
-    Tween(T* target, const T& start, const T& end, const double duration, const Curve& curve = Curve::linear) {
+    Tween(T* target, const T& start, const T& end, const float duration, const Curve& curve = Curve::linear) {
         this->target_ = target;
         this->start_ = start;
         this->end_ = end;
@@ -92,7 +92,7 @@ private:
 template<typename T>
 class FunctionalTween final : public TweenBase {
 public:
-    FunctionalTween(const std::function<void(T)>& targetFunc, const T& start, const T& end, const double duration, const Curve& curve = Curve::linear) {
+    FunctionalTween(const std::function<void(T)>& targetFunc, const T& start, const T& end, const float duration, const Curve& curve = Curve::linear) {
         this->targetFunc_ = targetFunc;
         this->start_ = start;
         this->end_ = end;

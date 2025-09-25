@@ -11,6 +11,7 @@ CustomRenderer::CustomRenderer(Object* owner, const std::vector<Vertex>& vertice
     this->indices_ = indices;
     this->shader_ = shader;
     this->renderingLayer_ = renderingLayer;
+    this->drawMode = drawMode;
 
     this->texture_ = texture;
 
@@ -24,19 +25,19 @@ CustomRenderer::CustomRenderer(Object* owner, const std::vector<Vertex>& vertice
     // I am going to work with this buffer. select it
     glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer_);
     // define all the data to use. Use STATIC for objects that are defined once and reused, use DYNAMIC for objects that are redefined multiple times and reused
-    glBufferData(GL_ARRAY_BUFFER, vertices_.size() * sizeof(Vertex), vertices_.data(), usage);
+    glBufferData(GL_ARRAY_BUFFER, static_cast<long>(vertices_.size() * sizeof(Vertex)), vertices_.data(), usage);
     // define the position vertexAttribute
-    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (const void*) offsetof(Vertex, position));
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), reinterpret_cast<const void*>(offsetof(Vertex, position)));
     // enable the position vertexAttribute
     glEnableVertexAttribArray(0);
     // define the texture attribute
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (const void*) offsetof(Vertex, uv));
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), reinterpret_cast<const void*>(offsetof(Vertex, uv)));
     // enable the texture attribute
     glEnableVertexAttribArray(1);
 
     glGenBuffers(1, &indexBuffer_);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer_);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices_.size() * sizeof(unsigned int), indices_.data(), usage);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, static_cast<long>(indices_.size() * sizeof(unsigned int)), indices_.data(), usage);
 
     // cache uniform locations to avoid lookups in draw
     mvpLocation_ = glGetUniformLocation(shader_->getProgram(), "mvp");
@@ -115,6 +116,37 @@ void CustomRenderer::setRenderLayer(const int layer) {
 
     removeFromAllRenderers();
     addToAllRenderers(renderingLayer_);
+}
+
+void CustomRenderer::redefine(const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices, const std::shared_ptr<Texture>& texture, const std::shared_ptr<Shader>& shader, const Usage usage) {
+    this->vertices_ = vertices;
+    this->indices_ = indices;
+    this->shader_ = shader;
+    this->texture_ = texture;
+
+    glBindVertexArray(vertexArrayObject_);
+
+    // I am going to work with this buffer. select it
+    glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer_);
+    // define all the data to use. Use STATIC for objects that are defined once and reused, use DYNAMIC for objects that are redefined multiple times and reused
+    glBufferData(GL_ARRAY_BUFFER, static_cast<long>(vertices_.size() * sizeof(Vertex)), vertices_.data(), usage);
+
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer_);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, static_cast<long>(indices_.size() * sizeof(unsigned int)), indices_.data(), usage);
+}
+
+void CustomRenderer::changeUsage(const Usage usage) const {
+    glBindVertexArray(vertexArrayObject_);
+    glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer_);
+    glBufferData(GL_ARRAY_BUFFER, static_cast<long>(vertices_.size() * sizeof(Vertex)), vertices_.data(), usage);
+}
+
+std::unique_ptr<Tween<float>> CustomRenderer::alphaTween(float start, float end, float duration, const Curve& curve) {
+    return std::make_unique<Tween<float>>(&alpha, start, end, duration, curve);
+}
+
+std::unique_ptr<Tween<float>> CustomRenderer::alphaTween(float end, float duration, const Curve& curve) {
+    return std::make_unique<Tween<float>>(&alpha, alpha, end, duration, curve);
 }
 
 CustomRenderer::~CustomRenderer() {

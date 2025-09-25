@@ -111,7 +111,9 @@ int main() {
     std::shared_ptr<Shader> mainShader = std::make_shared<Shader>("/Users/ricardito/Projects/learning-opengl/res/shaders/mainVertex.shader", "/Users/ricardito/Projects/learning-opengl/res/shaders/mainFragment.shader");
 
     // textures
-    std::shared_ptr<Texture> mainTexture = std::make_shared<Texture>("/Users/ricardito/Projects/learning-opengl/res/textures/box.jpg", GL_CLAMP, true);
+    std::shared_ptr<Texture> customTexture = std::make_shared<Texture>("/Users/ricardito/Projects/learning-opengl/res/textures/box.jpg", GL_CLAMP, true);
+    std::shared_ptr<Texture> spriteTexture = std::make_shared<Texture>("/Users/ricardito/Projects/learning-opengl/res/textures/super-mario-transparent-background-20.png", GL_CLAMP, true);
+    std::shared_ptr<Texture> spriteSheetTexture = std::make_shared<Texture>("/Users/ricardito/Projects/learning-opengl/res/textures/f1058a91de91f29cd65527cf97cab26b861de9b5_2_1380x896.png", GL_CLAMP, true);
 
     Object camera("mainCamera", 69, {0, 0}, 0, {1, 1});
     auto cameraComponent = camera.addComponent<Camera>();
@@ -130,8 +132,17 @@ int main() {
     };
 
     Object square("square", 0, {0, 0}, 0, {1, 1});
-    square.addComponent<CustomRenderer>(vertices, indices, mainTexture, mainShader, 0);
     square.addComponent<ComponentExample>();
+
+    // renderers
+    constexpr int RENDERER = 2;
+
+    if constexpr (RENDERER == 0)
+        square.addComponent<CustomRenderer>(vertices, indices, customTexture, mainShader, 0);
+    else if constexpr (RENDERER == 1)
+        square.addComponent<SpriteRenderer>(100, spriteTexture, mainShader, 0);
+    else if constexpr (RENDERER == 2)
+        square.addComponent<SpriteSheetRenderer>(69, 69, 69, 0, spriteSheetTexture, mainShader, 0);
 
     // empty the buffers to make sure its drawing properly
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);

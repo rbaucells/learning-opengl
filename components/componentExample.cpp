@@ -5,19 +5,53 @@
 #include "renderer/renderer.h"
 
 void ComponentExample::start() {
-    auto tween = std::make_unique<WaitTween>(5);
+    // subscribe to the left click event
+    left_click_event.subscribe(this, &ComponentExample::onMouseInput);
 
-    tween->onStart.subscribe([] {
+    auto positionTweenUniquePtr = object->transform.localPosTween({3, 0}, 5, Curve::expoOut);
+
+    positionTweenUniquePtr->onStart.subscribe([] {
         printf("Tween Started\n");
     });
 
-    tween->onComplete.subscribe([] {
+    positionTweenUniquePtr->onComplete.subscribe([] {
         printf("Tween Completed\n");
     });
 
-    tween->onCancel.subscribe([] {
+    positionTweenUniquePtr->onCancel.subscribe([] {
         printf("Tween Cancelled\n");
     });
 
-    auto* waitTween = addTween(tween);
+    // after this point the positionTweenUniquePtr ^ is invalid
+
+    runningPositionTweenRawPtr_ = addTween(positionTweenUniquePtr);
+
+    // runningPositionTweenRawPtr_ will remain valid until either
+
+    // (AUTO_KILL is on and the tween has naturally completed) or
+    // (the tween has been killed by either forceComplete() or forceCancel())6
+
+    // after which it will not be safe
+
+
+    // Renderers stuff
+    spriteSheetRendererWeakPtr_ = object->getComponent<SpriteSheetRenderer>();
+}
+
+void ComponentExample::update(float deltaTime) {
+    static int i = 1;
+
+    if (i > 230) {
+        i = 1;
+    }
+
+    if (const auto spriteSheetRenderer = spriteSheetRendererWeakPtr_.lock())
+        spriteSheetRenderer->moveTo(i += 2);
+}
+
+void ComponentExample::onMouseInput(const bool state) const {
+    if (state) {
+        printf("Mouse Left Clicked Down\n");
+        runningPositionTweenRawPtr_->forceCancel();
+    }
 }
