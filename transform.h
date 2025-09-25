@@ -40,23 +40,23 @@ public:
     void setParent(Transform *newParent);
     [[nodiscard]] Transform *getParent() const;
 
-    std::unique_ptr<TweenBase> localPosTween(Vector2 target, float duration, const Curve& curve);
-    std::unique_ptr<TweenBase> localPosTween(Vector2 start, Vector2 end, float duration, const Curve& curve);
+    std::shared_ptr<TweenBase> localPosTween(Vector2 target, float duration, const Curve& curve);
+    std::shared_ptr<TweenBase> localPosTween(Vector2 start, Vector2 end, float duration, const Curve& curve);
 
-    std::unique_ptr<TweenBase> localRotationTween(float target, float duration, const Curve& curve);
-    std::unique_ptr<TweenBase> localRotationTween(float start, float end, float duration, const Curve& curve);
+    std::shared_ptr<TweenBase> localRotationTween(float target, float duration, const Curve& curve);
+    std::shared_ptr<TweenBase> localRotationTween(float start, float end, float duration, const Curve& curve);
 
-    std::unique_ptr<TweenBase> localScaleTween(Vector2 target, float duration, const Curve& curve);
-    std::unique_ptr<TweenBase> localScaleTween(Vector2 start, Vector2 end, float duration, const Curve& curve);
+    std::shared_ptr<TweenBase> localScaleTween(Vector2 target, float duration, const Curve& curve);
+    std::shared_ptr<TweenBase> localScaleTween(Vector2 start, Vector2 end, float duration, const Curve& curve);
 
-    std::unique_ptr<TweenBase> globalPosTween(Vector2 target, float duration, const Curve& curve);
-    std::unique_ptr<TweenBase> globalPosTween(Vector2 start, Vector2 end, float duration, const Curve& curve);
+    std::shared_ptr<TweenBase> globalPosTween(Vector2 target, float duration, const Curve& curve);
+    std::shared_ptr<TweenBase> globalPosTween(Vector2 start, Vector2 end, float duration, const Curve& curve);
 
-    std::unique_ptr<TweenBase> globalRotationTween(float target, float duration, const Curve& curve);
-    std::unique_ptr<TweenBase> globalRotationTween(float start, float end, float duration, const Curve& curve);
+    std::shared_ptr<TweenBase> globalRotationTween(float target, float duration, const Curve& curve);
+    std::shared_ptr<TweenBase> globalRotationTween(float start, float end, float duration, const Curve& curve);
 
-    std::unique_ptr<TweenBase> globalScaleTween(Vector2 target, float duration, const Curve& curve);
-    std::unique_ptr<TweenBase> globalScaleTween(Vector2 start, Vector2 end, float duration, const Curve& curve);
+    std::shared_ptr<TweenBase> globalScaleTween(Vector2 target, float duration, const Curve& curve);
+    std::shared_ptr<TweenBase> globalScaleTween(Vector2 start, Vector2 end, float duration, const Curve& curve);
 
     Vector2 localPosition = {0, 0};
     float localRotation = 0;

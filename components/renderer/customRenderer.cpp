@@ -141,12 +141,12 @@ void CustomRenderer::changeUsage(const Usage usage) const {
     glBufferData(GL_ARRAY_BUFFER, static_cast<long>(vertices_.size() * sizeof(Vertex)), vertices_.data(), usage);
 }
 
-std::unique_ptr<Tween<float>> CustomRenderer::alphaTween(float start, float end, float duration, const Curve& curve) {
-    return std::make_unique<Tween<float>>(&alpha, start, end, duration, curve);
+std::shared_ptr<Tween<float>> CustomRenderer::alphaTween(float start, float end, float duration, const Curve& curve) {
+    return std::make_shared<Tween<float>>(&alpha, start, end, duration, curve);
 }
 
-std::unique_ptr<Tween<float>> CustomRenderer::alphaTween(float end, float duration, const Curve& curve) {
-    return std::make_unique<Tween<float>>(&alpha, alpha, end, duration, curve);
+std::shared_ptr<Tween<float>> CustomRenderer::alphaTween(float end, float duration, const Curve& curve) {
+    return std::make_shared<Tween<float>>(&alpha, alpha, end, duration, curve);
 }
 
 CustomRenderer::~CustomRenderer() {

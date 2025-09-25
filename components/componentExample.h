@@ -1,6 +1,5 @@
 #pragma once
 #include "../systems/component.h"
-#include "../systems/input.h"
 
 class SpriteSheetRenderer;
 
@@ -15,5 +14,5 @@ public:
 
 private:
     std::weak_ptr<SpriteSheetRenderer> spriteSheetRendererWeakPtr_;
-    TweenBase* runningPositionTweenRawPtr_;
+    std::weak_ptr<TweenBase> runningPositionTweenWeakPtr_;
 };

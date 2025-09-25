@@ -18,6 +18,9 @@ public:
 
     [[nodiscard]] virtual Bounds getBounds() const = 0;
 
+    virtual std::shared_ptr<Tween<float>> alphaTween(float start, float end, float duration, const Curve& curve) = 0;
+    virtual std::shared_ptr<Tween<float>> alphaTween(float end, float duration, const Curve& curve) = 0;
+
     ~RendererBase() override = default;
 
     enum DrawMode : int {
@@ -62,8 +65,8 @@ public:
 
     void changeUsage(Usage usage);
 
-    std::unique_ptr<Tween<float>> alphaTween(float start, float end, float duration, const Curve& curve = Curve::linear);
-    std::unique_ptr<Tween<float>> alphaTween(float end, float duration, const Curve& curve = Curve::linear);
+    std::shared_ptr<Tween<float>> alphaTween(float start, float end, float duration, const Curve& curve) override;
+    std::shared_ptr<Tween<float>> alphaTween(float end, float duration, const Curve& curve) override;
 
     void moveTo(int i);
     void moveToNext();
@@ -132,8 +135,8 @@ public:
 
     void changeUsage(Usage usage);
 
-    std::unique_ptr<Tween<float>> alphaTween(float start, float end, float duration, const Curve& curve = Curve::linear);
-    std::unique_ptr<Tween<float>> alphaTween(float end, float duration, const Curve& curve = Curve::linear);
+    std::shared_ptr<Tween<float>> alphaTween(float start, float end, float duration, const Curve& curve) override;
+    std::shared_ptr<Tween<float>> alphaTween(float end, float duration, const Curve& curve) override;
 
     ~SpriteRenderer() override;
 
@@ -179,8 +182,8 @@ public:
 
     void changeUsage(Usage usage) const;
 
-    std::unique_ptr<Tween<float>> alphaTween(float start, float end, float duration, const Curve& curve = Curve::linear);
-    std::unique_ptr<Tween<float>> alphaTween(float end, float duration, const Curve& curve = Curve::linear);
+    std::shared_ptr<Tween<float>> alphaTween(float start, float end, float duration, const Curve& curve) override;
+    std::shared_ptr<Tween<float>> alphaTween(float end, float duration, const Curve& curve) override;
 
     ~CustomRenderer() override;
 

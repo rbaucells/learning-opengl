@@ -12,7 +12,7 @@ class Object;
 class Component {
 protected:
     std::vector<std::unique_ptr<QueueEntry>> queue_;
-    std::vector<std::unique_ptr<TweenBase>> tweens_;
+    std::vector<std::shared_ptr<TweenBase>> tweens_;
 
 public:
     explicit Component(Object* owner);
@@ -35,11 +35,10 @@ public:
     virtual void onDestroy() {}
 
     template<derives_from_tween_base TWEEN_TYPE>
-    TWEEN_TYPE* addTween(std::unique_ptr<TWEEN_TYPE>& tween) {
-        TWEEN_TYPE* rawPtr = tween.get();
+    std::weak_ptr<TWEEN_TYPE> addTween(std::shared_ptr<TWEEN_TYPE>& tween) {
         tween->start();
-        tweens_.push_back(std::move(tween));
-        return rawPtr;
+        tweens_.push_back(tween);
+        return tween;
     }
 
     // fine to use raw pointer since component will never be alive at a time where the object isnt

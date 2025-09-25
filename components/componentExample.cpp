@@ -3,6 +3,7 @@
 #include "../object.h"
 #include "../systems/tweens/tween.h"
 #include "renderer/renderer.h"
+#include "../systems/input.h"
 
 void ComponentExample::start() {
     // subscribe to the left click event
@@ -24,7 +25,7 @@ void ComponentExample::start() {
 
     // after this point the positionTweenUniquePtr ^ is invalid
 
-    runningPositionTweenRawPtr_ = addTween(positionTweenUniquePtr);
+    runningPositionTweenWeakPtr_ = addTween(positionTweenUniquePtr);
 
     // runningPositionTweenRawPtr_ will remain valid until either
 
@@ -33,7 +34,6 @@ void ComponentExample::start() {
 
     // after which it will not be safe
 
-
     // Renderers stuff
     spriteSheetRendererWeakPtr_ = object->getComponent<SpriteSheetRenderer>();
 }
@@ -41,17 +41,19 @@ void ComponentExample::start() {
 void ComponentExample::update(float deltaTime) {
     static int i = 1;
 
-    if (i > 230) {
+    if (i > 230)
         i = 1;
-    }
 
     if (const auto spriteSheetRenderer = spriteSheetRendererWeakPtr_.lock())
-        spriteSheetRenderer->moveTo(i += 2);
+        spriteSheetRenderer->moveTo(i++);
 }
 
 void ComponentExample::onMouseInput(const bool state) const {
     if (state) {
         printf("Mouse Left Clicked Down\n");
-        runningPositionTweenRawPtr_->forceCancel();
+        if (const auto runningPositionTween = runningPositionTweenWeakPtr_.lock()) {
+            printf("Cancelling Running Position Tween\n");
+            runningPositionTween->forceCancel();
+        }
     }
 }
