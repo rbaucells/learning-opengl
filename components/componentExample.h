@@ -1,4 +1,5 @@
 #pragma once
+#include "../systems/betterEvents.h"
 #include "../systems/component.h"
 
 class SpriteSheetRenderer;
@@ -15,4 +16,6 @@ public:
 private:
     std::weak_ptr<SpriteSheetRenderer> spriteSheetRendererWeakPtr_;
     std::weak_ptr<TweenBase> runningPositionTweenWeakPtr_;
+
+    EventListener<int> listener_;
 };

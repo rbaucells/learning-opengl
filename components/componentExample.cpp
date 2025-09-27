@@ -18,10 +18,7 @@ void ComponentExample::start() {
     EventDispatcher<int> dispatcher;
     constexpr int i = 5;
 
-
-    EventListener<int> listener(&dispatcher, testFunction);
-
-    dispatcher.remove(&listener);
+    listener_.bind(&dispatcher, testFunction);
 
     dispatcher.invoke(i);
 
