@@ -5,13 +5,13 @@
 
 #include "GLFW/glfw3.h"
 
-void cursorMoveCallback(GLFWwindow *window, double xpos, double ypos) {
+void cursorMoveCallback(GLFWwindow *window, const double xpos, const double ypos) {
     const auto x = static_cast<float>(xpos);
     const auto y = static_cast<float>(ypos);
     mouse_moved_event.invoke({x, y});
 }
 
-void mouseButtonCallback(GLFWwindow *window, int button, int action, int mods) {
+void mouseButtonCallback(GLFWwindow *window, const int button, const int action, int mods) {
     const bool pressed = action == GLFW_PRESS;
     switch (button) {
         case GLFW_MOUSE_BUTTON_LEFT:
@@ -28,14 +28,14 @@ void mouseButtonCallback(GLFWwindow *window, int button, int action, int mods) {
     }
 }
 
-void scrollCallback(GLFWwindow *window, double xoffset, double yoffset) {
+void scrollCallback(GLFWwindow *window, const double xoffset, const double yoffset) {
     const auto x = static_cast<float>(xoffset);
     const auto y = static_cast<float>(yoffset);
     scroll_x_event.invoke(x);
     scroll_y_event.invoke(y);
 }
 
-void keyCallback(GLFWwindow *window, int key, int scancode, int action, int mods) {
+void keyCallback(GLFWwindow *window, const int key, int scancode, const int action, int mods) {
     if (action == GLFW_REPEAT) {
         return;
     }

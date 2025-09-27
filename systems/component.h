@@ -20,18 +20,24 @@ public:
 
     // initialization
     virtual void awake() {}
+
     virtual void onEnable() {}
+
     virtual void start() {}
 
     // update loop
     virtual void update(float deltaTime) {}
+
     virtual void lateUpdate(float deltaTime) {}
+
     virtual void fixedUpdate(float fixedDeltaTime) {}
+
     void manageQueue(float deltaTime);
     void manageTweens(float deltaTime);
 
     // de-initialization
     virtual void onDisable() {}
+
     virtual void onDestroy() {}
 
     template<derives_from_tween_base TWEEN_TYPE>
@@ -46,4 +52,4 @@ public:
     Object* object = nullptr;
 };
 
-inline std::vector<std::weak_ptr<Component>> componentsToInitialize {};
+inline std::vector<std::weak_ptr<Component>> componentsToInitialize{};

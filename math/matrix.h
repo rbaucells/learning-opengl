@@ -564,10 +564,10 @@ public:
      */
     [[nodiscard]] Vector3 multiply(const Vector3 &other) const requires (ROWS == 4 && COLUMNS == 4) {
         // Promote the 3D vector to a 4D vector with w=1 for a point
-        Vector4 tempVector4{other.x, other.y, other.z, 1.0f};
+        const Vector4 tempVector4{other.x, other.y, other.z, 1.0f};
 
         // Perform the core 4x4 matrix-vector multiplication
-        Vector4 result = multiply(tempVector4);
+        const Vector4 result = multiply(tempVector4);
 
         // Return the first three components as a 3D vector
         return Vector3{result.x, result.y, result.z};
@@ -580,9 +580,9 @@ public:
      */
     [[nodiscard]] Vector2 multiply(const Vector2 &other) const requires (ROWS == 4 && COLUMNS == 4) {
         // Promote the 2D vector to a 4D vector with z=0 and w=1 for a point in 2D space
-        Vector4 tempVector4{other.x, other.y, 0.0f, 1.0f};
+        const Vector4 tempVector4{other.x, other.y, 0.0f, 1.0f};
 
-        Vector4 result = multiply(tempVector4);
+        const Vector4 result = multiply(tempVector4);
 
         return Vector2{result.x, result.y};
     }

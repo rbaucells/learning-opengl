@@ -24,17 +24,28 @@ public:
     ~RendererBase() override = default;
 
     enum DrawMode : int {
-        triangles = GL_TRIANGLES,
+        points = GL_POINTS,
+        line_strip = GL_LINE_STRIP,
+        line_loop = GL_LINE_LOOP,
+        lines = GL_LINES,
+        line_strip_adjacency = GL_LINE_STRIP_ADJACENCY,
+        lines_adjacency = GL_LINES_ADJACENCY,
         triangle_strip = GL_TRIANGLE_STRIP,
         triangle_fan = GL_TRIANGLE_FAN,
-        lines = GL_LINES,
-        line_strip = GL_LINE_STRIP,
-        line_loop = GL_LINE_LOOP
+        triangles = GL_TRIANGLES,
+        triangle_strip_adjacancy = GL_TRIANGLE_STRIP_ADJACENCY,
+        triangles_adjacency = GL_TRIANGLES_ADJACENCY,
+        patches = GL_PATCHES
     };
 
+    // Performance hints for OpenGl, do not modify how its used
     enum Usage : GLuint {
+        // The data store contents will be specified once by the application, and sourced many times
         static_draw = GL_STATIC_DRAW,
+        // The data store contents will be respecified repeatedly by the application, and sourced many times.
         dynamic_draw = GL_DYNAMIC_DRAW,
+        // The data store contents will be specified once by the application, and sourced at most a few times.
+        stream_draw = GL_STREAM_DRAW
     };
 
 protected:

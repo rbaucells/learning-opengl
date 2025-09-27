@@ -71,6 +71,7 @@ add_executable(OpenGL components/ComponentExample.cpp components/ComponentExampl
         systems/audio/filters/bandPassFilter.cpp
         math/bounds.h
         components/renderer/rendererBase.cpp
+        systems/betterEvents.h
 )
 
 # add include directory

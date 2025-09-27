@@ -1,10 +1,10 @@
 #include <iostream>
 #include "renderer.h"
 #include "../../object.h"
-#include "glad/gl.h"
 #include "../../math/vertex.h"
 #include "../../systems/opengl wrappers/shader.h"
 #include "../../systems/opengl wrappers/texture.h"
+#include "glad/gl.h"
 
 SpriteSheetRenderer::SpriteSheetRenderer(Object* owner, Vector2 size, const int gridWidth, const int gridHeight, const int padding, const std::shared_ptr<Texture>& texture, const std::shared_ptr<Shader>& shader, const int renderingLayer, const Usage usage, const DrawMode drawMode) : RendererBase(owner) {
     this->texture_ = texture;

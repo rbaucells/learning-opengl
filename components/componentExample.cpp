@@ -1,13 +1,29 @@
 #include "componentExample.h"
 
 #include "../object.h"
+#include "../systems/betterEvents.h"
+#include "../systems/input.h"
 #include "../systems/tweens/tween.h"
 #include "renderer/renderer.h"
-#include "../systems/input.h"
+
+void testFunction(const int i) {
+    printf("Value: %d\n", i);
+}
 
 void ComponentExample::start() {
     // subscribe to the left click event
     left_click_event.subscribe(this, &ComponentExample::onMouseInput);
+    // left_click_event.unSubscribe(this, &ComponentExample::onMouseInput);
+
+    EventDispatcher<int> dispatcher;
+    constexpr int i = 5;
+
+
+    EventListener<int> listener(&dispatcher, testFunction);
+
+    dispatcher.remove(&listener);
+
+    dispatcher.invoke(i);
 
     auto positionTweenUniquePtr = object->transform.localPosTween({3, 0}, 5, Curve::expoOut);
 
@@ -23,16 +39,7 @@ void ComponentExample::start() {
         printf("Tween Cancelled\n");
     });
 
-    // after this point the positionTweenUniquePtr ^ is invalid
-
     runningPositionTweenWeakPtr_ = addTween(positionTweenUniquePtr);
-
-    // runningPositionTweenRawPtr_ will remain valid until either
-
-    // (AUTO_KILL is on and the tween has naturally completed) or
-    // (the tween has been killed by either forceComplete() or forceCancel())6
-
-    // after which it will not be safe
 
     // Renderers stuff
     spriteSheetRendererWeakPtr_ = object->getComponent<SpriteSheetRenderer>();
@@ -54,6 +61,9 @@ void ComponentExample::onMouseInput(const bool state) const {
         if (const auto runningPositionTween = runningPositionTweenWeakPtr_.lock()) {
             printf("Cancelling Running Position Tween\n");
             runningPositionTween->forceCancel();
+        }
+        else {
+            object->removeComponent<ComponentExample>();
         }
     }
 }
