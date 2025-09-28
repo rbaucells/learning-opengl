@@ -5,7 +5,7 @@ CallbackTween::CallbackTween(const std::function<void()>& func) {
 }
 
 void CallbackTween::start() {
-    onStart.invoke();
+    onStart->invoke();
 }
 
 bool CallbackTween::update(float deltaTime) {
@@ -14,9 +14,9 @@ bool CallbackTween::update(float deltaTime) {
 }
 
 void CallbackTween::forceComplete() {
-    onComplete.invoke();
+    onComplete->invoke();
 }
 
 void CallbackTween::forceCancel() {
-    onCancel.invoke();
+    onCancel->invoke();
 }

@@ -18,9 +18,9 @@ public:
 
     virtual ~TweenBase() = default;
 
-    Publisher<> onStart;
-    Publisher<> onCancel;
-    Publisher<> onComplete;
+    std::shared_ptr<Publisher<>> onStart;
+    std::shared_ptr<Publisher<>> onCancel;
+    std::shared_ptr<Publisher<>> onComplete;
 };
 
 template<typename T>
@@ -35,7 +35,7 @@ public:
     }
 
     void start() override {
-        onStart.invoke();
+        onStart->invoke();
         *target_ = start_;
         done_ = false;
         elapsed_ = 0;
@@ -45,7 +45,7 @@ public:
         // natural completion
         if (elapsed_ >= duration_ && !naturallyCompleted_) {
             naturallyCompleted_ = true;
-            onComplete.invoke();
+            onComplete->invoke();
         }
 
         // means we either (were force completed, or were force cancelled)
@@ -54,7 +54,7 @@ public:
 
 
         // if we finished naturally and AUTO_KILL is on we will kill ourself else if we finished naturally and if AUTO_KILL
-        // is off then we wont kill ourself until manually completed
+        // is off then we won't kill ourself until manually completed
         if (naturallyCompleted_)
             return AUTO_KILL;
 
@@ -69,12 +69,12 @@ public:
     void forceComplete() override {
         done_ = true;
         *target_ = end_;
-        onComplete.invoke();
+        onComplete->invoke();
     }
 
     void forceCancel() override {
         done_ = true;
-        onCancel.invoke();
+        onCancel->invoke();
     }
 
 private:
@@ -103,7 +103,7 @@ public:
     }
 
     void start() override {
-        onStart.invoke();
+        onStart->invoke();
 
         targetFunc_(start_);
         done_ = false;
@@ -114,7 +114,7 @@ public:
         // natural completion
         if (elapsed_ >= duration_ && !naturallyCompleted_) {
             naturallyCompleted_ = true;
-            onComplete.invoke();
+            onComplete->invoke();
         }
 
         // means we either (were force completed, or were force cancelled)
@@ -136,13 +136,13 @@ public:
     }
 
     void forceComplete() override {
-        onComplete.invoke();
+        onComplete->invoke();
         targetFunc_(end_);
         done_ = true;
     }
 
     void forceCancel() override {
-        onCancel.invoke();
+        onCancel->invoke();
         done_ = true;
     }
 

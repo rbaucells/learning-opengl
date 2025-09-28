@@ -13,7 +13,7 @@ void SequenceTween::join(std::unique_ptr<TweenBase> tween) {
 }
 
 void SequenceTween::start() {
-    onStart.invoke();
+    onStart->invoke();
     for (const auto& tween : tweens_.front()) {
         tween->start();
     }
@@ -25,7 +25,7 @@ bool SequenceTween::update(const float deltaTime) {
     // natural completion
     if (tweens_.empty() && !naturallyCompleted_) {
         naturallyCompleted_ = true;
-        onComplete.invoke();
+        onComplete->invoke();
     }
 
     // means we either (were force completed, or were force cancelled)
@@ -54,7 +54,7 @@ bool SequenceTween::update(const float deltaTime) {
 }
 
 void SequenceTween::forceComplete() {
-    onComplete.invoke();
+    onComplete->invoke();
     // force complete all the tweens inside
     while (!tweens_.empty()) {
         for (const auto& tween : tweens_.front()) {
@@ -67,7 +67,7 @@ void SequenceTween::forceComplete() {
 }
 
 void SequenceTween::forceCancel() {
-    onCancel.invoke();
+    onCancel->invoke();
 
     // force cancel all the tweens inside
     while (!tweens_.empty()) {

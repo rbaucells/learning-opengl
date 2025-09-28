@@ -10,8 +10,6 @@ AudioListener* AudioListener::mainListener = nullptr;
  * @param owner Owner
  */
 AudioListener::AudioListener(Object* owner) : Component(owner) {
-    std::printf("Creating Audio Listener\n");
-
     if (!mainListener)
         mainListener = this;
     else {

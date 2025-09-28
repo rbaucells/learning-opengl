@@ -41,7 +41,7 @@ public:
     virtual void onDestroy() {}
 
     template<derives_from_tween_base TWEEN_TYPE>
-    std::weak_ptr<TWEEN_TYPE> addTween(std::shared_ptr<TWEEN_TYPE>& tween) {
+    std::weak_ptr<TWEEN_TYPE> addTween(std::shared_ptr<TWEEN_TYPE> tween) {
         tween->start();
         tweens_.push_back(tween);
         return tween;

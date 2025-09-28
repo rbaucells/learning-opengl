@@ -178,7 +178,7 @@ int main() {
         while (accumulator >= FIXED_UPDATE_INTERVAL_IN_SECONDS) {
             float fixedDeltaTime = std::chrono::duration<float>(std::chrono::high_resolution_clock::now() - lastFixedUpdateTime).count();
 
-            fixedUpdateEventDispatcher.invoke(fixedDeltaTime);
+            fixedUpdateEventPublisher->invoke(fixedDeltaTime);
 
             lastFixedUpdateTime = std::chrono::high_resolution_clock::now();
             accumulator -= FIXED_UPDATE_INTERVAL_IN_SECONDS;
@@ -186,8 +186,8 @@ int main() {
 
         glClear(GL_COLOR_BUFFER_BIT);
 
-        updateEventDispatcher.invoke(deltaTime);
-        lateUpdateEventDispatcher.invoke(deltaTime);
+        updateEventPublisher->invoke(deltaTime);
+        lateUpdateEventPublisher->invoke(deltaTime);
 
         drawCalls();
 

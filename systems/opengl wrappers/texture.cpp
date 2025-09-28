@@ -6,7 +6,6 @@
 #include "glad/gl.h"
 
 Texture::Texture(const std::string& filePath, const int textureWrap, const bool flipVertically) {
-    std::printf("Constructing Texture\n");
     stbi_set_flip_vertically_on_load(flipVertically);
     unsigned char* data = stbi_load(filePath.c_str(), &width_, &height_, &numberOfChannels_, 0);
 

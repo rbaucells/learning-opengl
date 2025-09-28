@@ -4,24 +4,22 @@
 
 #include <vector>
 
-#include "systems/workQueue.h"
-
 Object::Object(const std::string& objectName, const int objectTag, const Vector2 pos, const float rot, const Vector2 scale) : name(objectName), tag(objectTag), transform(this, pos, rot, scale) {
     allObjects.push_back(this);
 
     // subscribe to the main game loop events
-    updateEventListener_.bind(&updateEventDispatcher, this, &Object::update);
-    lateUpdateEventListener_.bind(&updateEventDispatcher, this, &Object::lateUpdate);
-    fixedUpdateEventListener_.bind(&updateEventDispatcher, this, &Object::fixedUpdate);
+    updateEventSubscription_ = updateEventPublisher->subscribe(this, &Object::update);
+    fixedUpdateEventSubscription_ = fixedUpdateEventPublisher->subscribe(this, &Object::fixedUpdate);
+    updateEventSubscription_ = lateUpdateEventPublisher->subscribe(this, &Object::lateUpdate);
 }
 
-Object::Object(const std::string& objectName, const int objectTag, Vector2 pos, float rot, Vector2 scale, Transform* parent) : name(objectName), tag(objectTag), transform(this, pos, rot, scale) {
+Object::Object(const std::string& objectName, const int objectTag, Vector2 pos, float rot, Vector2 scale, Transform* parent) : name(objectName), tag(objectTag), transform(this, pos, rot, scale, parent) {
     allObjects.push_back(this);
 
     // subscribe to the main game loop events
-    updateEventListener_.bind(&updateEventDispatcher, this, &Object::update);
-    lateUpdateEventListener_.bind(&updateEventDispatcher, this, &Object::lateUpdate);
-    fixedUpdateEventListener_.bind(&updateEventDispatcher, this, &Object::fixedUpdate);
+    updateEventSubscription_ = updateEventPublisher->subscribe(this, &Object::update);
+    fixedUpdateEventSubscription_ = fixedUpdateEventPublisher->subscribe(this, &Object::fixedUpdate);
+    updateEventSubscription_ = lateUpdateEventPublisher->subscribe(this, &Object::lateUpdate);
 }
 
 /**

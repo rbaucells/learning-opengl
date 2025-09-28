@@ -1,6 +1,7 @@
 #pragma once
 #include <functional>
 #include <map>
+#include <memory>
 #include <random>
 
 template<typename... ARGS>
@@ -9,54 +10,106 @@ class Publisher;
 template<typename... ARGS>
 class Subscription {
 public:
-    Subscription(Publisher<ARGS...>* publisher, int id) {
+    Subscription() = default;
+
+    Subscription(const Subscription& other) = delete;
+    Subscription& operator=(const Subscription& other) = delete;
+
+    Subscription(std::shared_ptr<Publisher<ARGS...>> publisher, int id) {
         this->publisher_ = publisher;
         this->id_ = id;
     }
 
     Subscription(Subscription&& other) noexcept {
-        this->publisher_ = other.publisher_;
-        other.publisher_ = nullptr;
+        moveFrom(std::move(other));
+    }
 
-        this->id_ = other.id_;
+    Subscription& operator=(Subscription&& other) noexcept {
+        if (this != &other) {
+            cleanup();
+            moveFrom(std::move(other));
+        }
+
+        return *this;
+    }
+
+    void setForever() {
+        publisher_.reset();
     }
 
     ~Subscription() {
-        this->publisher_->unSubscribe(this);
+        cleanup();
     }
 
 private:
-    Publisher<ARGS...>* publisher_ = nullptr;
+    std::weak_ptr<Publisher<ARGS...>> publisher_;
     int id_;
+
+    friend class Publisher<ARGS...>;
+
+    void cleanup() {
+        if (auto publisher = publisher_.lock())
+            publisher->unSubscribe(this);
+
+        publisher_.reset();
+    }
+
+    void moveFrom(Subscription&& other) {
+        publisher_ = std::move(other.publisher_);
+        id_ = other.id_;
+        other.publisher_.reset();
+    }
 };
 
 template<typename... ARGS>
-class Publisher {
+class Publisher : public std::enable_shared_from_this<Publisher<ARGS...>> {
 public:
     void invoke(ARGS... args) {
-        for (auto func : funcitons_) {
-            func(std::forward<ARGS>(args)...);
+        for (auto& func : functions_) {
+            func.second(std::forward<ARGS>(args)...);
         }
     }
 
     Subscription<ARGS...> subscribe(std::function<void(ARGS...)> function) {
-        Subscription<ARGS...> subscription(this, curKey_);
+        Subscription<ARGS...> subscription(this->shared_from_this(), curKey_);
 
-        funcitons_.insert(curKey_, function);
+        functions_[curKey_] = function;
+        curKey_++;
+
+        return subscription;
+    }
+
+    template<typename T>
+    Subscription<ARGS...> subscribe(T* instance, void (T::*method)(ARGS...)) {
+        Subscription<ARGS...> subscription(this->shared_from_this(), curKey_);
+
+        functions_[curKey_] = [instance, method](ARGS... args) {
+            (instance->*method)(std::forward<ARGS>(args)...);
+        };
+        curKey_++;
+
+        return std::move(subscription);
+    }
+
+    template<typename T>
+    Subscription<ARGS...> subscribe(T* instance, void (T::*method)(ARGS...) const) {
+        Subscription<ARGS...> subscription(this->shared_from_this(), curKey_);
+
+        functions_[curKey_] = [instance, method](ARGS... args) {
+            (instance->*method)(std::forward<ARGS>(args)...);
+        };
         curKey_++;
 
         return std::move(subscription);
     }
 
     void unSubscribe(Subscription<ARGS...>* subscription) {
-        if (const auto it = funcitons_.find(subscription->id_); it != funcitons_.end()) {
-            funcitons_.erase(it);
+        if (const auto it = functions_.find(subscription->id_); it != functions_.end()) {
+            functions_.erase(it);
         }
     }
 
 private:
-    std::map<int, std::function<void(ARGS...)>> funcitons_;
+    std::map<int, std::function<void(ARGS...)>> functions_;
     int curKey_ = 0;
-
-    friend class Subscription<ARGS...>;
 };

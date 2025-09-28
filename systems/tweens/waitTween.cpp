@@ -5,7 +5,7 @@ WaitTween::WaitTween(const float duration) {
 }
 
 void WaitTween::start() {
-    onStart.invoke();
+    onStart->invoke();
 
     done_ = false;
     elapsed_ = 0;
@@ -15,7 +15,7 @@ bool WaitTween::update(const float deltaTime) {
     // natural completion
     if (elapsed_ >= duration_ && !naturallyCompleted_) {
         naturallyCompleted_ = true;
-        onComplete.invoke();
+        onComplete->invoke();
     }
 
     // means we either (were force completed, or were force cancelled)
@@ -34,11 +34,11 @@ bool WaitTween::update(const float deltaTime) {
 }
 
 void WaitTween::forceComplete() {
-    onComplete.invoke();
+    onComplete->invoke();
     done_ = true;
 }
 
 void WaitTween::forceCancel() {
-    onCancel.invoke();
+    onCancel->invoke();
     done_ = true;
 }

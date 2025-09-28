@@ -17,5 +17,5 @@ private:
     std::weak_ptr<SpriteSheetRenderer> spriteSheetRendererWeakPtr_;
     std::weak_ptr<TweenBase> runningPositionTweenWeakPtr_;
 
-    EventListener<bool> leftClickEventListener_;
+    Subscription<bool> leftClickEventSubscription_;
 };

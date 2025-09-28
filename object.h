@@ -13,9 +13,9 @@ class Object {
     bool activated_ = true;
     std::vector<std::shared_ptr<Component>> components_;
 
-    EventListener<float> updateEventListener_;
-    EventListener<float> lateUpdateEventListener_;
-    EventListener<float> fixedUpdateEventListener_;
+    Subscription<float> updateEventSubscription_;
+    Subscription<float> lateUpdateEventSubscription_;
+    Subscription<float> fixedUpdateEventSubscription_;
 
 public:
     const std::string name;

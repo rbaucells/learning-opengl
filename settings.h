@@ -1,4 +1,6 @@
 #pragma once
+#include <memory>
+
 #include "systems/betterEvents.h"
 #include "systems/event.h"
 
@@ -8,6 +10,6 @@ constexpr int FPS = 60;
 
 constexpr float FIXED_UPDATE_INTERVAL_IN_SECONDS = 1.0f / FIXED_UPDATE_PER_SECOND;
 
-inline Publisher<float> updateEventDispatcher;
-inline Publisher<float> lateUpdateEventDispatcher;
-inline Publisher<float> fixedUpdateEventDispatcher;
+inline std::shared_ptr<Publisher<float>> updateEventPublisher;
+inline std::shared_ptr<Publisher<float>> lateUpdateEventPublisher;
+inline std::shared_ptr<Publisher<float>> fixedUpdateEventPublisher;

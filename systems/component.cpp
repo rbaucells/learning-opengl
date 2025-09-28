@@ -20,7 +20,9 @@ void Component::manageTweens(const float deltaTime) {
             it = tweens_.erase(it);
             printf("Erased Tween\n");
         }
-        else
+        else {
             ++it;
+            printf("Incrementing Tween It\n");
+        }
     }
 }
