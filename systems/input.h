@@ -1,4 +1,5 @@
 #pragma once
+#include "betterEvents.h"
 #include "event.h"
 #include "../math/vector2.h"
 
@@ -60,7 +61,7 @@ void processGamepadEvents(const GLFWgamepadstate &current, const GLFWgamepadstat
 
 Vector2 mousePosToScreenPos(const Vector2 &mousePos);
 
-inline Event<bool> esc_event, f1_event, f2_event, f3_event, f4_event, f5_event, f6_event, f7_event, f8_event, f9_event, f10_event, f11_event, f12_event,
+inline Publisher<bool> esc_event, f1_event, f2_event, f3_event, f4_event, f5_event, f6_event, f7_event, f8_event, f9_event, f10_event, f11_event, f12_event,
         backtick_event, one_event, two_event, three_event, four_event, five_event, six_event, seven_event, eight_event, nine_event, zero_event, hyphen_event, equals_event, backspace_event,
         tab_event, q_event, w_event, e_event, r_event, t_event, y_event, u_event, i_event, o_event, p_event, left_bracket_event, right_bracket_event, back_slash_event,
         caps_lock_event, a_event, s_event, d_event, f_event, g_event, h_event, j_event, k_event, l_event, semicolon_event, apostrophe_event, enter_event,
@@ -73,6 +74,6 @@ inline Event<bool> esc_event, f1_event, f2_event, f3_event, f4_event, f5_event, 
         dpad_up_event, dpad_down_event, dpad_right_event, dpad_left_event,
         gamepad_view_event, gamepad_menu_event, gamepad_guide_event;
 
-inline Event<Vector2> mouse_moved_event, left_stick_moved_event, right_stick_moved_event;
+inline Publisher<Vector2> mouse_moved_event, left_stick_moved_event, right_stick_moved_event;
 
-inline Event<float> left_trigger_event, right_trigger_event, scroll_x_event, scroll_y_event;
+inline Publisher<float> left_trigger_event, right_trigger_event, scroll_x_event, scroll_y_event;

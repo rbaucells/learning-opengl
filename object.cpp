@@ -6,22 +6,22 @@
 
 #include "systems/workQueue.h"
 
-Object::Object(const std::string &objectName, const int objectTag, const Vector2 pos, const float rot, const Vector2 scale) : name(objectName), tag(objectTag), transform(this, pos, rot, scale) {
+Object::Object(const std::string& objectName, const int objectTag, const Vector2 pos, const float rot, const Vector2 scale) : name(objectName), tag(objectTag), transform(this, pos, rot, scale) {
     allObjects.push_back(this);
 
     // subscribe to the main game loop events
-    updateEvent.subscribe(this, &Object::update);
-    lateUpdateEvent.subscribe(this, &Object::lateUpdate);
-    fixedUpdateEvent.subscribe(this, &Object::fixedUpdate);
+    updateEventListener_.bind(&updateEventDispatcher, this, &Object::update);
+    lateUpdateEventListener_.bind(&updateEventDispatcher, this, &Object::lateUpdate);
+    fixedUpdateEventListener_.bind(&updateEventDispatcher, this, &Object::fixedUpdate);
 }
 
-Object::Object(const std::string &objectName, const int objectTag, Vector2 pos, float rot, Vector2 scale, Transform *parent) : name(objectName), tag(objectTag), transform(this, pos, rot, scale) {
+Object::Object(const std::string& objectName, const int objectTag, Vector2 pos, float rot, Vector2 scale, Transform* parent) : name(objectName), tag(objectTag), transform(this, pos, rot, scale) {
     allObjects.push_back(this);
 
     // subscribe to the main game loop events
-    updateEvent.subscribe(this, &Object::update);
-    lateUpdateEvent.subscribe(this, &Object::lateUpdate);
-    fixedUpdateEvent.subscribe(this, &Object::fixedUpdate);
+    updateEventListener_.bind(&updateEventDispatcher, this, &Object::update);
+    lateUpdateEventListener_.bind(&updateEventDispatcher, this, &Object::lateUpdate);
+    fixedUpdateEventListener_.bind(&updateEventDispatcher, this, &Object::fixedUpdate);
 }
 
 /**
@@ -37,15 +37,15 @@ void Object::update(const float deltaTime) {
 
     transform.manageTweens(deltaTime);
 
-    for (const auto &component: components_) {
+    for (const auto& component : components_) {
         component->update(deltaTime);
     }
 
-    for (const auto &component: components_) {
+    for (const auto& component : components_) {
         component->manageTweens(deltaTime);
     }
 
-    for (const auto &component: components_) {
+    for (const auto& component : components_) {
         component->manageQueue(deltaTime);
     }
 }
@@ -60,7 +60,7 @@ void Object::fixedUpdate(const float fixedDeltaTime) const {
     if (!activated_)
         return;
 
-    for (const auto &component: components_) {
+    for (const auto& component : components_) {
         component->fixedUpdate(fixedDeltaTime);
     }
 }
@@ -75,7 +75,7 @@ void Object::lateUpdate(const float deltaTime) const {
     if (!activated_)
         return;
 
-    for (const auto &component: components_) {
+    for (const auto& component : components_) {
         component->lateUpdate(deltaTime);
     }
 }
@@ -130,7 +130,6 @@ bool Object::getActive() const {
     return activated_;
 }
 
-
 // static methods
 
 /**
@@ -138,8 +137,8 @@ bool Object::getActive() const {
  * @param name the name of the object to find.
  * @return a pointer to the found object, or nullptr if no object is found.
  */
-Object *Object::findObjectByName(const std::string &name) {
-    for (Object *obj: allObjects) {
+Object* Object::findObjectByName(const std::string& name) {
+    for (Object* obj : allObjects) {
         if (obj->name == name)
             return obj;
     }
@@ -152,8 +151,8 @@ Object *Object::findObjectByName(const std::string &name) {
  * @param tag the tag of the object to find.
  * @return a pointer to the found object, or nullptr if no object is found.
  */
-Object *Object::findObjectByTag(const int tag) {
-    for (Object *obj: allObjects) {
+Object* Object::findObjectByTag(const int tag) {
+    for (Object* obj : allObjects) {
         if (obj->tag == tag)
             return obj;
     }
@@ -166,10 +165,10 @@ Object *Object::findObjectByTag(const int tag) {
  * @param name the name of the objects to find.
  * @return a vector of pointers to the found objects.
  */
-std::vector<Object *> Object::findObjectsByName(const std::string &name) {
-    std::vector<Object *> data;
+std::vector<Object*> Object::findObjectsByName(const std::string& name) {
+    std::vector<Object*> data;
 
-    for (Object *obj: allObjects) {
+    for (Object* obj : allObjects) {
         if (obj->name == name)
             data.push_back(obj);
     }
@@ -182,10 +181,10 @@ std::vector<Object *> Object::findObjectsByName(const std::string &name) {
  * @param tag the tag of the objects to find.
  * @return a vector of pointers to the found objects.
  */
-std::vector<Object *> Object::findObjectsByTag(const int tag) {
-    std::vector<Object *> data;
+std::vector<Object*> Object::findObjectsByTag(const int tag) {
+    std::vector<Object*> data;
 
-    for (Object *obj: allObjects) {
+    for (Object* obj : allObjects) {
         if (obj->tag == tag)
             data.push_back(obj);
     }

@@ -1,4 +1,5 @@
 #pragma once
+#include "systems/betterEvents.h"
 #include "systems/event.h"
 
 // variables
@@ -7,6 +8,6 @@ constexpr int FPS = 60;
 
 constexpr float FIXED_UPDATE_INTERVAL_IN_SECONDS = 1.0f / FIXED_UPDATE_PER_SECOND;
 
-inline Event<float> updateEvent;
-inline Event<float> lateUpdateEvent;
-inline Event<float> fixedUpdateEvent;
+inline Publisher<float> updateEventDispatcher;
+inline Publisher<float> lateUpdateEventDispatcher;
+inline Publisher<float> fixedUpdateEventDispatcher;

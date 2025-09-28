@@ -16,6 +16,9 @@ public:
 
     virtual void draw(const Matrix<4, 4>& view, const Matrix<4, 4>& projection) const = 0;
 
+    // std::weak_ptr<Shader> = Shader Being Used
+    Publisher<std::weak_ptr<Shader>> onDrawEventDispatcher;
+
     [[nodiscard]] virtual Bounds getBounds() const = 0;
 
     virtual std::shared_ptr<Tween<float>> alphaTween(float start, float end, float duration, const Curve& curve) = 0;

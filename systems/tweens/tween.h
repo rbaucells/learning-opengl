@@ -1,5 +1,7 @@
 #pragma once
 #include <queue>
+
+#include "../betterEvents.h"
 #include "../event.h"
 #include "../../math/curve.h"
 
@@ -16,9 +18,9 @@ public:
 
     virtual ~TweenBase() = default;
 
-    Event<> onStart;
-    Event<> onCancel;
-    Event<> onComplete;
+    Publisher<> onStart;
+    Publisher<> onCancel;
+    Publisher<> onComplete;
 };
 
 template<typename T>

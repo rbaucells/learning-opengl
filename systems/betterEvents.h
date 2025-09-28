@@ -1,127 +1,62 @@
 #pragma once
 #include <functional>
+#include <map>
 #include <random>
 
 template<typename... ARGS>
-class EventDispatcher;
+class Publisher;
 
 template<typename... ARGS>
-class EventListener {
+class Subscription {
 public:
-    EventListener() = default;
-
-    EventListener(EventDispatcher<ARGS...>* dispatcher, std::function<void(ARGS...)> func) {
-        bind(dispatcher, func);
+    Subscription(Publisher<ARGS...>* publisher, int id) {
+        this->publisher_ = publisher;
+        this->id_ = id;
     }
 
-    template<typename T>
-    EventListener(EventDispatcher<ARGS...>* dispatcher, T* instance, void (T::*method)(ARGS...)) {
-        bind(dispatcher, instance, method);
+    Subscription(Subscription&& other) noexcept {
+        this->publisher_ = other.publisher_;
+        other.publisher_ = nullptr;
+
+        this->id_ = other.id_;
     }
 
-    template<typename T>
-    EventListener(EventDispatcher<ARGS...>* dispatcher, T* instance, void (T::*method)(ARGS...) const) {
-        bind(dispatcher, instance, method);
-    }
-
-    void bind(EventDispatcher<ARGS...>* dispatcher, std::function<void(ARGS...)> func) {
-        unbind();
-
-        dispatcher_ = dispatcher;
-        function_ = func;
-        dispatcher_->add(this);
-
-        printf("Event Binded\n");
-    }
-
-    template<typename T>
-    void bind(EventDispatcher<ARGS...>* dispatcher, T* instance, void (T::*method)(ARGS...)) {
-        unbind();
-
-        dispatcher_ = dispatcher;
-
-        function_ = [instance, method](ARGS... args) {
-            (instance->*method)(args...);
-        };
-
-        dispatcher_->add(this);
-
-        printf("Event Binded\n");
-    }
-
-    template<typename T>
-    void bind(EventDispatcher<ARGS...>* dispatcher, T* instance, void (T::*method)(ARGS...) const) {
-        unbind();
-
-        dispatcher_ = dispatcher;
-
-        function_ = [instance, method](ARGS... args) {
-            (instance->*method)(args...);
-        };
-
-        dispatcher_->add(this);
-
-        printf("Event Binded\n");
-    }
-
-    void unbind() {
-        if (dispatcher_) {
-            dispatcher_->remove(this);
-            dispatcher_ = nullptr;
-
-            printf("Event UnBinded\n");
-        }
-    }
-
-    EventListener(EventListener& other) = delete;
-    EventListener& operator=(const EventListener&) = delete;
-
-    bool operator==(const EventListener& b) const {
-        return this == &b;
-    }
-
-    ~EventListener() {
-        unbind();
+    ~Subscription() {
+        this->publisher_->unSubscribe(this);
     }
 
 private:
-    EventDispatcher<ARGS...>* dispatcher_;
-    std::function<void(ARGS...)> function_;
-
-    friend class EventDispatcher<ARGS...>;
-
-    void invoke(ARGS... args) {
-        if (function_)
-            function_(std::forward<ARGS>(args)...);
-    }
+    Publisher<ARGS...>* publisher_ = nullptr;
+    int id_;
 };
 
 template<typename... ARGS>
-class EventDispatcher {
+class Publisher {
 public:
     void invoke(ARGS... args) {
-        for (auto* listener : listeners_) {
-            listener->invoke(std::forward<ARGS>(args)...);
+        for (auto func : funcitons_) {
+            func(std::forward<ARGS>(args)...);
+        }
+    }
+
+    Subscription<ARGS...> subscribe(std::function<void(ARGS...)> function) {
+        Subscription<ARGS...> subscription(this, curKey_);
+
+        funcitons_.insert(curKey_, function);
+        curKey_++;
+
+        return std::move(subscription);
+    }
+
+    void unSubscribe(Subscription<ARGS...>* subscription) {
+        if (const auto it = funcitons_.find(subscription->id_); it != funcitons_.end()) {
+            funcitons_.erase(it);
         }
     }
 
 private:
-    std::vector<EventListener<ARGS...>*> listeners_;
+    std::map<int, std::function<void(ARGS...)>> funcitons_;
+    int curKey_ = 0;
 
-    void add(EventListener<ARGS...>* listenerToAdd) {
-        listeners_.push_back(listenerToAdd);
-    }
-
-    void remove(EventListener<ARGS...>* listenerToRemove) {
-        for (auto it = listeners_.begin(); it != listeners_.end();) {
-            if (**it == *listenerToRemove) {
-                listeners_.erase(it);
-                return;
-            }
-
-            ++it;
-        }
-    }
-
-    friend class EventListener<ARGS...>;
+    friend class Subscription<ARGS...>;
 };

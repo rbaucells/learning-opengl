@@ -12,29 +12,9 @@ void testFunction(const int i) {
 
 void ComponentExample::start() {
     // subscribe to the left click event
-    left_click_event.subscribe(this, &ComponentExample::onMouseInput);
-    // left_click_event.unSubscribe(this, &ComponentExample::onMouseInput);
-
-    EventDispatcher<int> dispatcher;
-    constexpr int i = 5;
-
-    listener_.bind(&dispatcher, testFunction);
-
-    dispatcher.invoke(i);
+    leftClickEventListener_.bind(&left_click_event, this, &ComponentExample::onMouseInput);
 
     auto positionTweenUniquePtr = object->transform.localPosTween({3, 0}, 5, Curve::expoOut);
-
-    positionTweenUniquePtr->onStart.subscribe([] {
-        printf("Tween Started\n");
-    });
-
-    positionTweenUniquePtr->onComplete.subscribe([] {
-        printf("Tween Completed\n");
-    });
-
-    positionTweenUniquePtr->onCancel.subscribe([] {
-        printf("Tween Cancelled\n");
-    });
 
     runningPositionTweenWeakPtr_ = addTween(positionTweenUniquePtr);
 
