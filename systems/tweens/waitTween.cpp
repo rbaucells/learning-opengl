@@ -42,3 +42,7 @@ void WaitTween::forceCancel() {
     onCancel->invoke();
     done_ = true;
 }
+
+bool WaitTween::running() const {
+    return !done_ || !naturallyCompleted_;
+}

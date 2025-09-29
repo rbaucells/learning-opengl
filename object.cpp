@@ -1,6 +1,6 @@
-#include "systems/component.h"
 #include "object.h"
 #include "settings.h"
+#include "systems/component.h"
 
 #include <vector>
 
@@ -10,7 +10,7 @@ Object::Object(const std::string& objectName, const int objectTag, const Vector2
     // subscribe to the main game loop events
     updateEventSubscription_ = updateEventPublisher->subscribe(this, &Object::update);
     fixedUpdateEventSubscription_ = fixedUpdateEventPublisher->subscribe(this, &Object::fixedUpdate);
-    updateEventSubscription_ = lateUpdateEventPublisher->subscribe(this, &Object::lateUpdate);
+    lateUpdateEventSubscription_ = lateUpdateEventPublisher->subscribe(this, &Object::lateUpdate);
 }
 
 Object::Object(const std::string& objectName, const int objectTag, Vector2 pos, float rot, Vector2 scale, Transform* parent) : name(objectName), tag(objectTag), transform(this, pos, rot, scale, parent) {
@@ -19,7 +19,7 @@ Object::Object(const std::string& objectName, const int objectTag, Vector2 pos, 
     // subscribe to the main game loop events
     updateEventSubscription_ = updateEventPublisher->subscribe(this, &Object::update);
     fixedUpdateEventSubscription_ = fixedUpdateEventPublisher->subscribe(this, &Object::fixedUpdate);
-    updateEventSubscription_ = lateUpdateEventPublisher->subscribe(this, &Object::lateUpdate);
+    lateUpdateEventSubscription_ = lateUpdateEventPublisher->subscribe(this, &Object::lateUpdate);
 }
 
 /**

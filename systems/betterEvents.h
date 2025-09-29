@@ -18,6 +18,8 @@ public:
     Subscription(std::shared_ptr<Publisher<ARGS...>> publisher, int id) {
         this->publisher_ = publisher;
         this->id_ = id;
+
+        printf("Subscription constructed\n");
     }
 
     Subscription(Subscription&& other) noexcept {
@@ -39,6 +41,7 @@ public:
 
     ~Subscription() {
         cleanup();
+        printf("Subscription destructed\n");
     }
 
 private:
@@ -64,6 +67,11 @@ private:
 template<typename... ARGS>
 class Publisher : public std::enable_shared_from_this<Publisher<ARGS...>> {
 public:
+    static std::shared_ptr<Publisher<ARGS...>> create() {
+        // ReSharper disable once CppSmartPointerVsMakeFunction
+        return std::shared_ptr<Publisher>(new Publisher());
+    }
+
     void invoke(ARGS... args) {
         for (auto& func : functions_) {
             func.second(std::forward<ARGS>(args)...);
@@ -112,4 +120,6 @@ public:
 private:
     std::map<int, std::function<void(ARGS...)>> functions_;
     int curKey_ = 0;
+
+    Publisher() {}
 };

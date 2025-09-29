@@ -17,7 +17,7 @@ public:
     virtual void draw(const Matrix<4, 4>& view, const Matrix<4, 4>& projection) const = 0;
 
     // std::weak_ptr<Shader> = Shader Being Used
-    Publisher<std::weak_ptr<Shader>> onDrawEventDispatcher;
+    std::shared_ptr<Publisher<std::weak_ptr<Shader>>> onDrawEventDispatcher = Publisher<std::weak_ptr<Shader>>::create();
 
     [[nodiscard]] virtual Bounds getBounds() const = 0;
 

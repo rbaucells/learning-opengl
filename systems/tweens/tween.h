@@ -2,7 +2,6 @@
 #include <queue>
 
 #include "../betterEvents.h"
-#include "../event.h"
 #include "../../math/curve.h"
 
 // if AUTO_KILL is true, then when a tween has completed naturally its time it starts to return true to shouldDelete()
@@ -16,11 +15,13 @@ public:
     virtual void forceComplete() = 0;
     virtual void forceCancel() = 0;
 
+    virtual bool running() const = 0;
+
     virtual ~TweenBase() = default;
 
-    std::shared_ptr<Publisher<>> onStart;
-    std::shared_ptr<Publisher<>> onCancel;
-    std::shared_ptr<Publisher<>> onComplete;
+    std::shared_ptr<Publisher<>> onStart = Publisher<>::create();
+    std::shared_ptr<Publisher<>> onCancel = Publisher<>::create();
+    std::shared_ptr<Publisher<>> onComplete = Publisher<>::create();
 };
 
 template<typename T>
@@ -75,6 +76,10 @@ public:
     void forceCancel() override {
         done_ = true;
         onCancel->invoke();
+    }
+
+    bool running() const override {
+        return !done_ || !naturallyCompleted_;
     }
 
 private:
@@ -146,6 +151,10 @@ public:
         done_ = true;
     }
 
+    bool running() const override {
+        return !done_ || !naturallyCompleted_;
+    }
+
 private:
     std::function<void(T)> targetFunc_;
     T start_;
@@ -169,6 +178,8 @@ public:
     void forceComplete() override;
     void forceCancel() override;
 
+    bool running() const override;
+
 private:
     float duration_ = 0;
     float elapsed_ = 0;
@@ -186,6 +197,8 @@ public:
     void forceComplete() override;
     void forceCancel() override;
 
+    bool running() const override;
+
 private:
     std::function<void()> func_;
 };
@@ -199,6 +212,8 @@ public:
     bool update(float deltaTime) override;
     void forceComplete() override;
     void forceCancel() override;
+
+    bool running() const override;
 
 private:
     std::queue<std::vector<std::unique_ptr<TweenBase>>> tweens_;

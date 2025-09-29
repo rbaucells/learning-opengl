@@ -20,3 +20,7 @@ void CallbackTween::forceComplete() {
 void CallbackTween::forceCancel() {
     onCancel->invoke();
 }
+
+bool CallbackTween::running() const {
+    return false;
+}

@@ -79,3 +79,8 @@ void SequenceTween::forceCancel() {
 
     done_ = true;
 }
+
+
+bool SequenceTween::running() const {
+    return !done_ || !naturallyCompleted_;
+}

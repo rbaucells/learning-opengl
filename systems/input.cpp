@@ -1,27 +1,27 @@
 #include "input.h"
 
-#include "../settings.h"
 #include "../object.h"
+#include "../settings.h"
 
 #include "GLFW/glfw3.h"
 
 void cursorMoveCallback(GLFWwindow *window, const double xpos, const double ypos) {
     const auto x = static_cast<float>(xpos);
     const auto y = static_cast<float>(ypos);
-    mouse_moved_event->invoke({x, y});
+    mouseMovedEvent->invoke({x, y});
 }
 
 void mouseButtonCallback(GLFWwindow *window, const int button, const int action, int mods) {
     const bool pressed = action == GLFW_PRESS;
     switch (button) {
         case GLFW_MOUSE_BUTTON_LEFT:
-            left_click_event->invoke(pressed);
+            leftClickEvent->invoke(pressed);
             break;
         case GLFW_MOUSE_BUTTON_RIGHT:
-            right_click_event->invoke(pressed);
+            rightClickEvent->invoke(pressed);
             break;
         case GLFW_MOUSE_BUTTON_MIDDLE:
-            middle_click_event->invoke(pressed);
+            middleClickEvent->invoke(pressed);
             break;
         default:
             break;
@@ -31,8 +31,8 @@ void mouseButtonCallback(GLFWwindow *window, const int button, const int action,
 void scrollCallback(GLFWwindow *window, const double xoffset, const double yoffset) {
     const auto x = static_cast<float>(xoffset);
     const auto y = static_cast<float>(yoffset);
-    scroll_x_event->invoke(x);
-    scroll_y_event->invoke(y);
+    scrollXEvent->invoke(x);
+    scrollYEvent->invoke(y);
 }
 
 void keyCallback(GLFWwindow *window, const int key, int scancode, const int action, int mods) {
@@ -43,228 +43,228 @@ void keyCallback(GLFWwindow *window, const int key, int scancode, const int acti
 
     switch (key) {
         case GLFW_KEY_ESCAPE:
-            esc_event->invoke(pressed);
+            escEvent->invoke(pressed);
             break;
         case GLFW_KEY_F1:
-            f1_event->invoke(pressed);
+            f1Event->invoke(pressed);
             break;
         case GLFW_KEY_F2:
-            f2_event->invoke(pressed);
+            f2Event->invoke(pressed);
             break;
         case GLFW_KEY_F3:
-            f3_event->invoke(pressed);
+            f3Event->invoke(pressed);
             break;
         case GLFW_KEY_F4:
-            f4_event->invoke(pressed);
+            f4Event->invoke(pressed);
             break;
         case GLFW_KEY_F5:
-            f5_event->invoke(pressed);
+            f5Event->invoke(pressed);
             break;
         case GLFW_KEY_F6:
-            f6_event->invoke(pressed);
+            f6Event->invoke(pressed);
             break;
         case GLFW_KEY_F7:
-            f7_event->invoke(pressed);
+            f7Event->invoke(pressed);
             break;
         case GLFW_KEY_F8:
-            f8_event->invoke(pressed);
+            f8Event->invoke(pressed);
             break;
         case GLFW_KEY_F9:
-            f9_event->invoke(pressed);
+            f9Event->invoke(pressed);
             break;
         case GLFW_KEY_F10:
-            f10_event->invoke(pressed);
+            f10Event->invoke(pressed);
             break;
         case GLFW_KEY_F11:
-            f11_event->invoke(pressed);
+            f11Event->invoke(pressed);
             break;
         case GLFW_KEY_F12:
-            f12_event->invoke(pressed);
+            f12Event->invoke(pressed);
             break;
         case GLFW_KEY_GRAVE_ACCENT:
-            backtick_event->invoke(pressed);
+            backtickEvent->invoke(pressed);
             break;
         case GLFW_KEY_1:
-            one_event->invoke(pressed);
+            oneEvent->invoke(pressed);
             break;
         case GLFW_KEY_2:
-            two_event->invoke(pressed);
+            twoEvent->invoke(pressed);
             break;
         case GLFW_KEY_3:
-            three_event->invoke(pressed);
+            threeEvent->invoke(pressed);
             break;
         case GLFW_KEY_4:
-            four_event->invoke(pressed);
+            fourEvent->invoke(pressed);
             break;
         case GLFW_KEY_5:
-            five_event->invoke(pressed);
+            fiveEvent->invoke(pressed);
             break;
         case GLFW_KEY_6:
-            six_event->invoke(pressed);
+            sixEvent->invoke(pressed);
             break;
         case GLFW_KEY_7:
-            seven_event->invoke(pressed);
+            sevenEvent->invoke(pressed);
             break;
         case GLFW_KEY_8:
-            eight_event->invoke(pressed);
+            eightEvent->invoke(pressed);
             break;
         case GLFW_KEY_9:
-            nine_event->invoke(pressed);
+            nineEvent->invoke(pressed);
             break;
         case GLFW_KEY_0:
-            zero_event->invoke(pressed);
+            zeroEvent->invoke(pressed);
             break;
         case GLFW_KEY_MINUS:
-            hyphen_event->invoke(pressed);
+            hyphenEvent->invoke(pressed);
             break;
         case GLFW_KEY_EQUAL:
-            equals_event->invoke(pressed);
+            equalsEvent->invoke(pressed);
             break;
         case GLFW_KEY_BACKSPACE:
-            backspace_event->invoke(pressed);
+            backspaceEvent->invoke(pressed);
             break;
         case GLFW_KEY_TAB:
-            tab_event->invoke(pressed);
+            tabEvent->invoke(pressed);
             break;
         case GLFW_KEY_Q:
-            q_event->invoke(pressed);
+            qEvent->invoke(pressed);
             break;
         case GLFW_KEY_W:
-            w_event->invoke(pressed);
+            wEvent->invoke(pressed);
             break;
         case GLFW_KEY_E:
-            e_event->invoke(pressed);
+            eEvent->invoke(pressed);
             break;
         case GLFW_KEY_R:
-            r_event->invoke(pressed);
+            rEvent->invoke(pressed);
             break;
         case GLFW_KEY_T:
-            t_event->invoke(pressed);
+            tEvent->invoke(pressed);
             break;
         case GLFW_KEY_Y:
-            y_event->invoke(pressed);
+            yEvent->invoke(pressed);
             break;
         case GLFW_KEY_U:
-            u_event->invoke(pressed);
+            uEvent->invoke(pressed);
             break;
         case GLFW_KEY_I:
-            i_event->invoke(pressed);
+            iEvent->invoke(pressed);
             break;
         case GLFW_KEY_O:
-            o_event->invoke(pressed);
+            oEvent->invoke(pressed);
             break;
         case GLFW_KEY_P:
-            p_event->invoke(pressed);
+            pEvent->invoke(pressed);
             break;
         case GLFW_KEY_LEFT_BRACKET:
-            left_bracket_event->invoke(pressed);
+            leftBracketEvent->invoke(pressed);
             break;
         case GLFW_KEY_RIGHT_BRACKET:
-            right_bracket_event->invoke(pressed);
+            rightBracketEvent->invoke(pressed);
             break;
         case GLFW_KEY_BACKSLASH:
-            back_slash_event->invoke(pressed);
+            backSlashEvent->invoke(pressed);
             break;
         case GLFW_KEY_CAPS_LOCK:
-            caps_lock_event->invoke(pressed);
+            capsLockEvent->invoke(pressed);
             break;
         case GLFW_KEY_A:
-            a_event->invoke(pressed);
+            aEvent->invoke(pressed);
             break;
         case GLFW_KEY_S:
-            s_event->invoke(pressed);
+            sEvent->invoke(pressed);
             break;
         case GLFW_KEY_D:
-            d_event->invoke(pressed);
+            dEvent->invoke(pressed);
             break;
         case GLFW_KEY_F:
-            f_event->invoke(pressed);
+            fEvent->invoke(pressed);
             break;
         case GLFW_KEY_G:
-            g_event->invoke(pressed);
+            gEvent->invoke(pressed);
             break;
         case GLFW_KEY_H:
-            h_event->invoke(pressed);
+            hEvent->invoke(pressed);
             break;
         case GLFW_KEY_J:
-            j_event->invoke(pressed);
+            jEvent->invoke(pressed);
             break;
         case GLFW_KEY_K:
-            k_event->invoke(pressed);
+            kEvent->invoke(pressed);
             break;
         case GLFW_KEY_L:
-            l_event->invoke(pressed);
+            lEvent->invoke(pressed);
             break;
         case GLFW_KEY_SEMICOLON:
-            semicolon_event->invoke(pressed);
+            semicolonEvent->invoke(pressed);
             break;
         case GLFW_KEY_APOSTROPHE:
-            apostrophe_event->invoke(pressed);
+            apostropheEvent->invoke(pressed);
             break;
         case GLFW_KEY_ENTER:
         case GLFW_KEY_KP_ENTER:
-            enter_event->invoke(pressed);
+            enterEvent->invoke(pressed);
             break;
         case GLFW_KEY_LEFT_SHIFT:
         case GLFW_KEY_RIGHT_SHIFT:
-            shift_event->invoke(pressed);
+            shiftEvent->invoke(pressed);
             break;
         case GLFW_KEY_Z:
-            z_event->invoke(pressed);
+            zEvent->invoke(pressed);
             break;
         case GLFW_KEY_X:
-            x_event->invoke(pressed);
+            xEvent->invoke(pressed);
             break;
         case GLFW_KEY_C:
-            c_event->invoke(pressed);
+            cEvent->invoke(pressed);
             break;
         case GLFW_KEY_V:
-            v_event->invoke(pressed);
+            vEvent->invoke(pressed);
             break;
         case GLFW_KEY_B:
-            b_event->invoke(pressed);
+            bEvent->invoke(pressed);
             break;
         case GLFW_KEY_N:
-            n_event->invoke(pressed);
+            nEvent->invoke(pressed);
             break;
         case GLFW_KEY_M:
-            m_event->invoke(pressed);
+            mEvent->invoke(pressed);
             break;
         case GLFW_KEY_COMMA:
-            comma_event->invoke(pressed);
+            commaEvent->invoke(pressed);
             break;
         case GLFW_KEY_PERIOD:
-            period_event->invoke(pressed);
+            periodEvent->invoke(pressed);
             break;
         case GLFW_KEY_SLASH:
-            forward_slash_event->invoke(pressed);
+            forwardSlashEvent->invoke(pressed);
             break;
         case GLFW_KEY_LEFT_CONTROL:
         case GLFW_KEY_RIGHT_CONTROL:
-            control_event->invoke(pressed);
+            controlEvent->invoke(pressed);
             break;
         case GLFW_KEY_LEFT_ALT:
         case GLFW_KEY_RIGHT_ALT:
-            alt_event->invoke(pressed);
+            altEvent->invoke(pressed);
             break;
         case GLFW_KEY_RIGHT_SUPER:
         case GLFW_KEY_LEFT_SUPER:
-            super_event->invoke(pressed);
+            superEvent->invoke(pressed);
             break;
         case GLFW_KEY_SPACE:
-            space_event->invoke(pressed);
+            spaceEvent->invoke(pressed);
             break;
         case GLFW_KEY_UP:
-            up_event->invoke(pressed);
+            upEvent->invoke(pressed);
             break;
         case GLFW_KEY_DOWN:
-            down_event->invoke(pressed);
+            downEvent->invoke(pressed);
             break;
         case GLFW_KEY_RIGHT:
-            right_event->invoke(pressed);
+            rightEvent->invoke(pressed);
             break;
         case GLFW_KEY_LEFT:
-            left_event->invoke(pressed);
+            leftEvent->invoke(pressed);
             break;
         default:
             break;
@@ -279,46 +279,46 @@ void processGamepadEvents(const GLFWgamepadstate &current, const GLFWgamepadstat
 
             switch (i) {
                 case GLFW_GAMEPAD_BUTTON_A:
-                    gamepad_south_event->invoke(currentState);
+                    gamepadSouthEvent->invoke(currentState);
                     break;
                 case GLFW_GAMEPAD_BUTTON_B:
-                    gamepad_east_event->invoke(currentState);
+                    gamepadEastEvent->invoke(currentState);
                     break;
                 case GLFW_GAMEPAD_BUTTON_X:
-                    gamepad_west_event->invoke(currentState);
+                    gamepadWestEvent->invoke(currentState);
                     break;
                 case GLFW_GAMEPAD_BUTTON_Y:
-                    gamepad_north_event->invoke(currentState);
+                    gamepadNorthEvent->invoke(currentState);
                     break;
                 case GLFW_GAMEPAD_BUTTON_DPAD_UP:
-                    dpad_up_event->invoke(currentState);
+                    dpadUpEvent->invoke(currentState);
                     break;
                 case GLFW_GAMEPAD_BUTTON_DPAD_DOWN:
-                    dpad_down_event->invoke(currentState);
+                    dpadDownEvent->invoke(currentState);
                     break;
                 case GLFW_GAMEPAD_BUTTON_DPAD_RIGHT:
-                    dpad_right_event->invoke(currentState);
+                    dpadRightEvent->invoke(currentState);
                     break;
                 case GLFW_GAMEPAD_BUTTON_BACK:
-                    gamepad_view_event->invoke(currentState);
+                    gamepadViewEvent->invoke(currentState);
                     break;
                 case GLFW_GAMEPAD_BUTTON_START:
-                    gamepad_menu_event->invoke(currentState);
+                    gamepadMenuEvent->invoke(currentState);
                     break;
                 case GLFW_GAMEPAD_BUTTON_GUIDE:
-                    gamepad_guide_event->invoke(currentState);
+                    gamepadGuideEvent->invoke(currentState);
                     break;
                 case GLFW_GAMEPAD_BUTTON_LEFT_BUMPER:
-                    left_bumper_event->invoke(currentState);
+                    leftBumperEvent->invoke(currentState);
                     break;
                 case GLFW_GAMEPAD_BUTTON_RIGHT_BUMPER:
-                    right_bumper_event->invoke(currentState);
+                    rightBumperEvent->invoke(currentState);
                     break;
                 case GLFW_GAMEPAD_BUTTON_LEFT_THUMB:
-                    left_stick_event->invoke(currentState);
+                    leftStickEvent->invoke(currentState);
                     break;
                 case GLFW_GAMEPAD_BUTTON_RIGHT_THUMB:
-                    right_stick_event->invoke(currentState);
+                    rightStickEvent->invoke(currentState);
                     break;
                 default:
                     break;
@@ -349,21 +349,21 @@ void processGamepadEvents(const GLFWgamepadstate &current, const GLFWgamepadstat
 
     // if there was change on the left stick
     if (std::abs(curLeftX - lastLeftX) > CHANGE_THRESHOLD || std::abs(curLeftY - lastLeftY) > CHANGE_THRESHOLD) {
-        left_stick_moved_event->invoke({curLeftX, curLeftY});
+        leftStickMovedEvent->invoke({curLeftX, curLeftY});
     }
 
     // if there was change on the right stick
     if (std::abs(curRightX - lastRightX) > CHANGE_THRESHOLD || std::abs(curRightY - lastRightY) > CHANGE_THRESHOLD) {
-        right_stick_moved_event->invoke({curRightX, lastRightX});
+        rightStickMovedEvent->invoke({curRightX, curRightY});
     }
 
     // if there was a change on the left trigger
     if (std::abs(curLeftTrigger - lastLeftTrigger) > CHANGE_THRESHOLD) {
-        left_trigger_event->invoke(curLeftTrigger);
+        leftTriggerEvent->invoke(curLeftTrigger);
     }
 
     // if there was a change on the right trigger
     if (std::abs(curRightTrigger - lastRightTrigger) > CHANGE_THRESHOLD) {
-        left_trigger_event->invoke(curRightTrigger);
+        rightTriggerEvent->invoke(curRightTrigger); // NOTE: Fixed a potential typo here, it was previously invoking left_trigger_event for the right trigger.
     }
 }

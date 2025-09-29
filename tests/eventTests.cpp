@@ -18,7 +18,7 @@ int main() {
     {
         int x = 0;
 
-        std::shared_ptr<Publisher<int>> publisher = std::make_shared<Publisher<int>>();
+        std::shared_ptr<Publisher<int>> publisher = Publisher<int>::create();
         Subscription<int> subscription = publisher->subscribe([&x](int y) {
             x = y;
         });
@@ -32,7 +32,7 @@ int main() {
     }
 
     {
-        std::shared_ptr<Publisher<int>> publisher = std::make_shared<Publisher<int>>();
+        std::shared_ptr<Publisher<int>> publisher = Publisher<int>::create();
         Subscriber* subscriber = new Subscriber();
 
         Subscription<int> subscription = publisher->subscribe(subscriber, &Subscriber::setValue);
@@ -51,10 +51,9 @@ int main() {
         std::cout << "Subscriber deletion test passed" << std::endl;
     }
 
-    if constexpr (true)
-    {
+    if constexpr (true) {
         {
-            std::shared_ptr<Publisher<>> publisher = std::make_shared<Publisher<>>();
+            std::shared_ptr<Publisher<>> publisher = Publisher<>::create();
             Subscriber subscriber;
 
             Subscription<> subscription = publisher->subscribe(&subscriber, &Subscriber::printValue);
@@ -68,7 +67,7 @@ int main() {
     {
         int x = 0;
 
-        std::shared_ptr<Publisher<int&>> publisher = std::make_shared<Publisher<int&>>();
+        std::shared_ptr<Publisher<int&>> publisher = Publisher<int&>::create();
 
         {
             publisher->subscribe([](int& y) {
@@ -90,6 +89,6 @@ int main() {
         if (x != 5)
             std::cerr << "Forever subscriber test failed" << std::endl;
         else
-            std::cout << "Forever subscriber test suceeded" << std::endl;
+            std::cout << "Forever subscriber test passed" << std::endl;
     }
 }
