@@ -40,23 +40,23 @@ public:
     void setParent(Transform *newParent);
     [[nodiscard]] Transform *getParent() const;
 
-    std::shared_ptr<TweenBase> localPosTween(Vector2 target, float duration, const Curve& curve);
-    std::shared_ptr<TweenBase> localPosTween(Vector2 start, Vector2 end, float duration, const Curve& curve);
+    std::weak_ptr<Tween<Vector2>> localPosTween(Vector2 target, float duration, const Curve& curve);
+    std::weak_ptr<Tween<Vector2>> localPosTween(Vector2 start, Vector2 end, float duration, const Curve& curve);
 
-    std::shared_ptr<TweenBase> localRotationTween(float target, float duration, const Curve& curve);
-    std::shared_ptr<TweenBase> localRotationTween(float start, float end, float duration, const Curve& curve);
+    std::weak_ptr<Tween<float>> localRotationTween(float target, float duration, const Curve& curve);
+    std::weak_ptr<Tween<float>> localRotationTween(float start, float end, float duration, const Curve& curve);
 
-    std::shared_ptr<TweenBase> localScaleTween(Vector2 target, float duration, const Curve& curve);
-    std::shared_ptr<TweenBase> localScaleTween(Vector2 start, Vector2 end, float duration, const Curve& curve);
+    std::weak_ptr<Tween<Vector2>> localScaleTween(Vector2 target, float duration, const Curve& curve);
+    std::weak_ptr<Tween<Vector2>> localScaleTween(Vector2 start, Vector2 end, float duration, const Curve& curve);
 
-    std::shared_ptr<TweenBase> globalPosTween(Vector2 target, float duration, const Curve& curve);
-    std::shared_ptr<TweenBase> globalPosTween(Vector2 start, Vector2 end, float duration, const Curve& curve);
+    std::weak_ptr<FunctionalTween<Vector2>> globalPosTween(Vector2 target, float duration, const Curve& curve);
+    std::weak_ptr<FunctionalTween<Vector2>> globalPosTween(Vector2 start, Vector2 end, float duration, const Curve& curve);
 
-    std::shared_ptr<TweenBase> globalRotationTween(float target, float duration, const Curve& curve);
-    std::shared_ptr<TweenBase> globalRotationTween(float start, float end, float duration, const Curve& curve);
+    std::weak_ptr<FunctionalTween<float>> globalRotationTween(float target, float duration, const Curve& curve);
+    std::weak_ptr<FunctionalTween<float>> globalRotationTween(float start, float end, float duration, const Curve& curve);
 
-    std::shared_ptr<TweenBase> globalScaleTween(Vector2 target, float duration, const Curve& curve);
-    std::shared_ptr<TweenBase> globalScaleTween(Vector2 start, Vector2 end, float duration, const Curve& curve);
+    std::weak_ptr<FunctionalTween<Vector2>> globalScaleTween(Vector2 target, float duration, const Curve& curve);
+    std::weak_ptr<FunctionalTween<Vector2>> globalScaleTween(Vector2 start, Vector2 end, float duration, const Curve& curve);
 
     Vector2 localPosition = {0, 0};
     float localRotation = 0;

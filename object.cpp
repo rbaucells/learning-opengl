@@ -83,7 +83,7 @@ void Object::lateUpdate(const float deltaTime) const {
  */
 void Object::destroy() {
     markedForDeath = true;
-    waitingLineOfDeath.push_back(this);
+    objectsToDelete.push_back(this);
 }
 
 /**

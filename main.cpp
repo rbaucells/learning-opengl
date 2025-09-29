@@ -30,15 +30,12 @@ void debugErrorCallback(GLenum source, GLenum type, GLuint id, const GLenum seve
     switch (severity) {
         case GL_DEBUG_SEVERITY_HIGH:
             std::cerr << "HIGH: Debug message (" << id << "): " << message << std::endl;
-            __builtin_trap();
             break;
         case GL_DEBUG_SEVERITY_MEDIUM:
             std::cerr << "MEDIUM: Debug message (" << id << "): " << message << std::endl;
-            __builtin_trap();
             break;
         case GL_DEBUG_SEVERITY_LOW:
             std::cerr << "LOW: Debug message (" << id << "): " << message << std::endl;
-            __builtin_trap();
             break;
         default:
             std::cerr << "Debug message (" << id << "): " << message << std::endl;
@@ -135,13 +132,12 @@ int main() {
     square.addComponent<ComponentExample>();
 
     // renderers
-    constexpr int RENDERER = 2;
 
-    if constexpr (RENDERER == 0)
+    if constexpr (constexpr int renderer = 2; renderer == 0)
         square.addComponent<CustomRenderer>(vertices, indices, customTexture, mainShader, 0);
-    else if constexpr (RENDERER == 1)
+    else if constexpr (renderer == 1)
         square.addComponent<SpriteRenderer>(100, spriteTexture, mainShader, 0);
-    else if constexpr (RENDERER == 2)
+    else if constexpr (renderer == 2)
         square.addComponent<SpriteSheetRenderer>(69, 69, 69, 0, spriteSheetTexture, mainShader, 0);
 
     // empty the buffers to make sure its drawing properly
@@ -165,6 +161,9 @@ int main() {
         std::chrono::duration<float> timeSinceLastUpdate = startOfLoopTime - lastLoopTime;
         float deltaTime = timeSinceLastUpdate.count();
         lastLoopTime = std::chrono::high_resolution_clock::now();
+
+        std::string string = "Game Engine FPS: " + std::to_string(static_cast<int>(1 / deltaTime));;
+        Window::mainWindow->setWindowTitle(string);
 
         initializeObjects();
 
@@ -213,12 +212,12 @@ int main() {
 }
 
 void destroyObjects() {
-    for (Object* object : waitingLineOfDeath) {
+    for (Object* object : objectsToDelete) {
         object->destroyImmediately();
         // delete object; <- put this when objects moved to heap
     }
 
-    waitingLineOfDeath.clear();
+    objectsToDelete.clear();
 }
 
 void drawCalls() {

@@ -2,7 +2,6 @@
 #include <memory>
 
 #include "systems/betterEvents.h"
-#include "systems/event.h"
 
 // variables
 constexpr float FIXED_UPDATE_PER_SECOND = 60;

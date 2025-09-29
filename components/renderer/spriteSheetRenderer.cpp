@@ -223,12 +223,12 @@ void SpriteSheetRenderer::changeUsage(const Usage usage) {
     glBufferData(GL_ARRAY_BUFFER, static_cast<long>(vertices_.size() * sizeof(Vertex)), vertices_.data(), usage_);
 }
 
-std::shared_ptr<Tween<float>> SpriteSheetRenderer::alphaTween(float start, float end, float duration, const Curve& curve) {
-    return std::make_shared<Tween<float>>(&alpha, start, end, duration, curve);
+std::weak_ptr<Tween<float>> SpriteSheetRenderer::alphaTween(float start, float end, float duration, const Curve& curve) {
+    return addTween(std::make_shared<Tween<float>>(&alpha, start, end, duration, curve));
 }
 
-std::shared_ptr<Tween<float>> SpriteSheetRenderer::alphaTween(float end, float duration, const Curve& curve) {
-    return std::make_shared<Tween<float>>(&alpha, alpha, end, duration, curve);
+std::weak_ptr<Tween<float>> SpriteSheetRenderer::alphaTween(float end, float duration, const Curve& curve) {
+    return addTween(std::make_shared<Tween<float>>(&alpha, alpha, end, duration, curve));
 }
 
 void SpriteSheetRenderer::moveTo(const int i) {

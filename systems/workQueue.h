@@ -7,7 +7,7 @@ class QueueEntry {
 public:
     virtual ~QueueEntry() = default;
 
-    virtual bool run(float deltaTime) {return true;};
+    virtual bool run(float deltaTime) { return true; };
 };
 
 class ConditionalQueueEntry final : public QueueEntry {
@@ -28,6 +28,7 @@ public:
     TimedQueueEntry(const std::function<void()>& action, float time, int repetitions = 0);
 
     bool run(float deltaTime) override;
+
 private:
     std::function<void()> action_;
     float duration_ = 0.f;

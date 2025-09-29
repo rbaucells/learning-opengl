@@ -1,7 +1,5 @@
 #include "componentExample.h"
 
-#include <ranges>
-
 #include "../object.h"
 #include "../systems/betterEvents.h"
 #include "../systems/input.h"
@@ -11,20 +9,22 @@
 void ComponentExample::start() {
     leftClickEventSubscription_ = leftClickEvent->subscribe(this, &ComponentExample::onMouseInput);
 
-    runningPositionTweenWeakPtr_ = addTween(object->transform.localPosTween({3, 0}, 5, Curve::expoOut));
+    localPositionTweenWeakPtr_ = object->transform.localPosTween({3, 0}, 5, Curve::expoOut);
 
-    if (const auto runningPositionTween = runningPositionTweenWeakPtr_.lock()) {
-        runningPositionTween->onComplete->subscribe([]() {
-            printf("Running Position Tween is Complete\n");
+    if (const auto positionTween = localPositionTweenWeakPtr_.lock()) {
+        positionTween->onComplete->subscribe([] {
+            printf("position tween complete\n");
         }).setForever();
 
-        runningPositionTween->onStart->subscribe([]() {
-            printf("Running Position Tween is Started\n");
+        positionTween->onStart->subscribe([] {
+            printf("position tween started\n");
         }).setForever();
 
-        runningPositionTween->onCancel->subscribe([]() {
-            printf("Running Position Tween is Cancelled\n");
+        positionTween->onCancel->subscribe([] {
+            printf("position tween cancelled\n");
         }).setForever();
+
+        positionTween->start();
     }
 
     // Renderers stuff
@@ -42,14 +42,14 @@ void ComponentExample::update(float deltaTime) {
 }
 
 void ComponentExample::onMouseInput(const bool state) const {
-    // if (state) {
-    //     // printf("Mouse Left Clicked Down\n");
-    //     if (const auto runningPositionTween = runningPositionTweenWeakPtr_.lock()) {
-    //         // printf("Cancelling Running Position Tween\n");
-    //         runningPositionTween->forceCancel();
-    //     }
-    //     else {
-    //         object->removeComponent<ComponentExample>();
-    //     }
-    // }
+    if (state) {
+        printf("Mouse Left Clicked Down\n");
+        if (const auto positionTween = localPositionTweenWeakPtr_.lock()) {
+            positionTween->forceCancel();
+        }
+        else {
+            printf("kms\n");
+            object->removeComponent<ComponentExample>();
+        }
+    }
 }

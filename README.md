@@ -17,7 +17,7 @@ help me learn complicated things in game dev and game engine design
   - Animation system - Done :)
   - GUI for editing scenes
   - Lighting system - like RTX
-  - 2 channel audio system (with procedural-ness, like random pitch changes)
+  - 2 channel audio system (with procedural-ness, like random pitch changes) - Done :)
   - UI system
   - Physics and colliders
   - Text fonts and animations

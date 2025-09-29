@@ -44,6 +44,8 @@ public:
 
     void setCoordinateSystemHeight(float height);
 
+    void setWindowTitle(const std::string& title);
+
     ~Window();
 
 private:

@@ -15,7 +15,7 @@ public:
     virtual void forceComplete() = 0;
     virtual void forceCancel() = 0;
 
-    virtual bool running() const = 0;
+    [[nodiscard]] virtual bool running() const = 0;
 
     virtual ~TweenBase() = default;
 
@@ -25,6 +25,14 @@ public:
 };
 
 template<typename T>
+concept HasArithmeticOperations = requires(T a, T b, float c) {
+    { a + b } -> std::same_as<T>;
+    { a - b } -> std::same_as<T>;
+    { a * c } -> std::same_as<T>;
+};
+
+template<typename T>
+requires HasArithmeticOperations<T>
 class Tween final : public TweenBase {
 public:
     Tween(T* target, const T& start, const T& end, const float duration, const Curve& curve = Curve::linear) {
@@ -53,7 +61,6 @@ public:
         if (done_)
             return true;
 
-
         // if we finished naturally and AUTO_KILL is on we will kill ourself else if we finished naturally and if AUTO_KILL
         // is off then we won't kill ourself until manually completed
         if (naturallyCompleted_)
@@ -78,7 +85,7 @@ public:
         onCancel->invoke();
     }
 
-    bool running() const override {
+    [[nodiscard]] bool running() const override {
         return !done_ || !naturallyCompleted_;
     }
 
@@ -97,6 +104,7 @@ private:
 };
 
 template<typename T>
+requires HasArithmeticOperations<T>
 class FunctionalTween final : public TweenBase {
 public:
     FunctionalTween(const std::function<void(T)>& targetFunc, const T& start, const T& end, const float duration, const Curve& curve = Curve::linear) {
@@ -126,7 +134,6 @@ public:
         if (done_)
             return true;
 
-
         // if we finished naturally and AUTO_KILL is on we will kill ourself else if we finished naturally and if AUTO_KILL
         // is off then we wont kill ourself until manually completed
         if (naturallyCompleted_)
@@ -151,7 +158,7 @@ public:
         done_ = true;
     }
 
-    bool running() const override {
+    [[nodiscard]] bool running() const override {
         return !done_ || !naturallyCompleted_;
     }
 
@@ -178,7 +185,7 @@ public:
     void forceComplete() override;
     void forceCancel() override;
 
-    bool running() const override;
+    [[nodiscard]] bool running() const override;
 
 private:
     float duration_ = 0;
@@ -197,7 +204,7 @@ public:
     void forceComplete() override;
     void forceCancel() override;
 
-    bool running() const override;
+    [[nodiscard]] bool running() const override;
 
 private:
     std::function<void()> func_;
@@ -213,7 +220,7 @@ public:
     void forceComplete() override;
     void forceCancel() override;
 
-    bool running() const override;
+    [[nodiscard]] bool running() const override;
 
 private:
     std::queue<std::vector<std::unique_ptr<TweenBase>>> tweens_;

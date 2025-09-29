@@ -18,11 +18,9 @@ void Component::manageTweens(const float deltaTime) {
     for (auto it = tweens_.begin(); it != tweens_.end();) {
         if ((*it)->update(deltaTime)) {
             it = tweens_.erase(it);
-            printf("Erased Tween\n");
         }
         else {
             ++it;
-            printf("Incrementing Tween It\n");
         }
     }
 }

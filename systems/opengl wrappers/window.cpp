@@ -77,6 +77,10 @@ void Window::setCoordinateSystemHeight(const float height) {
     updateWindowSize(nullptr, curWindowWidth_, curWindowHeight_);
 }
 
+void Window::setWindowTitle(const std::string& title) {
+    glfwSetWindowTitle(window_, title.c_str());
+}
+
 Window::~Window() {
     glfwDestroyWindow(window_);
 }

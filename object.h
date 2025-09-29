@@ -106,4 +106,4 @@ public:
 };
 
 inline std::vector<Object*> allObjects;
-inline std::vector<Object*> waitingLineOfDeath;
+inline std::vector<Object*> objectsToDelete;

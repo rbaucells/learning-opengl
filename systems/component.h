@@ -4,12 +4,12 @@
 #include "tweens/tween.h"
 
 template<typename TWEEN_TYPE>
-concept derives_from_tween_base = std::is_base_of_v<TweenBase, TWEEN_TYPE>;
+concept DerivesFromTweenBase = std::is_base_of_v<TweenBase, TWEEN_TYPE>;
 
 // forward declaration
 class Object;
 
-class Component {
+class Component : public std::enable_shared_from_this<Component> {
 protected:
     std::vector<std::unique_ptr<QueueEntry>> queue_;
     std::vector<std::shared_ptr<TweenBase>> tweens_;
@@ -20,16 +20,12 @@ public:
 
     // initialization
     virtual void awake() {}
-
     virtual void onEnable() {}
-
     virtual void start() {}
 
     // update loop
     virtual void update(float deltaTime) {}
-
     virtual void lateUpdate(float deltaTime) {}
-
     virtual void fixedUpdate(float fixedDeltaTime) {}
 
     void manageQueue(float deltaTime);
@@ -37,12 +33,10 @@ public:
 
     // de-initialization
     virtual void onDisable() {}
-
     virtual void onDestroy() {}
 
-    template<derives_from_tween_base TWEEN_TYPE>
+    template<DerivesFromTweenBase TWEEN_TYPE>
     std::weak_ptr<TWEEN_TYPE> addTween(std::shared_ptr<TWEEN_TYPE> tween) {
-        tween->start();
         tweens_.push_back(tween);
         return tween;
     }
@@ -52,4 +46,4 @@ public:
     Object* object = nullptr;
 };
 
-inline std::vector<std::weak_ptr<Component>> componentsToInitialize{};
+inline std::vector<std::weak_ptr<Component>> componentsToInitialize = {};

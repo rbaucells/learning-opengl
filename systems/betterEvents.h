@@ -18,8 +18,6 @@ public:
     Subscription(std::shared_ptr<Publisher<ARGS...>> publisher, int id) {
         this->publisher_ = publisher;
         this->id_ = id;
-
-        printf("Subscription constructed\n");
     }
 
     Subscription(Subscription&& other) noexcept {
@@ -41,12 +39,11 @@ public:
 
     ~Subscription() {
         cleanup();
-        printf("Subscription destructed\n");
     }
 
 private:
     std::weak_ptr<Publisher<ARGS...>> publisher_;
-    int id_;
+    int id_ = 0;
 
     friend class Publisher<ARGS...>;
 
@@ -73,7 +70,8 @@ public:
     }
 
     void invoke(ARGS... args) {
-        for (auto& func : functions_) {
+        // make a copy in case the event does something that causes a subscription to destruct
+        for (auto functionsCopy = functions_; auto& func : functionsCopy) {
             func.second(std::forward<ARGS>(args)...);
         }
     }
@@ -121,5 +119,5 @@ private:
     std::map<int, std::function<void(ARGS...)>> functions_;
     int curKey_ = 0;
 
-    Publisher() {}
+    Publisher() = default;
 };
