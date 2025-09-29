@@ -129,7 +129,6 @@ int SpriteRenderer::getRenderLayer() const {
 void SpriteRenderer::setRenderLayer(const int layer) {
     this->renderingLayer_ = layer;
 
-    removeFromAllRenderers();
     addToAllRenderers(renderingLayer_);
 }
 
@@ -178,8 +177,4 @@ std::weak_ptr<Tween<float>> SpriteRenderer::alphaTween(float start, float end, f
 
 std::weak_ptr<Tween<float>> SpriteRenderer::alphaTween(float end, float duration, const Curve& curve) {
     return addTween(std::make_shared<Tween<float>>(&alpha, alpha, end, duration, curve));
-}
-
-SpriteRenderer::~SpriteRenderer() {
-    removeFromAllRenderers();
 }

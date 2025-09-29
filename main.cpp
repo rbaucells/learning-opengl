@@ -224,9 +224,7 @@ void drawCalls() {
     // iterate through all the renderers in reverse. AKA: from back to front
     const Matrix<4, 4> cameraViewMatrix = Camera::mainCamera->getViewMatrix();
     const Matrix<4, 4> projectionViewMatrix = Window::mainWindow->getProjectionMatrix();
-    for (auto& renderersInLayer : std::ranges::reverse_view(allRenderers)) {
-        for (const auto& renderer : renderersInLayer.second) {
-            renderer->draw(cameraViewMatrix, projectionViewMatrix);
-        }
+    for (auto& [layer, publisher] : std::ranges::reverse_view(renderersDrawPublishers)) {
+        publisher->invoke(cameraViewMatrix, projectionViewMatrix);
     }
 }

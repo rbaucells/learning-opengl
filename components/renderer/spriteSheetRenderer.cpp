@@ -150,7 +150,6 @@ int SpriteSheetRenderer::getRenderLayer() const {
 void SpriteSheetRenderer::setRenderLayer(const int layer) {
     this->renderingLayer_ = layer;
 
-    removeFromAllRenderers();
     addToAllRenderers(renderingLayer_);
 }
 
@@ -261,8 +260,4 @@ void SpriteSheetRenderer::moveTo(const int i) {
 
 void SpriteSheetRenderer::moveToNext() {
     moveTo(currentIndex_ + 1);
-}
-
-SpriteSheetRenderer::~SpriteSheetRenderer() {
-    removeFromAllRenderers();
 }

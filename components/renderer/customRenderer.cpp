@@ -114,7 +114,6 @@ int CustomRenderer::getRenderLayer() const {
 void CustomRenderer::setRenderLayer(const int layer) {
     this->renderingLayer_ = layer;
 
-    removeFromAllRenderers();
     addToAllRenderers(renderingLayer_);
 }
 
@@ -147,8 +146,4 @@ std::weak_ptr<Tween<float>> CustomRenderer::alphaTween(float start, float end, f
 
 std::weak_ptr<Tween<float>> CustomRenderer::alphaTween(float end, float duration, const Curve& curve) {
     return addTween(std::make_shared<Tween<float>>(&alpha, alpha, end, duration, curve));
-}
-
-CustomRenderer::~CustomRenderer() {
-    removeFromAllRenderers();
 }

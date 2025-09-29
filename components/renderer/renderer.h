@@ -52,10 +52,11 @@ public:
     };
 
 protected:
-    void removeFromAllRenderers();
     void addToAllRenderers(int layer);
 
     int renderingLayer_ = 0;
+
+    Subscription<const Matrix<4,4>&, const Matrix<4,4>&> drawSubscription_;
 };
 
 class SpriteSheetRenderer final : public RendererBase {
@@ -84,8 +85,6 @@ public:
 
     void moveTo(int i);
     void moveToNext();
-
-    ~SpriteSheetRenderer() override;
 
     float alpha = 1;
     DrawMode drawMode = triangles;
@@ -152,8 +151,6 @@ public:
     std::weak_ptr<Tween<float>> alphaTween(float start, float end, float duration, const Curve& curve) override;
     std::weak_ptr<Tween<float>> alphaTween(float end, float duration, const Curve& curve) override;
 
-    ~SpriteRenderer() override;
-
     float alpha = 1;
     DrawMode drawMode = triangles;
 
@@ -199,8 +196,6 @@ public:
     std::weak_ptr<Tween<float>> alphaTween(float start, float end, float duration, const Curve& curve) override;
     std::weak_ptr<Tween<float>> alphaTween(float end, float duration, const Curve& curve) override;
 
-    ~CustomRenderer() override;
-
     float alpha = 1.f;
     DrawMode drawMode = triangles;
 
@@ -224,4 +219,4 @@ private:
     std::vector<unsigned int> indices_ = {};
 };
 
-inline std::map<unsigned int, std::vector<RendererBase*>> allRenderers;
+inline std::map<unsigned int, std::shared_ptr<Publisher<const Matrix<4,4>&, const Matrix<4,4>&>>> renderersDrawPublishers;
