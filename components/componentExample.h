@@ -9,8 +9,6 @@ public:
     using Component::Component;
 
     void start() override;
-    void update(float deltaTime) override;
-
     void onMouseInput(bool state) const;
 
 private:

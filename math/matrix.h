@@ -8,17 +8,21 @@
 #include "vector3.h"
 #include "vector4.h"
 
-template<int ROWS, int COLUMNS>
+template<typename T, typename U>
+concept IsConvertableTo = std::convertible_to<U, T>;
+
+template<int ROWS, int COLUMNS, typename T = float>
 class Matrix {
 public:
     const int rows = ROWS;
     const int columns = COLUMNS;
 
-    float data[COLUMNS][ROWS] = {};
+    T data[COLUMNS][ROWS] = {};
 
     Matrix() = default;
 
-    Matrix(const Matrix<ROWS, COLUMNS> &other) {
+    template<IsConvertableTo<T> U>
+    explicit Matrix(const Matrix<ROWS, COLUMNS, U> &other) {
         assert(ROWS == other.rows && COLUMNS == other.columns);
 
         for (int c = 0; c < COLUMNS; c++) {
@@ -28,7 +32,8 @@ public:
         }
     }
 
-    Matrix<ROWS, COLUMNS> &operator=(const Matrix &other) {
+    template<IsConvertableTo<T> U>
+    Matrix<ROWS, COLUMNS, T> &operator=(const Matrix<ROWS, COLUMNS, U> &other) {
         if (this != &other) {
             for (int c = 0; c < COLUMNS; c++) {
                 for (int r = 0; r < ROWS; r++) {
@@ -46,10 +51,11 @@ public:
      * @param other The matrix to add to this one
      * @return Matrix with each element in this one added to the corresponding element in the other one
      */
-    [[nodiscard]] Matrix<ROWS, COLUMNS> add(const Matrix<ROWS, COLUMNS> &other) const {
+    template<IsConvertableTo<T> U>
+    [[nodiscard]] Matrix<ROWS, COLUMNS, T> add(const Matrix<ROWS, COLUMNS, U> &other) const {
         assert(other.rows == ROWS || other.columns == COLUMNS);
 
-        Matrix result;
+        Matrix<ROWS, COLUMNS, T> result;
 
         for (int c = 0; c < COLUMNS; c++) {
             for (int r = 0; r < ROWS; r++) {
@@ -60,7 +66,8 @@ public:
         return result;
     }
 
-    Matrix<ROWS, COLUMNS> operator+(const Matrix<ROWS, COLUMNS> &other) const {
+    template<IsConvertableTo<T> U>
+    Matrix<ROWS, COLUMNS, T> operator+(const Matrix<ROWS, COLUMNS, U> &other) const {
         return add(other);
     }
 
@@ -70,10 +77,11 @@ public:
      * @param other The matrix to subtract from this one
      * @return Matrix with each element in other one subtracted from the corresponding element in the this one
      */
-    [[nodiscard]] Matrix<ROWS, COLUMNS> subtract(const Matrix<ROWS, COLUMNS> &other) const {
+    template<IsConvertableTo<T> U>
+    [[nodiscard]] Matrix<ROWS, COLUMNS, T> subtract(const Matrix<ROWS, COLUMNS, U> &other) const {
         assert(other.rows == ROWS || other.columns == COLUMNS);
 
-        Matrix result;
+        Matrix<ROWS, COLUMNS, T> result;
 
         for (int c = 0; c < COLUMNS; c++) {
             for (int r = 0; r < ROWS; r++) {
@@ -84,7 +92,8 @@ public:
         return result;
     }
 
-    Matrix<ROWS, COLUMNS> operator-(const Matrix<ROWS, COLUMNS> &other) const {
+    template<IsConvertableTo<T> U>
+    Matrix<ROWS, COLUMNS, T> operator-(const Matrix<ROWS, COLUMNS, U> &other) const {
         return subtract(other);
     }
 
@@ -93,11 +102,11 @@ public:
    * @param other Matrix to multiply this * other
    * @return The product of the two matrix. Having Number of rows as this, and number of columns as other
    */
-    template<int OTHER_ROWS, int OTHER_COLUMNS>
-    Matrix<ROWS, OTHER_COLUMNS> multiply(const Matrix<OTHER_ROWS, OTHER_COLUMNS> &other) const {
+    template<int OTHER_ROWS, int OTHER_COLUMNS ,IsConvertableTo<T> U>
+    Matrix<ROWS, OTHER_COLUMNS, T> multiply(const Matrix<OTHER_ROWS, OTHER_COLUMNS, U> &other) const {
         assert(COLUMNS == other.rows);
 
-        Matrix<ROWS, OTHER_COLUMNS> result;
+        Matrix<ROWS, OTHER_COLUMNS, T> result;
 
         for (int c = 0; c < COLUMNS; c++) {
             for (int r = 0; r < ROWS; r++) {
@@ -110,8 +119,8 @@ public:
         return result;
     }
 
-    template<int OTHER_ROWS, int OTHER_COLUMNS>
-    Matrix<ROWS, OTHER_COLUMNS> operator*(const Matrix<OTHER_ROWS, OTHER_COLUMNS> &other) const {
+    template<int OTHER_ROWS, int OTHER_COLUMNS, IsConvertableTo<T> U>
+    Matrix<ROWS, OTHER_COLUMNS, T> operator*(const Matrix<OTHER_ROWS, OTHER_COLUMNS, U> &other) const {
         return multiply(other);
     }
 
@@ -120,7 +129,8 @@ public:
      * @param other The Matrix to compare against
      * @return Weather or not the two matrices have the same data
      */
-    [[nodiscard]] bool compare(const Matrix &other) const {
+    template<int OTHER_ROWS, int OTHER_COLUMNS, IsConvertableTo<T> U>
+    [[nodiscard]] bool compare(const Matrix<OTHER_ROWS, OTHER_COLUMNS, U> &other) const {
         if (other.rows != ROWS || other.columns != COLUMNS)
             return false;
 
@@ -134,15 +144,16 @@ public:
         return true;
     }
 
-    bool operator==(const Matrix &other) const {
+    template<int OTHER_ROWS, int OTHER_COLUMNS, IsConvertableTo<T> U>
+    bool operator==(const Matrix<OTHER_ROWS, OTHER_COLUMNS, U> &other) const {
         return compare(other);
     }
 
-    float *operator[](const int index) {
+    T *operator[](const int index) {
         return &data[index][0];
     }
 
-    const float *operator[](const int index) const {
+    const T *operator[](const int index) const {
         return &data[index][0];
     }
 
@@ -151,8 +162,8 @@ public:
      * @note Matrix must be a square matrix (n x n)
      * @return Matrix with columns and rows swapped
      */
-    [[nodiscard]] Matrix<ROWS, COLUMNS> transpose() const requires (ROWS == COLUMNS) {
-        Matrix<ROWS, ROWS> result;
+    [[nodiscard]] Matrix<ROWS, COLUMNS, T> transpose() const requires (ROWS == COLUMNS) {
+        Matrix<ROWS, ROWS, T> result;
 
         for (int c = 0; c < COLUMNS; c++) {
             for (int r = 0; r < ROWS; r++) {
@@ -168,7 +179,7 @@ public:
      * @throws Runtime errors if matrix is singular (not invertible)
      * @return The inverse of the matrix
      */
-    [[nodiscard]] Matrix<ROWS, COLUMNS> inverse() const requires (ROWS == COLUMNS) {
+    [[nodiscard]] Matrix<ROWS, COLUMNS, T> inverse() const requires (ROWS == COLUMNS) {
         // its a one by one, we can just return 1 / value
         if constexpr (ROWS == 1) {
             if (data[0][0] == 0) {
@@ -182,7 +193,7 @@ public:
 
         // its a two by two, we can do the special fast thing
         if constexpr (ROWS == 2) {
-            float det = determinant();
+            T det = determinant();
 
             if (det == 0) {
                 std::__throw_runtime_error("Determinant cannot be zero");
@@ -198,7 +209,7 @@ public:
             return result;
         }
         else {
-            const Matrix identityMatrix = Matrix::identity();
+            const Matrix<ROWS, COLUMNS, T> identityMatrix = Matrix::identity();
             Matrix<ROWS, COLUMNS * 2> temp;
 
             for (int c = 0; c < COLUMNS; c++) {
@@ -233,7 +244,7 @@ public:
                 }
 
                 // normalize pivot row to 1
-                float value = temp[c][c];
+                T value = temp[c][c];
                 for (int cc = 0; cc < temp.columns; cc++) {
                     temp[cc][c] /= value;
                 }
@@ -245,7 +256,7 @@ public:
                         continue;
                     }
                     // it isnt on the main diagonal, (expected to be a 0)
-                    float k = temp[c][r];
+                    T k = temp[c][r];
 
                     for (int cc = 0; cc < temp.columns; cc++) {
                         temp[cc][r] += -k * temp[cc][c];
@@ -253,7 +264,7 @@ public:
                 }
             }
 
-            Matrix<ROWS, COLUMNS> result;
+            Matrix<ROWS, COLUMNS, T> result;
 
             for (int c = 0; c < COLUMNS; ++c) {
                 for (int r = 0; r < ROWS; r++) {
@@ -269,7 +280,7 @@ public:
      * @warning if zero do not attempt to find inverse of this matrix
      * @return The determinant of this matrix
      */
-    [[nodiscard]] float determinant() const requires (ROWS == COLUMNS) {
+    [[nodiscard]] T determinant() const requires (ROWS == COLUMNS) {
         if constexpr (ROWS == 1) {
             return data[0][0];
         }
@@ -277,11 +288,11 @@ public:
             return data[0][0] * data[1][1] - data[0][1] * data[1][0];
         }
         else {
-            float result = 0;
+            T result = 0;
             int sign = 1;
 
             for (int c = 0; c < COLUMNS; c++) {
-                Matrix<ROWS - 1, COLUMNS - 1> insideMatrix = getSubMatrix(0, c);
+                Matrix<ROWS - 1, COLUMNS - 1, T> insideMatrix = getSubMatrix(0, c);
 
                 result += sign * data[c][0] * insideMatrix.determinant();
                 sign *= -1;
@@ -296,8 +307,8 @@ public:
      * @param value The scalar to multiply with each element
      * @return The matrix scaled uniformly
      */
-    [[nodiscard]] Matrix<4, 4> scale(const float value) const requires (ROWS == COLUMNS && COLUMNS == 4) {
-        Matrix<4, 4> result;
+    [[nodiscard]] Matrix<4, 4, T> scale(const T value) const requires (ROWS == COLUMNS && COLUMNS == 4) {
+        Matrix<4, 4, T> result;
 
         for (int c = 0; c < 4; c++) {
             for (int r = 0; r < 4; r++) {
@@ -315,8 +326,8 @@ public:
      * @param z The scale factor for the z-axis.
      * @return The matrix scaled along {x, y, z}
      */
-    [[nodiscard]] Matrix<4, 4> scaleAnisotropic(const float x, const float y, const float z) const requires (ROWS == COLUMNS && COLUMNS == 4) {
-        Matrix<4, 4> scaleMatrix = identity();
+    [[nodiscard]] Matrix<4, 4, T> scaleAnisotropic(const T x, const T y, const T z) const requires (ROWS == COLUMNS && COLUMNS == 4) {
+        Matrix<4, 4, T> scaleMatrix = identity();
 
         scaleMatrix.data[0][0] = x;
         scaleMatrix.data[1][1] = y;
@@ -332,8 +343,8 @@ public:
      * @param z How much to translate along the z
      * @return The matrix translated by x, y, and z
      */
-    [[nodiscard]] Matrix<4, 4> translate(const float x, const float y, const float z) const requires (ROWS == COLUMNS && COLUMNS == 4) {
-        Matrix<4, 4> translationMatrix = identity();
+    [[nodiscard]] Matrix<4, 4, T> translate(const T x, const T y, const T z) const requires (ROWS == COLUMNS && COLUMNS == 4) {
+        Matrix<4, 4, T> translationMatrix = identity();
 
         translationMatrix.data[3][0] = x;
         translationMatrix.data[3][1] = y;
@@ -347,11 +358,11 @@ public:
      * @param angle How many DEGREES to rotate along the x
      * @return Matrix rotated by angle
      */
-    [[nodiscard]] Matrix<4, 4> rotateX(const float angle) const requires (ROWS == COLUMNS && COLUMNS == 4) {
-        const float sin = std::sinf(angle * (static_cast<float>(M_PI) / 180.0f));
-        const float cos = std::cosf(angle * (static_cast<float>(M_PI) / 180.0f));
+    [[nodiscard]] Matrix<4, 4, T> rotateX(const T angle) const requires (ROWS == COLUMNS && COLUMNS == 4) {
+        const T sin = std::sinf(angle * (static_cast<T>(M_PI) / 180.0f));
+        const T cos = std::cosf(angle * (static_cast<T>(M_PI) / 180.0f));
 
-        Matrix<4, 4> rotationMatrix = identity();
+        Matrix<4, 4, T> rotationMatrix = identity();
 
         rotationMatrix.data[1][1] = cos;
         rotationMatrix.data[1][2] = sin;
@@ -366,11 +377,11 @@ public:
      * @param angle How many DEGREES to rotate along the y
      * @return Matrix rotated by angle
      */
-    [[nodiscard]] Matrix<4, 4> rotateY(const float angle) const requires (ROWS == COLUMNS && COLUMNS == 4) {
-        const float sin = std::sinf(angle * (static_cast<float>(M_PI) / 180.0f));
-        const float cos = std::cosf(angle * (static_cast<float>(M_PI) / 180.0f));
+    [[nodiscard]] Matrix<4, 4, T> rotateY(const T angle) const requires (ROWS == COLUMNS && COLUMNS == 4) {
+        const T sin = std::sinf(angle * (static_cast<T>(M_PI) / 180.0f));
+        const T cos = std::cosf(angle * (static_cast<T>(M_PI) / 180.0f));
 
-        Matrix<4, 4> rotationMatrix = identity();
+        Matrix<4, 4, T> rotationMatrix = identity();
 
         rotationMatrix.data[0][0] = cos;
         rotationMatrix.data[0][2] = -sin;
@@ -385,11 +396,11 @@ public:
      * @param angle How many DEGREES to rotate along the y
      * @return Matrix rotated by angle
      */
-    [[nodiscard]] Matrix<4, 4> rotateZ(const float angle) const requires (ROWS == COLUMNS && COLUMNS == 4) {
-        const float sin = std::sinf(angle * (static_cast<float>(M_PI) / 180.0f));
-        const float cos = std::cosf(angle * (static_cast<float>(M_PI) / 180.0f));
+    [[nodiscard]] Matrix<4, 4, T> rotateZ(const T angle) const requires (ROWS == COLUMNS && COLUMNS == 4) {
+        const T sin = std::sinf(angle * (static_cast<T>(M_PI) / 180.0f));
+        const T cos = std::cosf(angle * (static_cast<T>(M_PI) / 180.0f));
 
-        Matrix<4, 4> rotationMatrix = identity();
+        Matrix<4, 4, T> rotationMatrix = identity();
 
         rotationMatrix.data[0][0] = cos;
         rotationMatrix.data[0][1] = sin;
@@ -465,9 +476,9 @@ public:
      * @param far The coordinate of the far depth clipping plane
      * @return A 4x4 orthographic projection matrix
      */
-    static Matrix<4, 4> ortho(const float left, const float right, const float bottom, const float top, const float near, const float far) {
+    static Matrix<4, 4, T> ortho(const T left, const T right, const T bottom, const T top, const T near, const T far) {
         // identity
-        Matrix<4, 4> transformation = identity();
+        Matrix<4, 4, T> transformation = identity();
         // transformation
         transformation.data[0][0] = 2.0f / (right - left);
         transformation.data[1][1] = 2.0f / (top - bottom);
@@ -483,8 +494,8 @@ public:
      * @brief Generates the identity matrix of size this Rows x this Rows
      * @return Matrix with 1s on main diagonal, 0s everywhere else
      */
-    static Matrix<ROWS, ROWS> identity() {
-        Matrix<ROWS, ROWS> result;
+    static Matrix<ROWS, ROWS, T> identity() {
+        Matrix<ROWS, ROWS, T> result;
 
         for (int i = 0; i < ROWS; i++) {
             result[i][i] = 1;
@@ -506,7 +517,7 @@ public:
         // a = b;
         // b = temp;
 
-        float temp[C_SIZE];
+        T temp[C_SIZE];
 
         for (int c = 0; c < C_SIZE; c++) {
             temp[c] = matrix[c][rowA];
@@ -521,11 +532,11 @@ public:
         }
     }
 
-    explicit operator const float *() const {
+    operator const T *() const {
         return &data[0][0];
     }
 
-    explicit operator float *() {
+    operator T *() {
         return &data[0][0];
     }
 

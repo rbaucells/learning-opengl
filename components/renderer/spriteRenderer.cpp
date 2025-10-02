@@ -77,6 +77,8 @@ void SpriteRenderer::draw(const Matrix<4, 4>& view, const Matrix<4, 4>& projecti
     shader_->setUniformValue(glUniform1i, channelsLocation_, texture_->getNumberOfChannels());
     shader_->setUniformValue(glUniform1f, alphaLocation_, alpha);
 
+    onDrawEventDispatcher->invoke(shader_);
+
     // bind the texture
     texture_->bind();
     // bind the vertexArray

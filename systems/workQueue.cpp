@@ -32,6 +32,11 @@ bool TimedQueueEntry::run(const float deltaTime) {
             return false;
         }
 
+        if (timesToRun_ == -1) {
+            elapsed_ = 0;
+            return false;
+        }
+
         return true;
     }
 

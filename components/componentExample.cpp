@@ -31,24 +31,12 @@ void ComponentExample::start() {
     spriteSheetRendererWeakPtr_ = object->getComponent<SpriteSheetRenderer>();
 }
 
-void ComponentExample::update(float deltaTime) {
-    static int i = 1;
-
-    if (i > 230)
-        i = 1;
-
-    if (const auto spriteSheetRenderer = spriteSheetRendererWeakPtr_.lock())
-        spriteSheetRenderer->moveTo(i++);
-}
-
 void ComponentExample::onMouseInput(const bool state) const {
     if (state) {
-        printf("Mouse Left Clicked Down\n");
         if (const auto positionTween = localPositionTweenWeakPtr_.lock()) {
             positionTween->forceCancel();
         }
         else {
-            printf("kms\n");
             object->removeComponent<ComponentExample>();
         }
     }

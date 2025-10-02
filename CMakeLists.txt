@@ -71,6 +71,10 @@ add_executable(OpenGL components/componentExample.cpp components/componentExampl
         math/bounds.h
         components/renderer/rendererBase.cpp
         systems/betterEvents.h
+        "systems/opengl wrappers/ShaderProgram.cpp"
+        "systems/opengl wrappers/ShaderProgram.h"
+        "systems/opengl wrappers/betterShader.cpp"
+        "systems/opengl wrappers/betterShader.h"
 )
 
 # add include directory
