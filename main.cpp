@@ -20,7 +20,6 @@
 #include "systems/opengl wrappers/texture.h"
 #include "systems/opengl wrappers/window.h"
 #include "systems/audio/audioListener.h"
-#include "systems/opengl wrappers/shader.h"
 #include "systems/opengl wrappers/shaderProgram.h"
 
 // callbacks

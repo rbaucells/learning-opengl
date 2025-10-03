@@ -1,7 +1,7 @@
 #pragma once
 #include <queue>
 
-#include "../betterEvents.h"
+#include "../events.h"
 #include "../../math/curve.h"
 
 // if AUTO_KILL is true, then when a tween has completed naturally its time it starts to return true to shouldDelete()

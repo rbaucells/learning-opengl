@@ -1,7 +1,7 @@
 #include "componentExample.h"
 
 #include "../object.h"
-#include "../systems/betterEvents.h"
+#include "../systems/events.h"
 #include "../systems/input.h"
 #include "../systems/tweens/tween.h"
 #include "renderer/renderer.h"

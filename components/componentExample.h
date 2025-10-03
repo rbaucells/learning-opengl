@@ -1,5 +1,5 @@
 #pragma once
-#include "../systems/betterEvents.h"
+#include "../systems/events.h"
 #include "../systems/component.h"
 
 class SpriteSheetRenderer;

@@ -1,7 +1,7 @@
 #pragma once
 #include <memory>
 
-#include "betterEvents.h"
+#include "events.h"
 #include "../math/vector2.h"
 
 // forward declaration of GLFW things

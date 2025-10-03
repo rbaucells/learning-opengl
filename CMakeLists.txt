@@ -68,11 +68,12 @@ add_executable(OpenGL components/componentExample.cpp components/componentExampl
         systems/audio/filters/bandPassFilter.cpp
         math/bounds.h
         components/renderer/rendererBase.cpp
-        systems/betterEvents.h
+        systems/events.h
         "systems/opengl wrappers/ShaderProgram.cpp"
         "systems/opengl wrappers/ShaderProgram.h"
         "systems/opengl wrappers/Shader.cpp"
         "systems/opengl wrappers/Shader.h"
+        exceptions/initializationException.h
 )
 
 # add include directory
@@ -116,6 +117,6 @@ target_include_directories(curveTests PRIVATE)
 
 add_test(NAME curveTests COMMAND curveTests)
 
-add_executable(EventTests tests/eventTests.cpp systems/betterEvents.h)
+add_executable(EventTests tests/eventTests.cpp systems/events.h)
 
 add_test(NAME EventTests COMMAND EventTests)

@@ -1,7 +1,7 @@
 #pragma once
 #include <memory>
 
-#include "systems/betterEvents.h"
+#include "systems/events.h"
 
 // variables
 constexpr float FIXED_UPDATE_PER_SECOND = 60;
