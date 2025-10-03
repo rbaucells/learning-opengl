@@ -38,8 +38,6 @@ add_executable(OpenGL components/componentExample.cpp components/componentExampl
         "systems/opengl wrappers/texture.cpp"
         "systems/opengl wrappers/texture.h"
         math/Color.h
-        "systems/opengl wrappers/shader.cpp"
-        "systems/opengl wrappers/shader.h"
         "systems/opengl wrappers/window.cpp"
         "systems/opengl wrappers/window.h"
         systems/audio/sound.cpp
@@ -73,8 +71,8 @@ add_executable(OpenGL components/componentExample.cpp components/componentExampl
         systems/betterEvents.h
         "systems/opengl wrappers/ShaderProgram.cpp"
         "systems/opengl wrappers/ShaderProgram.h"
-        "systems/opengl wrappers/betterShader.cpp"
-        "systems/opengl wrappers/betterShader.h"
+        "systems/opengl wrappers/Shader.cpp"
+        "systems/opengl wrappers/Shader.h"
 )
 
 # add include directory

@@ -1,38 +1,29 @@
 #pragma once
-#include <fstream>
 #include <string>
+
+#include "glad/gl.h"
 
 class Shader {
 public:
-    Shader(const std::string& vertex, const std::string& fragment);
+    enum ShaderType {
+        vertex = GL_VERTEX_SHADER,
+        fragment = GL_FRAGMENT_SHADER,
+        compute = GL_COMPUTE_SHADER,
+        geometry = GL_GEOMETRY_SHADER,
+        tesselation_evaluation = GL_TESS_EVALUATION_SHADER,
+        tesselation_control = GL_TESS_CONTROL_SHADER
+    };
 
-    [[nodiscard]] int getUniformLocation(const std::string& name) const;
-    [[nodiscard]] int getProgram() const;
+    static std::shared_ptr<Shader> create(ShaderType type, const std::string& filePath);
 
-    /**
-     * @brief Meant to be used with gl uniform functions
-     * @tparam FUNC The type of function pointer
-     * @tparam ARGS What types are the arguments
-     * @param func The opengl uniform function to call
-     * @param args The arguments passed into the funtion
-     */
-    template<typename FUNC, typename... ARGS>
-    void setUniformValue(FUNC func, ARGS... args) const {
-        bind();
-        func(std::forward<ARGS>(args)...);
-    }
-
-    void bind() const;
+    [[nodiscard]] GLuint getShaderId() const;
 
     ~Shader();
 
 private:
-    int programId_;
+    static std::string readShaderFile(const std::string& filePath);
 
-    // shading
-    static std::string getShaderString(const std::string& filePath);
+    Shader(ShaderType type, const std::string& filePath);
 
-    static unsigned int compileShader(unsigned int type, const std::string& source);
-
-    static unsigned int createShader(const std::string& vertexShader, const std::string& fragmentShader);
+    GLuint shader_;
 };

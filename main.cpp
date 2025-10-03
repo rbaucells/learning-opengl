@@ -20,6 +20,8 @@
 #include "systems/opengl wrappers/texture.h"
 #include "systems/opengl wrappers/window.h"
 #include "systems/audio/audioListener.h"
+#include "systems/opengl wrappers/shader.h"
+#include "systems/opengl wrappers/shaderProgram.h"
 
 // callbacks
 void errorCallback(const int error, const char* description) {
@@ -105,7 +107,11 @@ int main() {
     window.reCalculateProjectionMatrix();
 
     // shaders
-    std::shared_ptr<Shader> mainShader = std::make_shared<Shader>("/Users/ricardito/Projects/learning-opengl/res/shaders/mainVertex.shader", "/Users/ricardito/Projects/learning-opengl/res/shaders/mainFragment.shader");
+    std::shared_ptr<Shader> fragShader = Shader::create(Shader::fragment, "/Users/ricardito/Projects/learning-opengl/res/shaders/mainFragment.shader");
+    std::shared_ptr<Shader> vertexShader = Shader::create(Shader::vertex, "/Users/ricardito/Projects/learning-opengl/res/shaders/mainVertex.shader");
+
+    // shader programs
+    std::shared_ptr<ShaderProgram> mainProgram = ShaderProgram::create({fragShader, vertexShader});
 
     // textures
     std::shared_ptr<Texture> customTexture = std::make_shared<Texture>("/Users/ricardito/Projects/learning-opengl/res/textures/box.jpg", GL_CLAMP, true);
@@ -132,13 +138,12 @@ int main() {
     square.addComponent<ComponentExample>();
 
     // renderers
-
     if constexpr (constexpr int renderer = 2; renderer == 0)
-        square.addComponent<CustomRenderer>(vertices, indices, customTexture, mainShader, 0);
+        square.addComponent<CustomRenderer>(vertices, indices, customTexture, mainProgram, 0);
     else if constexpr (renderer == 1)
-        square.addComponent<SpriteRenderer>(100, spriteTexture, mainShader, 0);
+        square.addComponent<SpriteRenderer>(100, spriteTexture, mainProgram, 0);
     else if constexpr (renderer == 2)
-        square.addComponent<SpriteSheetRenderer>(69, 69, 69, 0, spriteSheetTexture, mainShader, 0);
+        square.addComponent<SpriteSheetRenderer>(69, 69, 69, 0, spriteSheetTexture, mainProgram, 0);
 
     // empty the buffers to make sure its drawing properly
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);

@@ -3,10 +3,11 @@
 #include "../../object.h"
 #include "../../math/vertex.h"
 #include "../../systems/opengl wrappers/shader.h"
+#include "../../systems/opengl wrappers/shaderProgram.h"
 #include "../../systems/opengl wrappers/texture.h"
 #include "glad/gl.h"
 
-CustomRenderer::CustomRenderer(Object* owner, const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices, const std::shared_ptr<Texture>& texture, const std::shared_ptr<Shader>& shader, const int renderingLayer, const Usage usage, const DrawMode drawMode) : RendererBase(owner) {
+CustomRenderer::CustomRenderer(Object* owner, const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices, const std::shared_ptr<Texture>& texture, const std::shared_ptr<ShaderProgram>& shader, const int renderingLayer, const Usage usage, const DrawMode drawMode) : RendererBase(owner) {
     this->vertices_ = vertices;
     this->indices_ = indices;
     this->shader_ = shader;
@@ -40,9 +41,9 @@ CustomRenderer::CustomRenderer(Object* owner, const std::vector<Vertex>& vertice
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, static_cast<long>(indices_.size() * sizeof(unsigned int)), indices_.data(), usage);
 
     // cache uniform locations to avoid lookups in draw
-    mvpLocation_ = glGetUniformLocation(shader_->getProgram(), "mvp");
-    channelsLocation_ = glGetUniformLocation(shader_->getProgram(), "channels");
-    alphaLocation_ = glGetUniformLocation(shader_->getProgram(), "alpha");
+    mvpLocation_ = shader_->getUniformLocation("mvp");
+    channelsLocation_ = shader->getUniformLocation("channels");
+    alphaLocation_ = shader->getUniformLocation("alpha");
 }
 
 void CustomRenderer::draw(const Matrix<4, 4>& view, const Matrix<4, 4>& projection) const {
@@ -50,17 +51,20 @@ void CustomRenderer::draw(const Matrix<4, 4>& view, const Matrix<4, 4>& projecti
     const Matrix<4, 4> model = object->transform.localToWorldMatrix();
 
     // combine the matrices into a single MVP matrix
-    Matrix<4, 4> mvp = projection * (view * model);
-
-    const auto* floatPointer = static_cast<const GLfloat*>(mvp);
+    const Matrix<4, 4> mvp = projection * (view * model);
 
     // make sure were using the shader
     shader_->bind();
 
     // pass the uniform data using the saved locations
-    shader_->setUniformValue(glUniformMatrix4fv, mvpLocation_, 1, GL_FALSE, floatPointer);
-    shader_->setUniformValue(glUniform1i, channelsLocation_, texture_->getNumberOfChannels());
-    shader_->setUniformValue(glUniform1f, alphaLocation_, alpha);
+    shader_->setUniformFloatMat4(mvpLocation_, mvp);
+    // shader_->setUniformValue(glUniformMatrix4fv, mvpLocation_, 1, GL_FALSE, floatPointer);
+
+    shader_->setUniformInt(channelsLocation_, texture_->getNumberOfChannels());
+    // shader_->setUniformValue(glUniform1i, channelsLocation_, texture_->getNumberOfChannels());
+
+    shader_->setUniformFloat(alphaLocation_, alpha);
+    // shader_->setUniformValue(glUniform1f, alphaLocation_, alpha);
 
     onDrawEventDispatcher->invoke(shader_);
 
@@ -119,7 +123,7 @@ void CustomRenderer::setRenderLayer(const int layer) {
     addToAllRenderers(renderingLayer_);
 }
 
-void CustomRenderer::redefine(const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices, const std::shared_ptr<Texture>& texture, const std::shared_ptr<Shader>& shader, const Usage usage) {
+void CustomRenderer::redefine(const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices, const std::shared_ptr<Texture>& texture, const std::shared_ptr<ShaderProgram>& shader, const Usage usage) {
     this->vertices_ = vertices;
     this->indices_ = indices;
     this->shader_ = shader;

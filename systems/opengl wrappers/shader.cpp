@@ -1,37 +1,24 @@
 #include "shader.h"
 
+#include <fstream>
 #include <iostream>
 #include <sstream>
 
 #include "glad/gl.h"
 
-Shader::Shader(const std::string& vertex, const std::string& fragment) {
-    // get the strings from the shader files
-    auto const vertexShader = getShaderString(vertex);
-    auto const fragmentShader = getShaderString(fragment);
-    // compile the shaders
-    this->programId_ = createShader(vertexShader, fragmentShader);
-
-    bind();
+std::shared_ptr<Shader> Shader::create(const ShaderType type, const std::string& filePath) {
+    return std::shared_ptr<Shader>(new Shader(type, filePath));
 }
 
-int Shader::getUniformLocation(const std::string& name) const {
-    return glGetUniformLocation(programId_, name.c_str());
-}
-
-int Shader::getProgram() const {
-    return programId_;
-}
-
-void Shader::bind() const {
-    glUseProgram(programId_);
+GLuint Shader::getShaderId() const {
+    return shader_;
 }
 
 Shader::~Shader() {
-    glDeleteProgram(programId_);
+    glDeleteShader(shader_);
 }
 
-std::string Shader::getShaderString(const std::string& filePath) {
+std::string Shader::readShaderFile(const std::string& filePath) {
     std::fstream fileStream(filePath);
 
     std::string line;
@@ -44,43 +31,25 @@ std::string Shader::getShaderString(const std::string& filePath) {
     return ss.str();
 }
 
-unsigned int Shader::compileShader(const unsigned int type, const std::string& source) {
-    const unsigned int id = glCreateShader(type);
-    const char* src = source.c_str();
+Shader::Shader(const ShaderType type, const std::string& filePath) {
+    const auto fileContents = readShaderFile(filePath);
 
-    glShaderSource(id, 1, &src, nullptr);
-    glCompileShader(id);
+    shader_ = glCreateShader(type);
+    const char* src = fileContents.c_str();
+
+    glShaderSource(shader_, 1, &src, nullptr);
+    glCompileShader(shader_);
 
     int result;
-    glGetShaderiv(id, GL_COMPILE_STATUS, &result);
+    glGetShaderiv(shader_, GL_COMPILE_STATUS, &result);
 
     if (result == GL_FALSE) {
-        int lenght;
-        glGetShaderiv(id, GL_INFO_LOG_LENGTH, &lenght);
-        char message[lenght];
-        glGetShaderInfoLog(id, lenght, &lenght, message);
-        std::cout << "Failed to compile shader! \n" << message << std::endl;
-        glDeleteShader(id);
-        return 0;
+        int length;
+        glGetShaderiv(shader_, GL_INFO_LOG_LENGTH, &length);
+        char message[length];
+        glGetShaderInfoLog(shader_, length, &length, message);
+        std::cerr << "Failed to compile shader! \n" << message << std::endl;
+        glDeleteShader(shader_);
+        exit(1);
     }
-
-    return id;
-}
-
-unsigned int Shader::createShader(const std::string& vertexShader, const std::string& fragmentShader) {
-    const unsigned int program = glCreateProgram();
-
-    const unsigned int vertexShaderId = compileShader(GL_VERTEX_SHADER, vertexShader);
-    const unsigned int fragmentShaderId = compileShader(GL_FRAGMENT_SHADER, fragmentShader);
-
-    glAttachShader(program, vertexShaderId);
-    glAttachShader(program, fragmentShaderId);
-    glLinkProgram(program);
-    glValidateProgram(program);
-
-    // we can delete the shaders because they are already attached to our program
-    glDeleteShader(vertexShaderId);
-    glDeleteShader(fragmentShaderId);
-
-    return program;
 }

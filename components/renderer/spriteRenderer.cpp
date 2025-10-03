@@ -3,10 +3,11 @@
 #include "../../object.h"
 #include "../../math/vertex.h"
 #include "../../systems/opengl wrappers/shader.h"
+#include "../../systems/opengl wrappers/shaderProgram.h"
 #include "../../systems/opengl wrappers/texture.h"
 #include "glad/gl.h"
 
-SpriteRenderer::SpriteRenderer(Object* owner, const Vector2 size, const std::shared_ptr<Texture>& texture, const std::shared_ptr<Shader>& shader, int renderingLayer, const Usage usage, const DrawMode drawMode) : RendererBase(owner) {
+SpriteRenderer::SpriteRenderer(Object* owner, const Vector2 size, const std::shared_ptr<Texture>& texture, const std::shared_ptr<ShaderProgram>& shader, int renderingLayer, const Usage usage, const DrawMode drawMode) : RendererBase(owner) {
     this->size_ = size;
     this->vertices_ = {
         {{-size_.x / 2, -size_.y / 2}, {0, 0}}, // bottom left
@@ -51,12 +52,12 @@ SpriteRenderer::SpriteRenderer(Object* owner, const Vector2 size, const std::sha
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, static_cast<long>(indices_.size() * sizeof(unsigned int)), indices_.data(), usage);
 
     // cache uniform locations to avoid lookups in draw
-    mvpLocation_ = glGetUniformLocation(shader_->getProgram(), "mvp");
-    channelsLocation_ = glGetUniformLocation(shader_->getProgram(), "channels");
-    alphaLocation_ = glGetUniformLocation(shader_->getProgram(), "alpha");
+    mvpLocation_ = shader_->getUniformLocation("mvp");
+    channelsLocation_ = shader->getUniformLocation("channels");
+    alphaLocation_ = shader->getUniformLocation("alpha");
 }
 
-SpriteRenderer::SpriteRenderer(Object* owner, const float pixelsPerUnit, const std::shared_ptr<Texture>& texture, const std::shared_ptr<Shader>& shader, const int renderingLayer, const Usage usage, const DrawMode drawMode)
+SpriteRenderer::SpriteRenderer(Object* owner, const float pixelsPerUnit, const std::shared_ptr<Texture>& texture, const std::shared_ptr<ShaderProgram>& shader, const int renderingLayer, const Usage usage, const DrawMode drawMode)
     : SpriteRenderer(owner, Vector2(static_cast<float>(texture->getWidth()) / pixelsPerUnit, static_cast<float>(texture->getHeight()) / pixelsPerUnit), texture, shader, renderingLayer, usage, drawMode) {
 }
 
@@ -65,17 +66,20 @@ void SpriteRenderer::draw(const Matrix<4, 4>& view, const Matrix<4, 4>& projecti
     const Matrix<4, 4> model = object->transform.localToWorldMatrix();
 
     // combine the matrices into a single MVP matrix
-    Matrix<4, 4> mvp = projection * (view * model);
-
-    const auto* floatPointer = static_cast<const GLfloat*>(mvp);
+    const Matrix<4, 4> mvp = projection * (view * model);
 
     // make sure were using the shader
     shader_->bind();
 
     // pass the uniform data using the saved locations
-    shader_->setUniformValue(glUniformMatrix4fv, mvpLocation_, 1, GL_FALSE, floatPointer);
-    shader_->setUniformValue(glUniform1i, channelsLocation_, texture_->getNumberOfChannels());
-    shader_->setUniformValue(glUniform1f, alphaLocation_, alpha);
+    shader_->setUniformFloatMat4(mvpLocation_, mvp);
+    // shader_->setUniformValue(glUniformMatrix4fv, mvpLocation_, 1, GL_FALSE, floatPointer);
+
+    shader_->setUniformInt(channelsLocation_, texture_->getNumberOfChannels());
+    // shader_->setUniformValue(glUniform1i, channelsLocation_, texture_->getNumberOfChannels());
+
+    shader_->setUniformFloat(alphaLocation_, alpha);
+    // shader_->setUniformValue(glUniform1f, alphaLocation_, alpha);
 
     onDrawEventDispatcher->invoke(shader_);
 
@@ -161,7 +165,7 @@ void SpriteRenderer::changeTexture(const std::shared_ptr<Texture>& texture, cons
     this->usage_ = usage;
 }
 
-void SpriteRenderer::changeShader(const std::shared_ptr<Shader>& shader) {
+void SpriteRenderer::changeShader(const std::shared_ptr<ShaderProgram>& shader) {
     this->shader_ = shader;
 }
 

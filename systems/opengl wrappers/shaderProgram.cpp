@@ -2,29 +2,71 @@
 #include <fstream>
 #include <iostream>
 
-#include "betterShader.h"
+#include "shader.h"
+#include <vector>
 
-ShaderProgram::ShaderProgram() {
-    this->program_ = glCreateProgram();
+std::shared_ptr<ShaderProgram> ShaderProgram::create() {
+    return std::shared_ptr<ShaderProgram>(new ShaderProgram());
 }
 
-void ShaderProgram::attach(const BetterShader& shader) {
-    glAttachShader(program_, shader.getShaderId());
+std::shared_ptr<ShaderProgram> ShaderProgram::create(std::initializer_list<std::shared_ptr<Shader>> shaders) {
+    auto* ptr = new ShaderProgram();
+
+    for (auto& shader : shaders) {
+        ptr->attach(shader);
+    }
+
+    ptr->linkAndVerify();
+
+    return std::shared_ptr<ShaderProgram>(ptr);
 }
 
-void ShaderProgram::linkAndVerify() {
+
+void ShaderProgram::attach(const std::shared_ptr<Shader>& shader) {
+    glAttachShader(program_, shader->getShaderId());
+    shaderObjects_.push_back(shader);
+}
+
+void ShaderProgram::detach(const std::shared_ptr<Shader>& shader) {
+    glDetachShader(program_, shader->getShaderId());
+
+    for (auto it = shaderObjects_.begin(); it != shaderObjects_.end(); ) {
+        if ((*it)->getShaderId() == shader->getShaderId()) {
+            shaderObjects_.erase(it);
+        }
+        else {
+            ++it;
+        }
+    }
+}
+
+void ShaderProgram::linkAndVerify() const {
     glLinkProgram(program_);
-    glValidateProgram(program_);
 
-    int result;
-    glGetProgramiv(program_, GL_COMPILE_STATUS, &result);
+    int linkResult;
+    glGetProgramiv(program_, GL_COMPILE_STATUS, &linkResult);
 
-    if (result == GL_FALSE) {
+    if (linkResult == GL_FALSE) {
         int length;
         glGetProgramiv(program_, GL_INFO_LOG_LENGTH, &length);
         char message[length];
         glGetProgramInfoLog(program_, length, &length, message);
-        std::cerr << "Failed to compile shader! \n" << message << std::endl;
+        std::cerr << "Failed to link shader program! \n" << message << std::endl;
+        glDeleteProgram(program_);
+        exit(1);
+    }
+
+    glValidateProgram(program_);
+
+    int validationResult;
+    glGetProgramiv(program_, GL_COMPILE_STATUS, &validationResult);
+
+    if (validationResult == GL_FALSE) {
+        int length;
+        glGetProgramiv(program_, GL_INFO_LOG_LENGTH, &length);
+        char message[length];
+        glGetProgramInfoLog(program_, length, &length, message);
+        std::cerr << "Failed to validate shader program! \n" << message << std::endl;
         glDeleteProgram(program_);
         exit(1);
     }
@@ -38,242 +80,246 @@ int ShaderProgram::getUniformLocation(const std::string& name) const {
     return glGetUniformLocation(program_, name.c_str());
 }
 
+ShaderProgram::ShaderProgram() {
+    this->program_ = glCreateProgram();
+}
+
 #pragma region setters
 #pragma region ints
-void ShaderProgram::setUniformInt(GLint location, GLint v0) {
+void ShaderProgram::setUniformInt(const GLint location, const GLint v0) const {
     glProgramUniform1i(program_, location, v0);
 }
 
-void ShaderProgram::setUniformInt(GLint location, GLint v0, GLint v1) {
+void ShaderProgram::setUniformInt(const GLint location, const GLint v0, const GLint v1) const {
     glProgramUniform2i(program_, location, v0, v1);
 }
 
-void ShaderProgram::setUniformInt(GLint location, GLint v0, GLint v1, GLint v2) {
+void ShaderProgram::setUniformInt(const GLint location, const GLint v0, const GLint v1, const GLint v2) const {
     glProgramUniform3i(program_, location, v0, v1, v2);
 }
 
-void ShaderProgram::setUniformInt(GLint location, GLint v0, GLint v1, GLint v2, GLint v3) {
+void ShaderProgram::setUniformInt(const GLint location, const GLint v0, const GLint v1, const GLint v2, const GLint v3) const {
     glProgramUniform4i(program_, location, v0, v1, v2, v3);
 }
 #pragma endregion
 #pragma region unsigned ints
-void ShaderProgram::setUniformUint(GLint location, GLuint v0) {
+void ShaderProgram::setUniformUint(const GLint location, const GLuint v0) const {
     glProgramUniform1ui(program_, location, v0);
 }
 
-void ShaderProgram::setUniformUint(GLint location, GLuint v0, GLuint v1) {
+void ShaderProgram::setUniformUint(const GLint location, const GLuint v0, const GLuint v1) const {
     glProgramUniform2ui(program_, location, v0, v1);
 }
 
-void ShaderProgram::setUniformUint(GLint location, GLuint v0, GLuint v1, GLuint v2) {
+void ShaderProgram::setUniformUint(const GLint location, const GLuint v0, const GLuint v1, const GLuint v2) const {
     glProgramUniform3ui(program_, location, v0, v1, v2);
 }
 
-void ShaderProgram::setUniformUint(GLint location, GLuint v0, GLuint v1, GLuint v2, GLuint v3) {
+void ShaderProgram::setUniformUint(const GLint location, const GLuint v0, const GLuint v1, const GLuint v2, const GLuint v3) const {
     glProgramUniform4ui(program_, location, v0, v1, v2, v3);
 }
 #pragma endregion
 #pragma region floats
-void ShaderProgram::setUniformFloat(GLint location, GLfloat v0) {
+void ShaderProgram::setUniformFloat(const GLint location, const GLfloat v0) const {
     glProgramUniform1f(program_, location, v0);
 }
 
-void ShaderProgram::setUniformFloat(GLint location, GLfloat v0, GLfloat v1) {
+void ShaderProgram::setUniformFloat(const GLint location, const GLfloat v0, const GLfloat v1) const {
     glProgramUniform2f(program_, location, v0, v1);
 }
 
-void ShaderProgram::setUniformFloat(GLint location, GLfloat v0, GLfloat v1, GLfloat v2) {
+void ShaderProgram::setUniformFloat(const GLint location, const GLfloat v0, const GLfloat v1, const GLfloat v2) const {
     glProgramUniform3f(program_, location, v0, v1, v2);
 }
 
-void ShaderProgram::setUniformFloat(GLint location, GLfloat v0, GLfloat v1, GLfloat v2, GLfloat v3) {
+void ShaderProgram::setUniformFloat(const GLint location, const GLfloat v0, const GLfloat v1, const GLfloat v2, const GLfloat v3) const {
     glProgramUniform4f(program_, location, v0, v1, v2, v3);
 }
 #pragma endregion
 #pragma region doubles
-void ShaderProgram::setUniformDouble(GLint location, GLdouble v0) {
+void ShaderProgram::setUniformDouble(const GLint location, const GLdouble v0) const {
     glProgramUniform1d(program_, location, v0);
 }
 
-void ShaderProgram::setUniformDouble(GLint location, GLdouble v0, GLdouble v1) {
+void ShaderProgram::setUniformDouble(const GLint location, const GLdouble v0, const GLdouble v1) const {
     glProgramUniform2d(program_, location, v0, v1);
 }
 
-void ShaderProgram::setUniformDouble(GLint location, GLdouble v0, GLdouble v1, GLdouble v2) {
+void ShaderProgram::setUniformDouble(const GLint location, const GLdouble v0, const GLdouble v1, const GLdouble v2) const {
     glProgramUniform3d(program_, location, v0, v1, v2);
 }
 
-void ShaderProgram::setUniformDouble(GLint location, GLdouble v0, GLdouble v1, GLdouble v2, GLdouble v3) {
+void ShaderProgram::setUniformDouble(const GLint location, const GLdouble v0, const GLdouble v1, const GLdouble v2, const GLdouble v3) const {
     glProgramUniform4d(program_, location, v0, v1, v2, v3);
 }
 #pragma endregion
 #pragma region int arrays
-void ShaderProgram::setUniformIntArray(GLint location, GLsizei count, const GLint* value) {
+void ShaderProgram::setUniformIntArray(const GLint location, const GLsizei count, const  GLint* value) const {
     glProgramUniform1iv(program_, location, count, value);
 }
 
-void ShaderProgram::setUniformIntVec2Array(GLint location, GLsizei count, const GLint* value) {
+void ShaderProgram::setUniformIntVec2Array(const GLint location, const GLsizei count, const  GLint* value) const {
     glProgramUniform2iv(program_, location, count, value);
 }
 
-void ShaderProgram::setUniformIntVec3Array(GLint location, GLsizei count, const GLint* value) {
+void ShaderProgram::setUniformIntVec3Array(const GLint location, const GLsizei count, const  GLint* value) const {
     glProgramUniform3iv(program_, location, count, value);
 }
 
-void ShaderProgram::setUniformIntVec4Array(GLint location, GLsizei count, const GLint* value) {
+void ShaderProgram::setUniformIntVec4Array(const GLint location, const GLsizei count, const  GLint* value) const {
     glProgramUniform4iv(program_, location, count, value);
 }
 #pragma endregion
 #pragma region unsigned int arrays
-void ShaderProgram::setUniformUintArray(GLint location, GLsizei count, const GLuint* value) {
+void ShaderProgram::setUniformUintArray(const GLint location, const GLsizei count, const  GLuint* value) const {
     glProgramUniform1uiv(program_, location, count, value);
 }
 
-void ShaderProgram::setUniformUintVec2Array(GLint location, GLsizei count, const GLuint* value) {
+void ShaderProgram::setUniformUintVec2Array(const GLint location, const GLsizei count, const  GLuint* value) const {
     glProgramUniform2uiv(program_, location, count, value);
 }
 
-void ShaderProgram::setUniformUintVec3Array(GLint location, GLsizei count, const GLuint* value) {
+void ShaderProgram::setUniformUintVec3Array(const GLint location, const GLsizei count, const  GLuint* value) const {
     glProgramUniform3uiv(program_, location, count, value);
 }
 
-void ShaderProgram::setUniformUintVec4Array(GLint location, GLsizei count, const GLuint* value) {
+void ShaderProgram::setUniformUintVec4Array(const GLint location, const GLsizei count, const  GLuint* value) const {
     glProgramUniform4uiv(program_, location, count, value);
 }
 #pragma endregion
 #pragma region float arrays
-void ShaderProgram::setUniformFloatArray(GLint location, GLsizei count, const GLfloat* value) {
+void ShaderProgram::setUniformFloatArray(const GLint location, const GLsizei count, const  GLfloat* value) const {
     glProgramUniform1fv(program_, location, count, value);
 }
 
-void ShaderProgram::setUniformFloatVec2Array(GLint location, GLsizei count, const GLfloat* value) {
+void ShaderProgram::setUniformFloatVec2Array(const GLint location, const GLsizei count, const  GLfloat* value) const {
     glProgramUniform2fv(program_, location, count, value);
 }
 
-void ShaderProgram::setUniformFloatVec3Array(GLint location, GLsizei count, const GLfloat* value) {
+void ShaderProgram::setUniformFloatVec3Array(const GLint location, const GLsizei count, const  GLfloat* value) const {
     glProgramUniform3fv(program_, location, count, value);
 }
 
-void ShaderProgram::setUniformFloatVec4Array(GLint location, GLsizei count, const GLfloat* value) {
+void ShaderProgram::setUniformFloatVec4Array(const GLint location, const GLsizei count, const  GLfloat* value) const {
     glProgramUniform4fv(program_, location, count, value);
 }
 #pragma endregion
 #pragma region double arrays
-void ShaderProgram::setUniformDoubleArray(GLint location, GLsizei count, const GLdouble* value) {
+void ShaderProgram::setUniformDoubleArray(const GLint location, const GLsizei count, const  GLdouble* value) const {
     glProgramUniform1dv(program_, location, count, value);
 }
 
-void ShaderProgram::setUniformDoubleVec2Array(GLint location, GLsizei count, const GLdouble* value) {
+void ShaderProgram::setUniformDoubleVec2Array(const GLint location, const GLsizei count, const  GLdouble* value) const {
     glProgramUniform2dv(program_, location, count, value);
 }
 
-void ShaderProgram::setUniformDoubleVec3Array(GLint location, GLsizei count, const GLdouble* value) {
+void ShaderProgram::setUniformDoubleVec3Array(const GLint location, const GLsizei count, const  GLdouble* value) const {
     glProgramUniform3dv(program_, location, count, value);
 }
 
-void ShaderProgram::setUniformDoubleVec4Array(GLint location, GLsizei count, const GLdouble* value) {
+void ShaderProgram::setUniformDoubleVec4Array(const GLint location, const GLsizei count, const  GLdouble* value) const {
     glProgramUniform4dv(program_, location, count, value);
 }
 #pragma endregion
 #pragma region float square matrices
-void ShaderProgram::setUniformFloatMat2(GLint location, const Matrix<2, 2>& matrix, GLboolean transpose) {
+void ShaderProgram::setUniformFloatMat2(const GLint location, const Matrix<2, 2>& matrix, const GLboolean transpose) const {
     glProgramUniformMatrix2fv(program_, location, 1, transpose, matrix);
 }
 
-void ShaderProgram::setUniformFloatMat3(GLint location, const Matrix<3, 3>& matrix, GLboolean transpose) {
+void ShaderProgram::setUniformFloatMat3(const GLint location, const Matrix<3, 3>& matrix, const GLboolean transpose) const {
     glProgramUniformMatrix3fv(program_, location, 1, transpose, matrix);
 }
 
-void ShaderProgram::setUniformFloatMat4(GLint location, const Matrix<4, 4>& matrix, GLboolean transpose) {
+void ShaderProgram::setUniformFloatMat4(const GLint location, const Matrix<4, 4>& matrix, const GLboolean transpose) const {
     glProgramUniformMatrix4fv(program_, location, 1, transpose, matrix);
 }
 #pragma endregion
 #pragma region float non-square matrices
-void ShaderProgram::setUniformFloatMat2x3(GLint location, const Matrix<2, 3>& matrix, GLboolean transpose) {
+void ShaderProgram::setUniformFloatMat2x3(const GLint location, const Matrix<2, 3>& matrix, const GLboolean transpose) const {
     glProgramUniformMatrix2x3fv(program_, location, 1, transpose, matrix);
 }
 
-void ShaderProgram::setUniformFloatMat3x2(GLint location, const Matrix<3, 2>& matrix, GLboolean transpose) {
+void ShaderProgram::setUniformFloatMat3x2(const GLint location, const Matrix<3, 2>& matrix, const GLboolean transpose) const {
     glProgramUniformMatrix3x2fv(program_, location, 1, transpose, matrix);
 }
 
-void ShaderProgram::setUniformFloatMat2x4(GLint location, const Matrix<2, 4>& matrix, GLboolean transpose) {
+void ShaderProgram::setUniformFloatMat2x4(const GLint location, const Matrix<2, 4>& matrix, const GLboolean transpose) const {
     glProgramUniformMatrix2x4fv(program_, location, 1, transpose, matrix);
 }
 
-void ShaderProgram::setUniformFloatMat4x2(GLint location, const Matrix<4, 2>& matrix, GLboolean transpose) {
+void ShaderProgram::setUniformFloatMat4x2(const GLint location, const Matrix<4, 2>& matrix, const GLboolean transpose) const {
     glProgramUniformMatrix4x2fv(program_, location, 1, transpose, matrix);
 }
 
-void ShaderProgram::setUniformFloatMat3x4(GLint location, const Matrix<3, 4>& matrix, GLboolean transpose) {
+void ShaderProgram::setUniformFloatMat3x4(const GLint location, const Matrix<3, 4>& matrix, const GLboolean transpose) const {
     glProgramUniformMatrix3x4fv(program_, location, 1, transpose, matrix);
 }
 
-void ShaderProgram::setUniformFloatMat4x3(GLint location, const Matrix<4, 3>& matrix, GLboolean transpose) {
+void ShaderProgram::setUniformFloatMat4x3(const GLint location, const Matrix<4, 3>& matrix, const GLboolean transpose) const {
     glProgramUniformMatrix4x3fv(program_, location, 1, transpose, matrix);
 }
 #pragma endregion
 #pragma region float square matrix arrays
-void ShaderProgram::setUniformFloatMat2Array(GLint location, GLsizei count, const GLfloat* value, GLboolean transpose) {
+void ShaderProgram::setUniformFloatMat2Array(const GLint location, const GLsizei count, const  GLfloat* value, const GLboolean transpose) const {
     glProgramUniformMatrix2fv(program_, location, count, transpose, value);
 }
 
-void ShaderProgram::setUniformFloatMat3Array(GLint location, GLsizei count, const GLfloat* value, GLboolean transpose) {
+void ShaderProgram::setUniformFloatMat3Array(const GLint location, const GLsizei count, const  GLfloat* value, const GLboolean transpose) const {
     glProgramUniformMatrix3fv(program_, location, count, transpose, value);
 }
 
-void ShaderProgram::setUniformFloatMat4Array(GLint location, GLsizei count, const GLfloat* value, GLboolean transpose) {
+void ShaderProgram::setUniformFloatMat4Array(const GLint location, const GLsizei count, const  GLfloat* value, const GLboolean transpose) const {
     glProgramUniformMatrix4fv(program_, location, count, transpose, value);
 }
 #pragma endregion
 #pragma region double square matrices
-void ShaderProgram::setUniformDoubleMat2(GLint location, const Matrix<2, 2, double>& matrix, GLboolean transpose) {
+void ShaderProgram::setUniformDoubleMat2(const GLint location, const Matrix<2, 2, double>& matrix, const GLboolean transpose) const {
     glProgramUniformMatrix2dv(program_, location, 1, transpose, matrix);
 }
 
-void ShaderProgram::setUniformDoubleMat3(GLint location, const Matrix<3, 3, double>& matrix, GLboolean transpose) {
+void ShaderProgram::setUniformDoubleMat3(const GLint location, const Matrix<3, 3, double>& matrix, const GLboolean transpose) const {
     glProgramUniformMatrix3dv(program_, location, 1, transpose, matrix);
 }
 
-void ShaderProgram::setUniformDoubleMat4(GLint location, const Matrix<4, 4, double>& matrix, GLboolean transpose) {
+void ShaderProgram::setUniformDoubleMat4(const GLint location, const Matrix<4, 4, double>& matrix, const GLboolean transpose) const {
     glProgramUniformMatrix4dv(program_, location, 1, transpose, matrix);
 }
 #pragma endregion
 #pragma region double non-square matrices
-void ShaderProgram::setUniformDoubleMat2x3(GLint location, const Matrix<2, 3, double>& matrix, GLboolean transpose) {
+void ShaderProgram::setUniformDoubleMat2x3(const GLint location, const Matrix<2, 3, double>& matrix, const GLboolean transpose) const {
     glProgramUniformMatrix2x3dv(program_, location, 1, transpose, matrix);
 }
 
-void ShaderProgram::setUniformDoubleMat3x2(GLint location, const Matrix<3, 2, double>& matrix, GLboolean transpose) {
+void ShaderProgram::setUniformDoubleMat3x2(const GLint location, const Matrix<3, 2, double>& matrix, const GLboolean transpose) const {
     glProgramUniformMatrix3x2dv(program_, location, 1, transpose, matrix);
 }
 
-void ShaderProgram::setUniformDoubleMat2x4(GLint location, const Matrix<2, 4, double>& matrix, GLboolean transpose) {
+void ShaderProgram::setUniformDoubleMat2x4(const GLint location, const Matrix<2, 4, double>& matrix, const GLboolean transpose) const {
     glProgramUniformMatrix2x4dv(program_, location, 1, transpose, matrix);
 }
 
-void ShaderProgram::setUniformDoubleMat4x2(GLint location, const Matrix<4, 2, double>& matrix, GLboolean transpose) {
+void ShaderProgram::setUniformDoubleMat4x2(const GLint location, const Matrix<4, 2, double>& matrix, const GLboolean transpose) const {
     glProgramUniformMatrix4x2dv(program_, location, 1, transpose, matrix);
 }
 
-void ShaderProgram::setUniformDoubleMat3x4(GLint location, const Matrix<3, 4, double>& matrix, GLboolean transpose) {
+void ShaderProgram::setUniformDoubleMat3x4(const GLint location, const Matrix<3, 4, double>& matrix, const GLboolean transpose) const {
     glProgramUniformMatrix3x4dv(program_, location, 1, transpose, matrix);
 }
 
-void ShaderProgram::setUniformDoubleMat4x3(GLint location, const Matrix<4, 3, double>& matrix, GLboolean transpose) {
+void ShaderProgram::setUniformDoubleMat4x3(const GLint location, const Matrix<4, 3, double>& matrix, const GLboolean transpose) const {
     glProgramUniformMatrix4x3dv(program_, location, 1, transpose, matrix);
 }
 #pragma endregion
 #pragma region double square matrix arrays
-void ShaderProgram::setUniformDoubleMat2Array(GLint location, GLsizei count, const GLdouble* value, GLboolean transpose) {
+void ShaderProgram::setUniformDoubleMat2Array(const GLint location, const GLsizei count, const  GLdouble* value, const GLboolean transpose) const {
     glProgramUniformMatrix2dv(program_, location, count, transpose, value);
 }
 
-void ShaderProgram::setUniformDoubleMat3Array(GLint location, GLsizei count, const GLdouble* value, GLboolean transpose) {
+void ShaderProgram::setUniformDoubleMat3Array(const GLint location, const GLsizei count, const  GLdouble* value, const GLboolean transpose) const {
     glProgramUniformMatrix3dv(program_, location, count, transpose, value);
 }
 
-void ShaderProgram::setUniformDoubleMat4Array(GLint location, GLsizei count, const GLdouble* value, GLboolean transpose) {
+void ShaderProgram::setUniformDoubleMat4Array(const GLint location, const GLsizei count, const  GLdouble* value, const GLboolean transpose) const {
     glProgramUniformMatrix4dv(program_, location, count, transpose, value);
 }
 #pragma endregion

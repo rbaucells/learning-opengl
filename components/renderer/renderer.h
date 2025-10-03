@@ -6,7 +6,7 @@
 #include "glad/gl.h"
 #include "../../math/bounds.h"
 
-class Shader;
+class ShaderProgram;
 class Texture;
 
 class RendererBase : public Component {
@@ -17,7 +17,7 @@ public:
     virtual void draw(const Matrix<4, 4>& view, const Matrix<4, 4>& projection) const = 0;
 
     // std::weak_ptr<Shader> = Shader Being Used
-    std::shared_ptr<Publisher<std::weak_ptr<Shader>>> onDrawEventDispatcher = Publisher<std::weak_ptr<Shader>>::create();
+    std::shared_ptr<Publisher<std::weak_ptr<ShaderProgram>>> onDrawEventDispatcher = Publisher<std::weak_ptr<ShaderProgram>>::create();
 
     [[nodiscard]] virtual Bounds getBounds() const = 0;
 
@@ -61,8 +61,8 @@ protected:
 
 class SpriteSheetRenderer final : public RendererBase {
 public:
-    SpriteSheetRenderer(Object* owner, Vector2 size, int gridWidth, int gridHeight, int padding, const std::shared_ptr<Texture>& texture, const std::shared_ptr<Shader>& shader, int renderingLayer, Usage usage = dynamic_draw, DrawMode drawMode = triangles);
-    SpriteSheetRenderer(Object* owner, float pixelsPerUnit, int gridWidth, int gridHeight, int padding, const std::shared_ptr<Texture>& texture, const std::shared_ptr<Shader>& shader, int renderingLayer, Usage usage = dynamic_draw, DrawMode drawMode = triangles);
+    SpriteSheetRenderer(Object* owner, Vector2 size, int gridWidth, int gridHeight, int padding, const std::shared_ptr<Texture>& texture, const std::shared_ptr<ShaderProgram>& shader, int renderingLayer, Usage usage = dynamic_draw, DrawMode drawMode = triangles);
+    SpriteSheetRenderer(Object* owner, float pixelsPerUnit, int gridWidth, int gridHeight, int padding, const std::shared_ptr<Texture>& texture, const std::shared_ptr<ShaderProgram>& shader, int renderingLayer, Usage usage = dynamic_draw, DrawMode drawMode = triangles);
 
     void draw(const Matrix<4, 4>& view, const Matrix<4, 4>& projection) const override;
 
@@ -76,7 +76,7 @@ public:
 
     void changeTexture(const std::shared_ptr<Texture>& texture, int gridWidth, int gridHeight, int padding, Usage usage = dynamic_draw);
 
-    void changeShader(const std::shared_ptr<Shader>& shader);
+    void changeShader(const std::shared_ptr<ShaderProgram>& shader);
 
     void changeUsage(Usage usage);
 
@@ -107,7 +107,7 @@ private:
 
     Usage usage_ = static_draw;
 
-    std::shared_ptr<Shader> shader_ = nullptr;
+    std::shared_ptr<ShaderProgram> shader_ = nullptr;
 
     // uniforms locations
     GLint mvpLocation_ = -1;
@@ -129,8 +129,8 @@ private:
 
 class SpriteRenderer final : public RendererBase {
 public:
-    SpriteRenderer(Object* owner, Vector2 size, const std::shared_ptr<Texture>& texture, const std::shared_ptr<Shader>& shader, int renderingLayer, Usage usage = static_draw, DrawMode drawMode = triangles);
-    SpriteRenderer(Object* owner, float pixelsPerUnit, const std::shared_ptr<Texture>& texture, const std::shared_ptr<Shader>& shader, int renderingLayer, Usage usage = static_draw, DrawMode drawMode = triangles);
+    SpriteRenderer(Object* owner, Vector2 size, const std::shared_ptr<Texture>& texture, const std::shared_ptr<ShaderProgram>& shader, int renderingLayer, Usage usage = static_draw, DrawMode drawMode = triangles);
+    SpriteRenderer(Object* owner, float pixelsPerUnit, const std::shared_ptr<Texture>& texture, const std::shared_ptr<ShaderProgram>& shader, int renderingLayer, Usage usage = static_draw, DrawMode drawMode = triangles);
 
     void draw(const Matrix<4, 4>& view, const Matrix<4, 4>& projection) const override;
 
@@ -144,7 +144,7 @@ public:
 
     void changeTexture(const std::shared_ptr<Texture>& texture, Usage usage = static_draw);
 
-    void changeShader(const std::shared_ptr<Shader>& shader);
+    void changeShader(const std::shared_ptr<ShaderProgram>& shader);
 
     void changeUsage(Usage usage);
 
@@ -156,7 +156,7 @@ public:
 
 private:
     std::shared_ptr<Texture> texture_ = nullptr;
-    std::shared_ptr<Shader> shader_ = nullptr;
+    std::shared_ptr<ShaderProgram> shader_ = nullptr;
 
     Usage usage_;
 
@@ -180,7 +180,7 @@ private:
 
 class CustomRenderer final : public RendererBase {
 public:
-    CustomRenderer(Object* owner, const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices, const std::shared_ptr<Texture>& texture, const std::shared_ptr<Shader>& shader, int renderingLayer, Usage usage = static_draw, DrawMode drawMode = triangles);
+    CustomRenderer(Object* owner, const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices, const std::shared_ptr<Texture>& texture, const std::shared_ptr<ShaderProgram>& shader, int renderingLayer, Usage usage = static_draw, DrawMode drawMode = triangles);
 
     void draw(const Matrix<4, 4>& view, const Matrix<4, 4>& projection) const override;
 
@@ -189,7 +189,7 @@ public:
     [[nodiscard]] int getRenderLayer() const;
     void setRenderLayer(int layer);
 
-    void redefine(const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices, const std::shared_ptr<Texture>& texture, const std::shared_ptr<Shader>& shader, Usage usage);
+    void redefine(const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices, const std::shared_ptr<Texture>& texture, const std::shared_ptr<ShaderProgram>& shader, Usage usage);
 
     void changeUsage(Usage usage) const;
 
@@ -201,7 +201,7 @@ public:
 
 private:
     std::shared_ptr<Texture> texture_ = nullptr;
-    std::shared_ptr<Shader> shader_ = nullptr;
+    std::shared_ptr<ShaderProgram> shader_ = nullptr;
 
     // uniforms locations
     GLint mvpLocation_ = -1;

@@ -22,7 +22,7 @@ public:
     Matrix() = default;
 
     template<IsConvertableTo<T> U>
-    explicit Matrix(const Matrix<ROWS, COLUMNS, U> &other) {
+    explicit Matrix(const Matrix<ROWS, COLUMNS, U>& other) {
         assert(ROWS == other.rows && COLUMNS == other.columns);
 
         for (int c = 0; c < COLUMNS; c++) {
@@ -33,7 +33,19 @@ public:
     }
 
     template<IsConvertableTo<T> U>
-    Matrix<ROWS, COLUMNS, T> &operator=(const Matrix<ROWS, COLUMNS, U> &other) {
+    Matrix<ROWS, COLUMNS, T>& operator=(const Matrix<ROWS, COLUMNS, U>& other) {
+        if (this != &other) {
+            for (int c = 0; c < COLUMNS; c++) {
+                for (int r = 0; r < ROWS; r++) {
+                    data[c][r] = other.data[c][r];
+                }
+            }
+        }
+
+        return *this;
+    }
+
+    Matrix<ROWS, COLUMNS, T>& operator=(const Matrix<ROWS, COLUMNS, T>& other) {
         if (this != &other) {
             for (int c = 0; c < COLUMNS; c++) {
                 for (int r = 0; r < ROWS; r++) {
@@ -52,7 +64,7 @@ public:
      * @return Matrix with each element in this one added to the corresponding element in the other one
      */
     template<IsConvertableTo<T> U>
-    [[nodiscard]] Matrix<ROWS, COLUMNS, T> add(const Matrix<ROWS, COLUMNS, U> &other) const {
+    [[nodiscard]] Matrix<ROWS, COLUMNS, T> add(const Matrix<ROWS, COLUMNS, U>& other) const {
         assert(other.rows == ROWS || other.columns == COLUMNS);
 
         Matrix<ROWS, COLUMNS, T> result;
@@ -67,7 +79,7 @@ public:
     }
 
     template<IsConvertableTo<T> U>
-    Matrix<ROWS, COLUMNS, T> operator+(const Matrix<ROWS, COLUMNS, U> &other) const {
+    Matrix<ROWS, COLUMNS, T> operator+(const Matrix<ROWS, COLUMNS, U>& other) const {
         return add(other);
     }
 
@@ -78,7 +90,7 @@ public:
      * @return Matrix with each element in other one subtracted from the corresponding element in the this one
      */
     template<IsConvertableTo<T> U>
-    [[nodiscard]] Matrix<ROWS, COLUMNS, T> subtract(const Matrix<ROWS, COLUMNS, U> &other) const {
+    [[nodiscard]] Matrix<ROWS, COLUMNS, T> subtract(const Matrix<ROWS, COLUMNS, U>& other) const {
         assert(other.rows == ROWS || other.columns == COLUMNS);
 
         Matrix<ROWS, COLUMNS, T> result;
@@ -93,7 +105,7 @@ public:
     }
 
     template<IsConvertableTo<T> U>
-    Matrix<ROWS, COLUMNS, T> operator-(const Matrix<ROWS, COLUMNS, U> &other) const {
+    Matrix<ROWS, COLUMNS, T> operator-(const Matrix<ROWS, COLUMNS, U>& other) const {
         return subtract(other);
     }
 
@@ -102,8 +114,8 @@ public:
    * @param other Matrix to multiply this * other
    * @return The product of the two matrix. Having Number of rows as this, and number of columns as other
    */
-    template<int OTHER_ROWS, int OTHER_COLUMNS ,IsConvertableTo<T> U>
-    Matrix<ROWS, OTHER_COLUMNS, T> multiply(const Matrix<OTHER_ROWS, OTHER_COLUMNS, U> &other) const {
+    template<int OTHER_ROWS, int OTHER_COLUMNS, IsConvertableTo<T> U>
+    Matrix<ROWS, OTHER_COLUMNS, T> multiply(const Matrix<OTHER_ROWS, OTHER_COLUMNS, U>& other) const {
         assert(COLUMNS == other.rows);
 
         Matrix<ROWS, OTHER_COLUMNS, T> result;
@@ -120,7 +132,7 @@ public:
     }
 
     template<int OTHER_ROWS, int OTHER_COLUMNS, IsConvertableTo<T> U>
-    Matrix<ROWS, OTHER_COLUMNS, T> operator*(const Matrix<OTHER_ROWS, OTHER_COLUMNS, U> &other) const {
+    Matrix<ROWS, OTHER_COLUMNS, T> operator*(const Matrix<OTHER_ROWS, OTHER_COLUMNS, U>& other) const {
         return multiply(other);
     }
 
@@ -130,7 +142,7 @@ public:
      * @return Weather or not the two matrices have the same data
      */
     template<int OTHER_ROWS, int OTHER_COLUMNS, IsConvertableTo<T> U>
-    [[nodiscard]] bool compare(const Matrix<OTHER_ROWS, OTHER_COLUMNS, U> &other) const {
+    [[nodiscard]] bool compare(const Matrix<OTHER_ROWS, OTHER_COLUMNS, U>& other) const {
         if (other.rows != ROWS || other.columns != COLUMNS)
             return false;
 
@@ -145,15 +157,15 @@ public:
     }
 
     template<int OTHER_ROWS, int OTHER_COLUMNS, IsConvertableTo<T> U>
-    bool operator==(const Matrix<OTHER_ROWS, OTHER_COLUMNS, U> &other) const {
+    bool operator==(const Matrix<OTHER_ROWS, OTHER_COLUMNS, U>& other) const {
         return compare(other);
     }
 
-    T *operator[](const int index) {
+    T* operator[](const int index) {
         return &data[index][0];
     }
 
-    const T *operator[](const int index) const {
+    const T* operator[](const int index) const {
         return &data[index][0];
     }
 
@@ -512,7 +524,7 @@ public:
      * @param rowB Index of row b
      */
     template<int R_SIZE, int C_SIZE>
-    static void swapRows(Matrix<R_SIZE, C_SIZE> &matrix, const int rowA, const int rowB) {
+    static void swapRows(Matrix<R_SIZE, C_SIZE>& matrix, const int rowA, const int rowB) {
         // int temp = a;
         // a = b;
         // b = temp;
@@ -532,23 +544,23 @@ public:
         }
     }
 
-    operator const T *() const {
+    operator const T*() const {
         return &data[0][0];
     }
 
-    operator T *() {
+    operator T*() {
         return &data[0][0];
     }
 
-    Vector4 operator*(const Vector4 &other) const requires (ROWS == 4 && COLUMNS == 4) {
+    Vector4 operator*(const Vector4& other) const requires (ROWS == 4 && COLUMNS == 4) {
         return multiply(other);
     }
 
-    Vector3 operator*(const Vector3 &other) const requires (ROWS == 4 && COLUMNS == 4) {
+    Vector3 operator*(const Vector3& other) const requires (ROWS == 4 && COLUMNS == 4) {
         return multiply(other);
     }
 
-    Vector2 operator*(const Vector2 &other) const requires (ROWS == 4 && COLUMNS == 4) {
+    Vector2 operator*(const Vector2& other) const requires (ROWS == 4 && COLUMNS == 4) {
         return multiply(other);
     }
 
@@ -557,7 +569,7 @@ public:
      * @param other The 4D vector to multiply by.
      * @return A new 4D vector that is the result of the multiplication.
      */
-    [[nodiscard]] Vector4 multiply(const Vector4 &other) const requires (ROWS == 4 && COLUMNS == 4) {
+    [[nodiscard]] Vector4 multiply(const Vector4& other) const requires (ROWS == 4 && COLUMNS == 4) {
         Vector4 result;
 
         result.x = data[0][0] * other.x + data[1][0] * other.y + data[2][0] * other.z + data[3][0] * other.w;
@@ -573,7 +585,7 @@ public:
      * @param other The 3D vector to multiply by.
      * @return A new 3D vector that is the result of the multiplication.
      */
-    [[nodiscard]] Vector3 multiply(const Vector3 &other) const requires (ROWS == 4 && COLUMNS == 4) {
+    [[nodiscard]] Vector3 multiply(const Vector3& other) const requires (ROWS == 4 && COLUMNS == 4) {
         // Promote the 3D vector to a 4D vector with w=1 for a point
         const Vector4 tempVector4{other.x, other.y, other.z, 1.0f};
 
@@ -589,7 +601,7 @@ public:
      * @param other The 2D vector to multiply by.
      * @return A new 2D vector that is the result of the multiply.
      */
-    [[nodiscard]] Vector2 multiply(const Vector2 &other) const requires (ROWS == 4 && COLUMNS == 4) {
+    [[nodiscard]] Vector2 multiply(const Vector2& other) const requires (ROWS == 4 && COLUMNS == 4) {
         // Promote the 2D vector to a 4D vector with z=0 and w=1 for a point in 2D space
         const Vector4 tempVector4{other.x, other.y, 0.0f, 1.0f};
 

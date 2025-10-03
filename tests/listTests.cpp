@@ -1,5 +1,9 @@
 #include "../list.h"
 
+void add2(int& var) {
+    var += 2;
+}
+
 int main() {
     List<int> list;
 

@@ -3,10 +3,11 @@
 #include "../../object.h"
 #include "../../math/vertex.h"
 #include "../../systems/opengl wrappers/shader.h"
+#include "../../systems/opengl wrappers/shaderProgram.h"
 #include "../../systems/opengl wrappers/texture.h"
 #include "glad/gl.h"
 
-SpriteSheetRenderer::SpriteSheetRenderer(Object* owner, Vector2 size, const int gridWidth, const int gridHeight, const int padding, const std::shared_ptr<Texture>& texture, const std::shared_ptr<Shader>& shader, const int renderingLayer, const Usage usage, const DrawMode drawMode) : RendererBase(owner) {
+SpriteSheetRenderer::SpriteSheetRenderer(Object* owner, Vector2 size, const int gridWidth, const int gridHeight, const int padding, const std::shared_ptr<Texture>& texture, const std::shared_ptr<ShaderProgram>& shader, const int renderingLayer, const Usage usage, const DrawMode drawMode) : RendererBase(owner) {
     this->texture_ = texture;
     this->gridWidth_ = gridWidth;
     this->gridHeight_ = gridHeight;
@@ -71,14 +72,14 @@ SpriteSheetRenderer::SpriteSheetRenderer(Object* owner, Vector2 size, const int 
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, static_cast<long>(indices_.size() * sizeof(unsigned int)), indices_.data(), usage);
 
     // cache uniform locations to avoid lookups in draw
-    mvpLocation_ = glGetUniformLocation(shader_->getProgram(), "mvp");
-    channelsLocation_ = glGetUniformLocation(shader_->getProgram(), "channels");
-    alphaLocation_ = glGetUniformLocation(shader_->getProgram(), "alpha");
+    mvpLocation_ = shader_->getUniformLocation("mvp");
+    channelsLocation_ = shader->getUniformLocation("channels");
+    alphaLocation_ = shader->getUniformLocation("alpha");
 
     addToAllRenderers(renderingLayer_);
 }
 
-SpriteSheetRenderer::SpriteSheetRenderer(Object* owner, const float pixelsPerUnit, const int gridWidth, const int gridHeight, const int padding, const std::shared_ptr<Texture>& texture, const std::shared_ptr<Shader>& shader, const int renderingLayer, const Usage usage, const DrawMode drawMode)
+SpriteSheetRenderer::SpriteSheetRenderer(Object* owner, const float pixelsPerUnit, const int gridWidth, const int gridHeight, const int padding, const std::shared_ptr<Texture>& texture, const std::shared_ptr<ShaderProgram>& shader, const int renderingLayer, const Usage usage, const DrawMode drawMode)
     : SpriteSheetRenderer(owner, Vector2(static_cast<float>(gridWidth) / pixelsPerUnit, static_cast<float>(gridHeight) / pixelsPerUnit), gridWidth, gridHeight, padding, texture, shader, renderingLayer, usage, drawMode) {
 }
 
@@ -87,16 +88,19 @@ void SpriteSheetRenderer::draw(const Matrix<4, 4>& view, const Matrix<4, 4>& pro
     const Matrix<4, 4> model = object->transform.localToWorldMatrix();
 
     // combine the matrices into a single MVP matrix
-    Matrix<4, 4> mvp = projection * (view * model);
-
-    const auto* floatPointer = static_cast<const GLfloat*>(mvp);
+    const Matrix<4, 4> mvp = projection * (view * model);
 
     // make sure were using the shader
     shader_->bind();
     // pass the uniform data using the saved locations
-    shader_->setUniformValue(glUniformMatrix4fv, mvpLocation_, 1, GL_FALSE, floatPointer);
-    shader_->setUniformValue(glUniform1i, channelsLocation_, texture_->getNumberOfChannels());
-    shader_->setUniformValue(glUniform1f, alphaLocation_, alpha);
+    shader_->setUniformFloatMat4(mvpLocation_, mvp);
+    // shader_->setUniformValue(glUniformMatrix4fv, mvpLocation_, 1, GL_FALSE, floatPointer);
+
+    shader_->setUniformInt(channelsLocation_, texture_->getNumberOfChannels());
+    // shader_->setUniformValue(glUniform1i, channelsLocation_, texture_->getNumberOfChannels());
+
+    shader_->setUniformFloat(alphaLocation_, alpha);
+    // shader_->setUniformValue(glUniform1f, alphaLocation_, alpha);
 
     onDrawEventDispatcher->invoke(shader_);
 
@@ -212,7 +216,7 @@ void SpriteSheetRenderer::changeTexture(const std::shared_ptr<Texture>& texture,
     glBufferData(GL_ARRAY_BUFFER, static_cast<long>(vertices_.size() * sizeof(Vertex)), vertices_.data(), usage_);
 }
 
-void SpriteSheetRenderer::changeShader(const std::shared_ptr<Shader>& shader) {
+void SpriteSheetRenderer::changeShader(const std::shared_ptr<ShaderProgram>& shader) {
     this->shader_ = shader;
 }
 
