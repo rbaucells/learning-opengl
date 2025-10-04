@@ -41,9 +41,6 @@ public:
         return tween;
     }
 
-    // fine to use raw pointer since component will never be alive at a time where the object isnt
-    // and because component doesnt own object
+    // fine to use raw ptr as component is "owned" by object
     Object* object = nullptr;
 };
-
-inline std::vector<std::weak_ptr<Component>> componentsToInitialize = {};

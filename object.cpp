@@ -1,61 +1,78 @@
 #include "object.h"
-#include "settings.h"
 #include "systems/component.h"
 
+#include <utility>
 #include <vector>
 
-Object::Object(const std::string& objectName, const int objectTag, const Vector2 pos, const float rot, const Vector2 scale) : name(objectName), tag(objectTag), transform(this, pos, rot, scale) {
-    allObjects.push_back(this);
+#include "scene.h"
 
-    // subscribe to the main game loop events
-    updateEventSubscription_ = updateEventPublisher->subscribe(this, &Object::update);
-    fixedUpdateEventSubscription_ = fixedUpdateEventPublisher->subscribe(this, &Object::fixedUpdate);
-    lateUpdateEventSubscription_ = lateUpdateEventPublisher->subscribe(this, &Object::lateUpdate);
+Object::Object(std::string objectName, const int objectTag, const Vector2 pos, const float rot, const Vector2 scale) : name(std::move(objectName)), tag(objectTag), transform(this, pos, rot, scale) {}
+
+Object::Object(std::string objectName, const int objectTag, Vector2 pos, float rot, Vector2 scale, Transform* parent) : name(std::move(objectName)), tag(objectTag), transform(this, pos, rot, scale, parent) {}
+
+void Object::manageStarts() {
+    for (const auto& componentPtr : componentsToStart_) {
+        componentPtr->awake();
+    }
+
+    for (const auto& componentPtr : componentsToStart_) {
+        componentPtr->start();
+    }
+
+    if (enabled_) {
+        for (const auto& componentPtr : componentsToStart_) {
+            componentPtr->onEnable();
+        }
+    }
+
+    componentsToStart_.clear();
 }
 
-Object::Object(const std::string& objectName, const int objectTag, Vector2 pos, float rot, Vector2 scale, Transform* parent) : name(objectName), tag(objectTag), transform(this, pos, rot, scale, parent) {
-    allObjects.push_back(this);
+void Object::manageDestructions() {
+    if (enabled_) {
+        for (const auto& componentPtr : componentsToDestroy_) {
+            componentPtr->onDisable();
+        }
+    }
 
-    // subscribe to the main game loop events
-    updateEventSubscription_ = updateEventPublisher->subscribe(this, &Object::update);
-    fixedUpdateEventSubscription_ = fixedUpdateEventPublisher->subscribe(this, &Object::fixedUpdate);
-    lateUpdateEventSubscription_ = lateUpdateEventPublisher->subscribe(this, &Object::lateUpdate);
+    for (const auto& comp : componentsToDestroy_) {
+        comp->onDestroy();
+    }
+
+    // erase the component from components_ if the component is also in componentsToDestroy
+    std::erase_if(components_,
+                  [this](const std::shared_ptr<Component>& comp) {
+                      return std::ranges::find(componentsToDestroy_, comp) != componentsToDestroy_.end();
+                  });
+
+    componentsToDestroy_.clear();
 }
 
-/**
- * @brief called every frame, if the object is activated.
- *
- * it calls the update method on all of its components.
- * and also the doTween method on all of its components.
- * @param deltaTime the time elapsed since the last frame.
- */
 void Object::update(const float deltaTime) {
-    if (!activated_)
+    if (!enabled_)
         return;
-
-    transform.manageTweens(deltaTime);
 
     for (const auto& component : components_) {
         component->update(deltaTime);
     }
 
+    transform.update(deltaTime);
+
     for (const auto& component : components_) {
         component->manageTweens(deltaTime);
     }
 
+    transform.manageTweens(deltaTime);
+
     for (const auto& component : components_) {
         component->manageQueue(deltaTime);
     }
+
+    transform.manageQueue(deltaTime);
 }
 
-/**
- * @brief called at a fixed time interval, if the object is activated.
- *
- * it calls the fixedUpdate method on all of its components.
- * @param fixedDeltaTime the fixed time step.
- */
 void Object::fixedUpdate(const float fixedDeltaTime) const {
-    if (!activated_)
+    if (!enabled_)
         return;
 
     for (const auto& component : components_) {
@@ -63,14 +80,8 @@ void Object::fixedUpdate(const float fixedDeltaTime) const {
     }
 }
 
-/**
- * @brief called every frame after all update methods have been called, if the object is activated.
- *
- * it calls the lateUpdate method on all of its components.
- * @param deltaTime the time elapsed since the last frame.
- */
 void Object::lateUpdate(const float deltaTime) const {
-    if (!activated_)
+    if (!enabled_)
         return;
 
     for (const auto& component : components_) {
@@ -78,114 +89,48 @@ void Object::lateUpdate(const float deltaTime) const {
     }
 }
 
-/**
- * @brief Puts this object into the waiting line to be destroyed at the end of the frame
- */
 void Object::destroy() {
-    markedForDeath = true;
-    objectsToDelete.push_back(this);
+    scene->objectsToDestroy_.push_back(shared_from_this());
 }
 
-/**
- * @brief Immediately destroys the object, no waiting for end of frame
- * @warning Can be dangerous if ran in update loop and then something else tries to access this
- */
 void Object::destroyImmediately() {
     // we need to deactivate before destroying
-    if (getActive()) {
-        for (const auto& component : components_) {
-            component->onDisable();
+    if (enabled_) {
+        for (const auto& comp : components_) {
+            comp->onDisable();
         }
+
+        transform.onDisable();
     }
 
-    for (const auto& component : components_) {
-        component->onDestroy();
+    for (const auto& comp : components_) {
+        comp->onDestroy();
     }
+
+    transform.onDestroy();
 
     components_.clear();
-    std::erase(allObjects, this);
-    // don't worry about transform, destructor will clean up for us
+    componentsToDestroy_.clear();
+    componentsToStart_.clear();
 }
 
 void Object::setActive(const bool state) {
     // if activated but not anymore
-    if (activated_ && !state) {
+    if (enabled_ && !state) {
         for (const auto& component : components_) {
             component->onDisable();
         }
     }
     // if not activated but are now
-    else if (!activated_ && state) {
+    else if (!enabled_ && state) {
         for (const auto& component : components_) {
             component->onEnable();
         }
     }
 
-    activated_ = state;
+    enabled_ = state;
 }
 
 bool Object::getActive() const {
-    return activated_;
-}
-
-// static methods
-
-/**
- * @brief finds the first object in the scene with the specified name.
- * @param name the name of the object to find.
- * @return a pointer to the found object, or nullptr if no object is found.
- */
-Object* Object::findObjectByName(const std::string& name) {
-    for (Object* obj : allObjects) {
-        if (obj->name == name)
-            return obj;
-    }
-
-    return nullptr;
-}
-
-/**
- * @brief finds the first object in the scene with the specified tag.
- * @param tag the tag of the object to find.
- * @return a pointer to the found object, or nullptr if no object is found.
- */
-Object* Object::findObjectByTag(const int tag) {
-    for (Object* obj : allObjects) {
-        if (obj->tag == tag)
-            return obj;
-    }
-
-    return nullptr;
-}
-
-/**
- * @brief finds all objects in the scene with the specified name.
- * @param name the name of the objects to find.
- * @return a vector of pointers to the found objects.
- */
-std::vector<Object*> Object::findObjectsByName(const std::string& name) {
-    std::vector<Object*> data;
-
-    for (Object* obj : allObjects) {
-        if (obj->name == name)
-            data.push_back(obj);
-    }
-
-    return data;
-}
-
-/**
- * @brief finds all objects in the scene with the specified tag.
- * @param tag the tag of the objects to find.
- * @return a vector of pointers to the found objects.
- */
-std::vector<Object*> Object::findObjectsByTag(const int tag) {
-    std::vector<Object*> data;
-
-    for (Object* obj : allObjects) {
-        if (obj->tag == tag)
-            data.push_back(obj);
-    }
-
-    return data;
+    return enabled_;
 }

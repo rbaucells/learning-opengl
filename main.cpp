@@ -111,15 +111,15 @@ int main() {
 
     // shader programs
     std::shared_ptr<ShaderProgram> mainProgram = ShaderProgram::create({fragShader, vertexShader});
-
     // textures
     std::shared_ptr<Texture> customTexture = std::make_shared<Texture>("/Users/ricardito/Projects/learning-opengl/res/textures/box.jpg", GL_CLAMP, true);
     std::shared_ptr<Texture> spriteTexture = std::make_shared<Texture>("/Users/ricardito/Projects/learning-opengl/res/textures/super-mario-transparent-background-20.png", GL_CLAMP, true);
     std::shared_ptr<Texture> spriteSheetTexture = std::make_shared<Texture>("/Users/ricardito/Projects/learning-opengl/res/textures/f1058a91de91f29cd65527cf97cab26b861de9b5_2_1380x896.png", GL_CLAMP, true);
 
     Object camera("mainCamera", 69, {0, 0}, 0, {1, 1});
-    auto cameraComponent = camera.addComponent<Camera>();
-    auto listenerComponent = camera.addComponent<AudioListener>();
+
+    camera.addComponent<Camera>();
+    camera.addComponent<AudioListener>();
 
     std::vector<Vertex> vertices = {
         {{2, 2}, {1, 1}}, // top right

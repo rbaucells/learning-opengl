@@ -2,52 +2,49 @@
 #include <map>
 #include <memory>
 #include <vector>
-#include "settings.h"
 #include "transform.h"
 #include "systems/component.h"
 
+class Scene;
+
 template<typename T>
-concept is_component = std::is_base_of_v<Component, T>;
+concept IsComponent = std::is_base_of_v<Component, T>;
 
-class Object {
-    bool activated_ = true;
-    std::vector<std::shared_ptr<Component>> components_;
-
-    Subscription<float> updateEventSubscription_;
-    Subscription<float> lateUpdateEventSubscription_;
-    Subscription<float> fixedUpdateEventSubscription_;
-
+class Object : std::enable_shared_from_this<Object> {
 public:
     const std::string name;
     const int tag;
-    bool markedForDeath = false;
 
-    // all objects must have a transform
     Transform transform;
 
-    Object(const std::string& objectName, int objectTag, Vector2 pos, float rot, Vector2 scale);
-    Object(const std::string& objectName, int objectTag, Vector2 pos, float rot, Vector2 scale, Transform* parent);
+    Object(std::string objectName, int objectTag, Vector2 pos, float rot, Vector2 scale);
+    Object(std::string objectName, int objectTag, Vector2 pos, float rot, Vector2 scale, Transform* parent);
+
+    void manageStarts();
+    void manageDestructions();
 
     void update(float deltaTime);
     void fixedUpdate(float fixedDeltaTime) const;
     void lateUpdate(float deltaTime) const;
+
     void destroy();
     void destroyImmediately();
 
-    template<is_component T, typename... ARGS>
+    template<IsComponent T, typename... ARGS>
     std::weak_ptr<T> addComponent(ARGS&&... args) {
         // make the component
         std::shared_ptr<T> newComponent = std::make_shared<T>(this, std::forward<ARGS>(args)...);
 
         // get a weak ptr and add it to components
         std::weak_ptr<T> componentPtr(newComponent);
-        componentsToInitialize.push_back(componentPtr);
 
         components_.push_back(newComponent);
+        componentsToStart_.push_back(newComponent);
+
         return componentPtr;
     }
 
-    template<is_component T>
+    template<IsComponent T>
     std::weak_ptr<T> getComponent() {
         // loop until
         for (const auto& component : components_) {
@@ -57,13 +54,13 @@ public:
             }
         }
         // nothing was found
-        return std::weak_ptr<T> {};
+        return std::weak_ptr<T>{};
     }
 
-    template<is_component T>
+    template<IsComponent T>
     std::vector<std::weak_ptr<T>> getComponents() {
         // same as getComponent only it adds it to a vector then returns it
-        std::vector<std::weak_ptr<T>> foundComponents(components_.size());
+        std::vector<std::weak_ptr<T>> foundComponents;
 
         for (const auto& component : components_) {
             if (auto comp = std::dynamic_pointer_cast<T>(component)) {
@@ -74,36 +71,35 @@ public:
         return foundComponents;
     }
 
-    template<is_component T>
+    template<IsComponent T>
     void removeComponent() {
-        for (auto it = components_.begin(); it != components_.end(); ++it) {
-            if (std::dynamic_pointer_cast<T>(*it)) {
-                components_.erase(it);
+        for (auto& component : components_) {
+            if (std::dynamic_pointer_cast<T>(component)) {
+                componentsToDestroy_.push_back(component);
                 break;
             }
         }
     }
 
-    template<is_component T>
+    template<IsComponent T>
     void removeAllComponents() {
-        for (auto it = components_.begin(); it != components_.end();) {
-            if (std::dynamic_pointer_cast<T>(*it)) {
-                it = components_.erase(it);
-            }
-            else {
-                ++it;
+        for (auto& component : components_) {
+            if (std::dynamic_pointer_cast<T>(component)) {
+                componentsToDestroy_.push_back(component);
             }
         }
     }
 
-    static Object* findObjectByName(const std::string& name);
-    static Object* findObjectByTag(int tag);
-    static std::vector<Object*> findObjectsByName(const std::string& name);
-    static std::vector<Object*> findObjectsByTag(int tag);
-
     void setActive(bool state);
     [[nodiscard]] bool getActive() const;
-};
 
-inline std::vector<Object*> allObjects;
-inline std::vector<Object*> objectsToDelete;
+    // fine to use raw ptr as object is "owned" by scene
+    Scene* scene = nullptr;
+
+private:
+    bool enabled_ = true;
+    std::vector<std::shared_ptr<Component>> components_;
+
+    std::vector<std::shared_ptr<Component>> componentsToDestroy_;
+    std::vector<std::shared_ptr<Component>> componentsToStart_;
+};

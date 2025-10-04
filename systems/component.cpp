@@ -1,4 +1,6 @@
 #include "component.h"
+
+#include "../object.h"
 #include "tweens/tween.h"
 
 Component::Component(Object* owner) {

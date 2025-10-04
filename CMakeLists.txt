@@ -73,7 +73,8 @@ add_executable(OpenGL components/componentExample.cpp components/componentExampl
         "systems/opengl wrappers/ShaderProgram.h"
         "systems/opengl wrappers/Shader.cpp"
         "systems/opengl wrappers/Shader.h"
-        exceptions/initializationException.h
+        scene.cpp
+        scene.h
 )
 
 # add include directory
