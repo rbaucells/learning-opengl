@@ -24,13 +24,11 @@ void Object::manageStarts() {
     componentsToStart_.clear();
 }
 void Object::manageDestructions() {
-    if (enabled_) {
-        for (const auto& componentPtr : componentsToDestroy_) {
-            componentPtr->onDisable();
-        }
-    }
-
     for (const auto& comp : componentsToDestroy_) {
+        if (enabled_) {
+            comp->onDisable();
+        }
+
         comp->onDestroy();
     }
 
@@ -84,30 +82,25 @@ void Object::lateUpdate(const float deltaTime) const {
     }
 }
 
-void Object::destroy() {
-    auto mePtr = shared_from_this();
-    scene->objectsToDestroy_.push_back(mePtr);
+void Object::queueDestruction() {
+    scene->removeObject(shared_from_this());
 }
 
-void Object::destroyImmediately() {
-    // we need to deactivate before destroying
-    if (enabled_) {
-        for (const auto& comp : components_) {
-            comp->onDisable();
+void Object::removeComponent(const std::shared_ptr<Component>& compPtr) {
+    // if its not alr in there
+    if (std::ranges::find(componentsToDestroy_, compPtr) != componentsToDestroy_.end()) {
+        return;
+    }
+
+    componentsToDestroy_.push_back(compPtr);
+}
+
+void Object::removeComponentBy(const std::function<bool(const Component&)>& predicate) {
+    for (auto& comp : components_) {
+        if (predicate(*comp)) {
+            removeComponent(comp);
         }
-
-        transform.onDisable();
     }
-
-    for (const auto& comp : components_) {
-        comp->onDestroy();
-    }
-
-    transform.onDestroy();
-
-    components_.clear();
-    componentsToDestroy_.clear();
-    componentsToStart_.clear();
 }
 
 void Object::setActive(const bool state) {

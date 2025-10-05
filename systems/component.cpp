@@ -26,3 +26,7 @@ void Component::manageTweens(const float deltaTime) {
         }
     }
 }
+
+void Component::queueDestruction() {
+    object->removeComponent(shared_from_this());
+}

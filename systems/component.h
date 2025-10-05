@@ -3,8 +3,8 @@
 #include "workQueue.h"
 #include "tweens/tween.h"
 
-template<typename TWEEN_TYPE>
-concept DerivesFromTweenBase = std::is_base_of_v<TweenBase, TWEEN_TYPE>;
+template<typename T>
+concept DerivesFromTweenBase = std::is_base_of_v<TweenBase, T>;
 
 template<typename T>
 concept IsComponent = std::is_base_of_v<Component, T>;
@@ -34,11 +34,13 @@ public:
 
     virtual ~Component() = default;
 
-    template<DerivesFromTweenBase TWEEN_TYPE>
-    std::weak_ptr<TWEEN_TYPE> addTween(std::shared_ptr<TWEEN_TYPE> tween) {
+    template<DerivesFromTweenBase T>
+    std::weak_ptr<T> addTween(std::shared_ptr<T> tween) {
         tweens_.push_back(tween);
         return tween;
     }
+
+    void queueDestruction();
 
     // fine to use raw ptr as component is "owned" by object
     Object* object = nullptr;

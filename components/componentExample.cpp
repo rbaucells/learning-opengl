@@ -1,6 +1,7 @@
 #include "componentExample.h"
 
 #include "../object.h"
+#include "../systems/input.h"
 
 ComponentExample::ComponentExample(Object* owner) : Component(owner) {
     printf("Constructor\n");
@@ -8,12 +9,12 @@ ComponentExample::ComponentExample(Object* owner) : Component(owner) {
 
 void ComponentExample::awake() {
     printf("Awake\n");
+
+    leftClickSubscription_ = leftClickEvent->subscribe(this, &ComponentExample::onLeftClick);
 }
 
 void ComponentExample::start() {
     printf("Start\n");
-
-    object->destroy();
 }
 
 void ComponentExample::onEnable() {
@@ -21,15 +22,15 @@ void ComponentExample::onEnable() {
 }
 
 void ComponentExample::update(float deltaTime) {
-    printf("Update\n");
+    // printf("Update\n");
 }
 
 void ComponentExample::lateUpdate(float deltaTime) {
-    printf("LateUpdate\n");
+    // printf("LateUpdate\n");
 }
 
 void ComponentExample::fixedUpdate(float fixedDeltaTime) {
-    printf("FixedUpdate\n");
+    // printf("FixedUpdate\n");
 }
 
 void ComponentExample::onDisable() {
@@ -38,6 +39,10 @@ void ComponentExample::onDisable() {
 
 void ComponentExample::onDestroy() {
     printf("OnDestroy\n");
+}
+
+void ComponentExample::onLeftClick(const bool state) {
+    this->object->transform.localPosition.x += 1;
 }
 
 ComponentExample::~ComponentExample() {

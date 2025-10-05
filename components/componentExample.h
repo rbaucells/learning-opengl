@@ -19,5 +19,10 @@ public:
     void onDisable() override;
     void onDestroy() override;
 
+
+    void onLeftClick(bool state);
+
     ~ComponentExample() override;
+private:
+    Subscription<bool> leftClickSubscription_;
 };

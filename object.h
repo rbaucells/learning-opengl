@@ -21,9 +21,9 @@ public:
     void fixedUpdate(float fixedDeltaTime) const;
     void lateUpdate(float deltaTime) const;
 
-    void destroy();
-    void destroyImmediately();
+    void queueDestruction();
 
+#pragma region Component stuff
     template<IsComponent T, typename... ARGS>
     std::weak_ptr<T> addComponent(ARGS&&... args) {
         // make the component
@@ -48,7 +48,7 @@ public:
             }
         }
         // nothing was found
-        return std::weak_ptr<T>{};
+        return std::weak_ptr<T>();
     }
 
     template<IsComponent T>
@@ -70,10 +70,14 @@ public:
         for (auto& component : components_) {
             if (std::dynamic_pointer_cast<T>(component)) {
                 componentsToDestroy_.push_back(component);
-                break;
+                return;
             }
         }
     }
+
+    void removeComponent(const std::shared_ptr<Component>& compPtr);
+
+    void removeComponentBy(const std::function<bool(const Component&)>& predicate);
 
     template<IsComponent T>
     void removeAllComponents() {
@@ -83,7 +87,7 @@ public:
             }
         }
     }
-
+#pragma endregion
     void setActive(bool state);
     [[nodiscard]] bool getActive() const;
 
@@ -100,5 +104,6 @@ private:
     Object(Scene* scene, std::string objectName, int objectTag, Vector2 pos, float rot, Vector2 scale);
     Object(Scene* scene, std::string objectName, int objectTag, Vector2 pos, float rot, Vector2 scale, Transform* parent);
 
+    // for access to object constructor and private fields to clean up
     friend class Scene;
 };

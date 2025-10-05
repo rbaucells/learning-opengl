@@ -224,7 +224,7 @@ std::vector<Transform *> Transform::getChildren() {
 
 void Transform::deleteAllChildren() {
     for (const Transform *child: children_) {
-        child->object->destroy();
+        child->object->queueDestruction();
     }
 
     children_.clear();
