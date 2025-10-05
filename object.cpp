@@ -6,10 +6,6 @@
 
 #include "scene.h"
 
-Object::Object(std::string objectName, const int objectTag, const Vector2 pos, const float rot, const Vector2 scale) : name(std::move(objectName)), tag(objectTag), transform(this, pos, rot, scale) {}
-
-Object::Object(std::string objectName, const int objectTag, Vector2 pos, float rot, Vector2 scale, Transform* parent) : name(std::move(objectName)), tag(objectTag), transform(this, pos, rot, scale, parent) {}
-
 void Object::manageStarts() {
     for (const auto& componentPtr : componentsToStart_) {
         componentPtr->awake();
@@ -27,7 +23,6 @@ void Object::manageStarts() {
 
     componentsToStart_.clear();
 }
-
 void Object::manageDestructions() {
     if (enabled_) {
         for (const auto& componentPtr : componentsToDestroy_) {
@@ -90,7 +85,8 @@ void Object::lateUpdate(const float deltaTime) const {
 }
 
 void Object::destroy() {
-    scene->objectsToDestroy_.push_back(shared_from_this());
+    auto mePtr = shared_from_this();
+    scene->objectsToDestroy_.push_back(mePtr);
 }
 
 void Object::destroyImmediately() {
@@ -134,3 +130,7 @@ void Object::setActive(const bool state) {
 bool Object::getActive() const {
     return enabled_;
 }
+
+Object::Object(Scene* scene, std::string objectName, const int objectTag, const Vector2 pos, const float rot, const Vector2 scale) : name(std::move(objectName)), tag(objectTag), transform(this, pos, rot, scale), scene(scene) {}
+
+Object::Object(Scene* scene, std::string objectName, const int objectTag, Vector2 pos, float rot, Vector2 scale, Transform* parent) : name(std::move(objectName)), tag(objectTag), transform(this, pos, rot, scale, parent), scene(scene) {}

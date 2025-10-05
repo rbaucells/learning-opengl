@@ -9,6 +9,7 @@
 
 #include "list.h"
 #include "object.h"
+#include "scene.h"
 #include "components/camera.h"
 #include "components/componentExample.h"
 #include "components/renderer/renderer.h"
@@ -45,42 +46,7 @@ void debugErrorCallback(GLenum source, GLenum type, GLuint id, const GLenum seve
 };
 
 // declarations
-void initializeObjects();
-void destroyObjects();
 void drawCalls();
-
-void initializeObjects() {
-    // if there are some components left to be "started", start em and remove them from the queueueue
-    if (!componentsToInitialize.empty()) {
-        for (auto it = componentsToInitialize.begin(); it != componentsToInitialize.end();) {
-            if (const auto comp = it->lock()) {
-                comp->awake();
-                ++it;
-            }
-            else {
-                it = componentsToInitialize.erase(it);
-            }
-        }
-
-        // if the object is supposed to be active, call the onEnable
-        for (const auto& component : componentsToInitialize) {
-            if (auto comp = component.lock()) {
-                if (comp->object->getActive()) {
-                    comp->onEnable();
-                }
-            }
-        }
-
-        // start
-        for (const auto& component : componentsToInitialize) {
-            if (auto comp = component.lock()) {
-                comp->start();
-            }
-        }
-
-        componentsToInitialize.clear();
-    }
-}
 
 int main() {
     // when we get an glfwError, lmk
@@ -116,33 +82,35 @@ int main() {
     std::shared_ptr<Texture> spriteTexture = std::make_shared<Texture>("/Users/ricardito/Projects/learning-opengl/res/textures/super-mario-transparent-background-20.png", GL_CLAMP, true);
     std::shared_ptr<Texture> spriteSheetTexture = std::make_shared<Texture>("/Users/ricardito/Projects/learning-opengl/res/textures/f1058a91de91f29cd65527cf97cab26b861de9b5_2_1380x896.png", GL_CLAMP, true);
 
-    Object camera("mainCamera", 69, {0, 0}, 0, {1, 1});
+    Scene scene;
 
-    camera.addComponent<Camera>();
-    camera.addComponent<AudioListener>();
+    auto cameraObject = scene.addObject("mainCamera", 69, {0, 0}, 0, {1, 1});
+    cameraObject->addComponent<Camera>();
+    cameraObject->addComponent<AudioListener>();
 
-    std::vector<Vertex> vertices = {
-        {{2, 2}, {1, 1}}, // top right
-        {{-2, 2}, {0, 1}}, // top left
-        {{-2, -2}, {0, 0}}, // bottom left
-        {{2, -2}, {1, 0}} // bottom right
-    };
-
-    std::vector<unsigned int> indices = {
-        0, 1, 2,
-        2, 3, 0
-    };
-
-    Object square("square", 0, {0, 0}, 0, {1, 1});
-    square.addComponent<ComponentExample>();
+    auto square =  scene.addObject("square", 0, {0, 0}, 0, {1, 1});
+    square->addComponent<ComponentExample>();
 
     // renderers
-    if constexpr (constexpr int renderer = 2; renderer == 0)
-        square.addComponent<CustomRenderer>(vertices, indices, customTexture, mainProgram, 0);
+    if constexpr (constexpr int renderer = 2; renderer == 0) {
+        std::vector<Vertex> vertices = {
+            {{2, 2}, {1, 1}}, // top right
+            {{-2, 2}, {0, 1}}, // top left
+            {{-2, -2}, {0, 0}}, // bottom left
+            {{2, -2}, {1, 0}} // bottom right
+        };
+
+        std::vector<unsigned int> indices = {
+            0, 1, 2,
+            2, 3, 0
+        };
+
+        square->addComponent<CustomRenderer>(vertices, indices, customTexture, mainProgram, 0);
+    }
     else if constexpr (renderer == 1)
-        square.addComponent<SpriteRenderer>(100, spriteTexture, mainProgram, 0);
+        square->addComponent<SpriteRenderer>(100, spriteTexture, mainProgram, 0);
     else if constexpr (renderer == 2)
-        square.addComponent<SpriteSheetRenderer>(69, 69, 69, 0, spriteSheetTexture, mainProgram, 0);
+        square->addComponent<SpriteSheetRenderer>(69, 69, 69, 0, spriteSheetTexture, mainProgram, 0);
 
     // empty the buffers to make sure its drawing properly
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
@@ -169,7 +137,7 @@ int main() {
         std::string string = "Game Engine FPS: " + std::to_string(static_cast<int>(1 / deltaTime));;
         Window::mainWindow->setWindowTitle(string);
 
-        initializeObjects();
+        Scene::mainScene->manageStarts();
 
         GLFWgamepadstate currentGamepadState;
         glfwGetGamepadState(GLFW_JOYSTICK_1, &currentGamepadState);
@@ -181,7 +149,7 @@ int main() {
         while (accumulator >= FIXED_UPDATE_INTERVAL_IN_SECONDS) {
             float fixedDeltaTime = std::chrono::duration<float>(std::chrono::high_resolution_clock::now() - lastFixedUpdateTime).count();
 
-            fixedUpdateEventPublisher->invoke(fixedDeltaTime);
+            Scene::mainScene->fixedUpdate(fixedDeltaTime);
 
             lastFixedUpdateTime = std::chrono::high_resolution_clock::now();
             accumulator -= FIXED_UPDATE_INTERVAL_IN_SECONDS;
@@ -189,12 +157,12 @@ int main() {
 
         glClear(GL_COLOR_BUFFER_BIT);
 
-        updateEventPublisher->invoke(deltaTime);
-        lateUpdateEventPublisher->invoke(deltaTime);
+        Scene::mainScene->update(deltaTime);
+        Scene::mainScene->lateUpdate(deltaTime);
 
         drawCalls();
 
-        destroyObjects();
+        Scene::mainScene->manageDestructions();
 
         window.swapBuffers();
         glfwPollEvents();
@@ -215,19 +183,11 @@ int main() {
     exit(EXIT_SUCCESS);
 }
 
-void destroyObjects() {
-    for (Object* object : objectsToDelete) {
-        object->destroyImmediately();
-        // delete object; <- put this when objects moved to heap
-    }
-
-    objectsToDelete.clear();
-}
-
 void drawCalls() {
     // iterate through all the renderers in reverse. AKA: from back to front
     const Matrix<4, 4> cameraViewMatrix = Camera::mainCamera->getViewMatrix();
     const Matrix<4, 4> projectionViewMatrix = Window::mainWindow->getProjectionMatrix();
+
     for (auto& [layer, publisher] : std::ranges::reverse_view(renderersDrawPublishers)) {
         publisher->invoke(cameraViewMatrix, projectionViewMatrix);
     }

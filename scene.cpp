@@ -1,5 +1,7 @@
 #include "scene.h"
 
+#include <utility>
+
 #include "object.h"
 
 Scene::Scene(const bool main) {
@@ -38,6 +40,14 @@ void Scene::manageDestructions() {
     }
 
     objectsToDestroy_.clear();
+}
+
+std::shared_ptr<Object> Scene::addObject(const std::string& objectName, const int objectTag, const Vector2 pos, const float rot, const Vector2 scale) {
+    return objects_.emplace_back(new Object(this, objectName, objectTag, pos, rot, scale));
+}
+
+std::shared_ptr<Object> Scene::addObject(const std::string& objectName, const int objectTag, const Vector2 pos, const float rot, const Vector2 scale, Transform* parent) {
+    return objects_.emplace_back(new Object(this, objectName, objectTag, pos, rot, scale, parent));
 }
 
 void Scene::setMain() {

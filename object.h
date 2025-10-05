@@ -7,18 +7,12 @@
 
 class Scene;
 
-template<typename T>
-concept IsComponent = std::is_base_of_v<Component, T>;
-
-class Object : std::enable_shared_from_this<Object> {
+class Object : public std::enable_shared_from_this<Object> {
 public:
     const std::string name;
     const int tag;
 
     Transform transform;
-
-    Object(std::string objectName, int objectTag, Vector2 pos, float rot, Vector2 scale);
-    Object(std::string objectName, int objectTag, Vector2 pos, float rot, Vector2 scale, Transform* parent);
 
     void manageStarts();
     void manageDestructions();
@@ -102,4 +96,9 @@ private:
 
     std::vector<std::shared_ptr<Component>> componentsToDestroy_;
     std::vector<std::shared_ptr<Component>> componentsToStart_;
+
+    Object(Scene* scene, std::string objectName, int objectTag, Vector2 pos, float rot, Vector2 scale);
+    Object(Scene* scene, std::string objectName, int objectTag, Vector2 pos, float rot, Vector2 scale, Transform* parent);
+
+    friend class Scene;
 };

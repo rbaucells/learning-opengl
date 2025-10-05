@@ -6,14 +6,18 @@ class SpriteSheetRenderer;
 
 class ComponentExample final : public Component {
 public:
-    using Component::Component;
+    explicit ComponentExample(Object* owner);
 
+    void awake() override;
     void start() override;
-    void onMouseInput(bool state) const;
+    void onEnable() override;
 
-private:
-    std::weak_ptr<SpriteSheetRenderer> spriteSheetRendererWeakPtr_;
-    std::weak_ptr<TweenBase> localPositionTweenWeakPtr_;
+    void update(float deltaTime) override;
+    void lateUpdate(float deltaTime) override;
+    void fixedUpdate(float fixedDeltaTime) override;
 
-    Subscription<bool> leftClickEventSubscription_;
+    void onDisable() override;
+    void onDestroy() override;
+
+    ~ComponentExample() override;
 };

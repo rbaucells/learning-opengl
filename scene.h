@@ -1,6 +1,9 @@
 #pragma once
 #include <vector>
 
+#include "transform.h"
+#include "math/vector2.h"
+
 class Object;
 
 class Scene {
@@ -13,6 +16,9 @@ public:
 
     void manageStarts() const;
     void manageDestructions();
+
+    std::shared_ptr<Object> addObject(const std::string& objectName, int objectTag, Vector2 pos, float rot, Vector2 scale);
+    std::shared_ptr<Object> addObject(const std::string& objectName, int objectTag, Vector2 pos, float rot, Vector2 scale, Transform* parent);
 
     void setMain();
 
