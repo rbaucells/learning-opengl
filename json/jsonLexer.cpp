@@ -157,6 +157,11 @@ std::u8string JsonLexer::readNumber() {
                 stream_.unget();
                 return result;
                 break;
+            case '\n':
+                line_++;
+                character_ = 0;
+                return result;
+                break;
             default:
                 throw LexerError(std::format("Invalid Character: '%c', where number is supposed to be (line: %d, char: %d)", c, line_, character_));
                 break;
