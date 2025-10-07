@@ -14,6 +14,7 @@ struct JsonToken {
         boolean, //
         string, //
         number, //
+        eof,
     };
 
     Type type = Type::null;

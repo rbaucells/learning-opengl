@@ -121,6 +121,7 @@ add_test(NAME curveTests COMMAND curveTests)
 add_executable(EventTests tests/eventTests.cpp systems/events.h)
 
 add_test(NAME EventTests COMMAND EventTests)
+
 add_executable(json json/jsonArray.cpp json/jsonArray.h
         json/jsonObject.h json/jsonObject.cpp
         json/jsonParser.h
@@ -130,3 +131,13 @@ add_executable(json json/jsonArray.cpp json/jsonArray.h
         json/jsonValue.h
         json/jsonToken.h
 )
+add_executable(JsonTests tests/jsonTests.cpp json/jsonArray.cpp json/jsonArray.h
+        json/jsonObject.h json/jsonObject.cpp
+        json/jsonParser.h
+        json/jsonParser.cpp
+        json/jsonLexer.cpp
+        json/jsonLexer.h
+        json/jsonValue.h
+        json/jsonToken.h)
+
+add_test(NAME JsonTests COMMAND JsonTests)

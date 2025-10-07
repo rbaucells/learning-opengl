@@ -19,17 +19,19 @@ public:
         std::string messege;
     };
 
-    explicit JsonLexer(std::ifstream fileStream);
+    JsonLexer(std::istream& ss);
 
     JsonToken nextToken();
 
 private:
-    std::istringstream stream_;
+    std::istream& stream_;
 
-    int line_;
-    int character_;
+    int line_ = 1;
+    int character_ = 0;
 
     void throwIfNotExpected(const std::string& expected);
     std::u8string readString();
     std::u8string readNumber();
+
+    uint16_t readNext4HexBytesAsInt16();
 };
