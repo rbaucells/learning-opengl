@@ -12,7 +12,6 @@ JsonObject::JsonObject(const JsonValue& val) {
     *this = std::get<JsonObject>(val.value);
 }
 
-
 void JsonObject::putNumberField(const std::string& name, double value) {
     data_.insert_or_assign(name, JsonValue(JsonValue::Type::number, value));
 }
@@ -77,7 +76,6 @@ bool JsonObject::getIsNullField(const std::string& name) const {
     return true;
 }
 
-
 JsonArray JsonObject::getArrayField(std::string name) const {
     const auto jsonValue = data_.at(name);
 
@@ -88,5 +86,18 @@ JsonArray JsonObject::getArrayField(std::string name) const {
 }
 
 std::string JsonObject::toString() const {
-    return "";
+    std::string result = "{\n";
+
+    for (const auto& [key, value] : data_) {
+        result += "\"" + key + "\": " + value.valueToString() + ",\n";
+    }
+
+    // get rid of the last , and \n
+    result.pop_back();
+    result.pop_back();
+
+    // put back the \n and the }
+    result += "\n}";
+
+    return result;
 }

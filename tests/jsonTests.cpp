@@ -140,11 +140,9 @@ int main() {
         if (value.type == JsonValue::Type::object) {
             JsonObject obj = value;
 
-            auto array = obj.getArrayField("Array");
+            obj.putNumberField("This is a new number that i added cuz yes", 21);
 
-            std::cout << array.toString();
+            std::cout << obj.toString();
         }
-
-        std::cout << value.typeToString();
     }
 }

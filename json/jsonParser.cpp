@@ -138,6 +138,7 @@ double JsonParser::stringToDouble(const std::string& string) {
             exponentSign = -1;
             i++;
         }
+
         while (string[i] >= '0' && string[i] <= '9') {
             exponent = exponent * 10 + (string[i] - '0');
             i++;

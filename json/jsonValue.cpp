@@ -22,7 +22,7 @@ std::string JsonValue::typeToString() const {
 std::string JsonValue::valueToString() const {
     switch (type) {
         case Type::string:
-            return std::get<std::string>(value);
+            return "\"" + std::get<std::string>(value) + "\"";
         case Type::object:
             return std::get<JsonObject>(value).toString();
         case Type::boolean: {
