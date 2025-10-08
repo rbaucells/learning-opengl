@@ -19,4 +19,5 @@ struct JsonValue {
     std::variant<std::monostate, bool, std::string, double, JsonObject, JsonArray> value;
 
     [[nodiscard]] std::string typeToString() const;
+    [[nodiscard]] std::string valueToString() const;
 };

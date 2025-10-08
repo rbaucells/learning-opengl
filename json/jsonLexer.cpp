@@ -149,7 +149,7 @@ std::string JsonLexer::readString() {
             case '"':
                 return result;
 
-            // someones trying to escape something
+            // someone's trying to escape something
             case '\\': {
                 const int nextCharacterInt = stream_.get();
 
@@ -238,16 +238,16 @@ std::string JsonLexer::readString() {
             default:
                 int count;
 
-                if ((c & 0x80) == 0x00) { // its a standard 1 byte ASCII
+                if ((c & 0x80) == 0x00) { // it's a standard 1 byte ASCII
                     count = 1;
                 }
-                else if ((c & 0xE0) == 0xC0) { // its a 2 byte character
+                else if ((c & 0xE0) == 0xC0) { // it's a 2 byte character
                     count = 2;
                 }
-                else if ((c & 0xF0) == 0xE0) { // its a 3 byte character
+                else if ((c & 0xF0) == 0xE0) { // it's a 3 byte character
                     count = 3;
                 }
-                else if ((c & 0xF8) == 0xF0) { // its a 4 byte character
+                else if ((c & 0xF8) == 0xF0) { // it's a 4 byte character
                     count = 4;
                 }
                 else {
@@ -261,7 +261,13 @@ std::string JsonLexer::readString() {
                         throw LexerError("Stream closed while reading multi-byte character");
                     }
 
-                    const char continuationByte = stream_.get();
+                    const int continuationByteInt = stream_.get();
+
+                    if (continuationByteInt == -1) {
+                        throw LexerError("Reached end of file while expecting continuation byte");
+                    }
+
+                    const char continuationByte = static_cast<char>(continuationByteInt);
 
                     if ((continuationByte & 0xC0) != 0x80) {
                         throw LexerError("Invalid UTF-8 continuation byte detected");
@@ -325,23 +331,30 @@ uint16_t JsonLexer::readNext4HexBytesAsInt16() {
     uint16_t result = 0;
 
     for (int i = 0; i < 4; ++i) {
-        char c = stream_.get();
+        const int charAsInt = stream_.get();
+
+        if (charAsInt == -1) {
+            throw LexerError("Reached eof while reading next 4 bytes as int16");
+        }
+
+        const char c = static_cast<char>(charAsInt);
+
         character_++;
 
         if (!stream_.good()) {
             throw LexerError("Stream closed while reading next 4 hex bytes as int");
         }
 
-        result <<= 4; // shift left by 4 bits because each digit in hex is a 4 bits
+        result <<= 4; // shift left by 4 bits because each digit in hex is 4 bits
 
-        // if its a digit as a char
+        // if it's a digit as a char
         if (c >= '0' && c <= '9') {
             result |= (c - '0');
         }
-        else if (c >= 'a' && c <= 'f') { // if its an lowercase character
+        else if (c >= 'a' && c <= 'f') { // if it's a lowercase character
             result |= (c - 'a' + 10);
         }
-        else if (c >= 'A' && c <= 'F') { // if its an uppercase character
+        else if (c >= 'A' && c <= 'F') { // if it's an uppercase character
             result |= (c - 'A' + 10);
         }
         else {

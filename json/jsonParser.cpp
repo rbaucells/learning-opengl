@@ -64,7 +64,7 @@ JsonObject JsonParser::parseObject() {
         JsonToken seperator = lexer_.nextToken();
 
         if (seperator.type != JsonToken::Type::colon) {
-            throw ParserError(std::format("JsonObject key not followed by token of type sperator, got: {}", seperator.typeToString()));
+            throw ParserError(std::format("JsonObject key not followed by token of type seperator, got: {}", seperator.typeToString()));
         }
 
         JsonValue value = parseValue();
@@ -138,7 +138,6 @@ double JsonParser::stringToDouble(const std::string& string) {
             exponentSign = -1;
             i++;
         }
-
         while (string[i] >= '0' && string[i] <= '9') {
             exponent = exponent * 10 + (string[i] - '0');
             i++;

@@ -137,6 +137,14 @@ int main() {
 
         JsonValue value = parser.parseValue();
 
+        if (value.type == JsonValue::Type::object) {
+            JsonObject obj = value;
+
+            auto array = obj.getArrayField("Array");
+
+            std::cout << array.toString();
+        }
+
         std::cout << value.typeToString();
     }
 }

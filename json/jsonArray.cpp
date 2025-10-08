@@ -115,4 +115,16 @@ void JsonArray::putValue(int index, const JsonValue& value) {
 }
 
 
-std::string JsonArray::toString() const {}
+std::string JsonArray::toString() const {
+    std::string result = "[\n";
+
+    for (const JsonValue& value : data_) {
+        result += '\t' + value.valueToString() + ",\n";
+    }
+
+    // get rid of that last comma we put
+    result.pop_back();
+    result += "\n]";
+
+    return result;
+}

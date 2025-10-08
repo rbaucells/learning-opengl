@@ -4,15 +4,24 @@
 
 #include "jsonValue.h"
 
+JsonObject::JsonObject() {
+    this->data_ = {};
+}
+
+JsonObject::JsonObject(const JsonValue& val) {
+    *this = std::get<JsonObject>(val.value);
+}
+
+
 void JsonObject::putNumberField(const std::string& name, double value) {
     data_.insert_or_assign(name, JsonValue(JsonValue::Type::number, value));
 }
 
-void JsonObject::putBoolField(const std::string& name, bool value) {
+void JsonObject::putStringField(const std::string& name, std::string value) {
     data_.insert_or_assign(name, JsonValue(JsonValue::Type::number, value));
 }
 
-void JsonObject::putStringField(const std::string& name, std::string value) {
+void JsonObject::putBoolField(const std::string& name, bool value) {
     data_.insert_or_assign(name, JsonValue(JsonValue::Type::number, value));
 }
 
@@ -41,6 +50,15 @@ double JsonObject::getNumberField(std::string name) const {
     return std::get<double>(jsonValue.value);
 }
 
+std::string JsonObject::getStringField(std::string name) const {
+    const auto jsonValue = data_.at(name);
+
+    if (jsonValue.type != JsonValue::Type::string)
+        throw JsonObjectError(std::format("Tried to access json object field '{}' as a string, real type was {}", name, jsonValue.typeToString()));
+
+    return std::get<std::string>(jsonValue.value);
+}
+
 bool JsonObject::getBoolField(std::string name) const {
     const auto jsonValue = data_.at(name);
 
@@ -59,25 +77,16 @@ bool JsonObject::getIsNullField(const std::string& name) const {
     return true;
 }
 
-std::string JsonObject::getStringField(std::string name) const {
-    const auto jsonValue = data_.at(name);
-
-    if (jsonValue.type != JsonValue::Type::string)
-        throw JsonObjectError(std::format("Tried to access json object field '{}' as a string, real type was {}", name, jsonValue.typeToString()));
-
-    return std::get<std::string>(jsonValue.value);
-}
-
 
 JsonArray JsonObject::getArrayField(std::string name) const {
     const auto jsonValue = data_.at(name);
 
-    if (jsonValue.type != JsonValue::Type::string)
+    if (jsonValue.type != JsonValue::Type::array)
         throw JsonObjectError(std::format("Tried to access json object field '{}' as a jsonArray, real type was {}", name, jsonValue.typeToString()));
 
     return std::get<JsonArray>(jsonValue.value);
 }
 
 std::string JsonObject::toString() const {
-
+    return "";
 }

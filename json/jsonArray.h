@@ -10,14 +10,14 @@ class JsonArray {
 public:
     class JsonArrayError final : public std::exception {
     public:
-        explicit JsonArrayError(std::string messege) : messege(std::move(messege)) {};
+        explicit JsonArrayError(std::string message) : message_(std::move(message)) {};
 
         [[nodiscard]] const char* what() const noexcept override {
-            return messege.c_str();
+            return message_.c_str();
         }
 
     private:
-        std::string messege;
+        std::string message_;
     };
 
     void putNumber(double value);

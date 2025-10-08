@@ -13,14 +13,14 @@ class JsonParser {
 public:
     class ParserError final : public std::exception {
     public:
-        explicit ParserError(std::string message) : messege(std::move(message)) {};
+        explicit ParserError(std::string message) : message_(std::move(message)) {};
 
         [[nodiscard]] const char* what() const noexcept override {
-            return messege.c_str();
+            return message_.c_str();
         }
 
     private:
-        std::string messege;
+        std::string message_;
     };
 
     explicit JsonParser(JsonLexer& lexer) : lexer_(lexer) {}

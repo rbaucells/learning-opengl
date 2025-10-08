@@ -1,7 +1,7 @@
 #pragma once
 #include <fstream>
-#include <sstream>
 #include <string>
+#include <utility>
 
 struct JsonToken;
 
@@ -9,9 +9,9 @@ class JsonLexer {
 public:
     class LexerError final : public std::exception {
     public:
-        explicit LexerError(const std::string& messege) : messege(messege) {};
+        explicit LexerError(std::string  messege) : messege(std::move(messege)) {};
 
-        const char* what() const noexcept override {
+        [[nodiscard]] const char* what() const noexcept override {
             return messege.c_str();
         }
 

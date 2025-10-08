@@ -10,15 +10,18 @@ class JsonObject {
 public:
     class JsonObjectError final : public std::exception {
     public:
-        explicit JsonObjectError(std::string messege) : messege(std::move(messege)) {};
+        explicit JsonObjectError(std::string message) : message_(std::move(message)) {};
 
         [[nodiscard]] const char* what() const noexcept override {
-            return messege.c_str();
+            return message_.c_str();
         }
 
     private:
-        std::string messege;
+        std::string message_;
     };
+
+    JsonObject();
+    JsonObject(const JsonValue& val);
 
     void putNumberField(const std::string& name, double value);
     void putStringField(const std::string& name, std::string value);
