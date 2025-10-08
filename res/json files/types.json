@@ -19,7 +19,7 @@
 
     {
       "String inside an object inside an array inside an object": "hi",
-      "Another Number": 12e-5
+      "Another Number": 100e-2
     }
   ]
 }

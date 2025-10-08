@@ -14,9 +14,11 @@ struct JsonToken {
         boolean, //
         string, //
         number, //
-        eof,
+        eof //
     };
 
     Type type = Type::null;
-    std::u8string value;
+    std::string value;
+
+    std::string typeToString() const;
 };

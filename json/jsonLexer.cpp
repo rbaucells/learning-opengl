@@ -1,7 +1,6 @@
 #include "jsonLexer.h"
-#include <sstream>
-#include "jsonToken.h"
 #include <format>
+#include "jsonToken.h"
 
 constexpr int UTF8_MIN_NUMBER_DECIMAL_VALUE = 48;
 constexpr int UTF8_MAX_NUMBER_DECIMAL_VALUE = 57;
@@ -16,23 +15,25 @@ JsonToken JsonLexer::nextToken() {
     JsonToken jsonToken;
 
     do {
-        const char8_t c = stream_.get();
+        const int characterInt = stream_.get();
 
-        if (c == 0 || stream_.eof()) {
+        if (characterInt == -1 || stream_.eof()) {
             jsonToken.type = JsonToken::Type::eof;
-            jsonToken.value = u8"";
+            jsonToken.value = "";
 
             return jsonToken;
         }
 
-        if (c == '\n') {
-            line_++;
-            character_ = 0;
-            continue;
-        }
+        char c = static_cast<char>(characterInt);
 
-        if (c == ' ' || c == '\t' || c == '\r') {
-            character_++;
+        if (c == ' ' ||  c == '\n' || c == '\r' || c == '\t') {
+            if (c == '\n' || c == '\r') {
+                line_++;
+                character_ = 0;
+            }
+            else {
+                character_++;
+            }
             continue;
         }
 
@@ -42,36 +43,36 @@ JsonToken JsonLexer::nextToken() {
             // objects and arrays
             case '{':
                 jsonToken.type = JsonToken::Type::start_object;
-                jsonToken.value = u8"{";
+                jsonToken.value = "{";
                 return jsonToken;
             case '}':
                 jsonToken.type = JsonToken::Type::end_object;
-                jsonToken.value = u8"}";
+                jsonToken.value = "}";
                 return jsonToken;
             case '[':
                 jsonToken.type = JsonToken::Type::start_array;
-                jsonToken.value = u8"[";
+                jsonToken.value = "[";
                 return jsonToken;
             case ']':
                 jsonToken.type = JsonToken::Type::end_array;
-                jsonToken.value = u8"]";
+                jsonToken.value = "]";
                 return jsonToken;
 
             // special words (true, false, null)
             case 't':
                 throwIfNotExpected("rue");
                 jsonToken.type = JsonToken::Type::boolean;
-                jsonToken.value = u8"true";
+                jsonToken.value = "true";
                 return jsonToken;
             case 'f':
                 throwIfNotExpected("alse");
                 jsonToken.type = JsonToken::Type::boolean;
-                jsonToken.value = u8"false";
+                jsonToken.value = "false";
                 return jsonToken;
             case 'n':
                 throwIfNotExpected("ull");
                 jsonToken.type = JsonToken::Type::null;
-                jsonToken.value = u8"null";
+                jsonToken.value = "null";
                 return jsonToken;
 
             // number stuff
@@ -109,80 +110,55 @@ JsonToken JsonLexer::nextToken() {
             // default
             default:
                 throw LexerError(std::format("Unexpected character at (line %d, char %d)", line_, character_));
-                break;
         }
     }
     while (stream_.good());
 
     jsonToken.type = JsonToken::Type::eof;
-    jsonToken.value = u8"";
+    jsonToken.value = "";
 
     return jsonToken;
 }
 
 void JsonLexer::throwIfNotExpected(const std::string& expected) {
     for (const char expectedChar : expected) {
-        if (const char curChar = stream_.get(); curChar != expectedChar)
-            throw LexerError(std::format("Got unexpected char at (line: %d, char: %d) Expected: '%c', Got '%c'", line_, character_, curChar, expectedChar));
+        const int curCharInt = stream_.get();
+
+        if (curCharInt == -1)
+            throw LexerError("Got eof char while expecting string");
 
         character_++;
+
+        if (const char curChar = static_cast<char>(curCharInt); curChar != expectedChar)
+            throw LexerError(std::format("Got unexpected char at (line: {}, char: {}) Expected: '{}', Got '{}'", line_, character_, static_cast<char>(curChar), static_cast<char>(expectedChar)));
     }
 }
 
-std::u8string JsonLexer::readNumber() {
-    std::u8string result;
+std::string JsonLexer::readString() {
+    std::string result;
 
     while (stream_.good()) {
-        switch (const char c = stream_.get()) {
-            case '+':
-            case '-':
-            case '1':
-            case '2':
-            case '3':
-            case '4':
-            case '5':
-            case '6':
-            case '7':
-            case '8':
-            case '9':
-            case '0':
-            case 'e':
-            case 'E':
-            case '.':
-                result += c;
-                character_++;
-                break;
-            case ',':
-            case ' ':
-                stream_.unget();
-                return result;
-                break;
-            case '\n':
-                line_++;
-                character_ = 0;
-                return result;
-                break;
-            default:
-                throw LexerError(std::format("Invalid Character: '%c', where number is supposed to be (line: %d, char: %d)", c, line_, character_));
-                break;
-        }
-    }
+        const int characterInt = stream_.get();
 
-    return result;
-}
+        // eof
+        if (characterInt == -1)
+            return result;
 
-std::u8string JsonLexer::readString() {
-    std::u8string result;
-
-    while (stream_.good()) {
-        switch (const char c = stream_.get()) {
+        character_++;
+        switch (const char c = static_cast<char>(characterInt)) {
             case '"':
                 return result;
-                break;
 
             // someones trying to escape something
-            case '\\':
-                switch (char nextChar = stream_.get()) {
+            case '\\': {
+                const int nextCharacterInt = stream_.get();
+
+                // eof
+                if (nextCharacterInt == -1)
+                    return result += c;
+
+                character_++;
+                switch (static_cast<char>(nextCharacterInt)) {
                     case '\"':
                         result += '\"';
                         break;
@@ -212,6 +188,8 @@ std::u8string JsonLexer::readString() {
                             if (stream_.get() != '\\' || stream_.get() != 'u') {
                                 throw LexerError("High surrogate not followed by a valid \\u escape sequence");
                             }
+                            character_ += 2;
+
                             if (const uint32_t lowSurrogate = readNext4HexBytesAsInt16(); lowSurrogate >= 0xDC00 && lowSurrogate <= 0xDFFF) {
                                 // apply the formula: U = 0x10000 + (H - 0xD800) * 0x400 + (L - 0xDC00)
                                 uint32_t highBits = (codePoint - 0xD800) * 0x400; // 0x400 = 1024
@@ -255,6 +233,7 @@ std::u8string JsonLexer::readString() {
                         throw LexerError("Unknown escaped character");
                 }
                 break;
+            }
 
             default:
                 int count;
@@ -282,7 +261,7 @@ std::u8string JsonLexer::readString() {
                         throw LexerError("Stream closed while reading multi-byte character");
                     }
 
-                    const char8_t continuationByte = stream_.get();
+                    const char continuationByte = stream_.get();
 
                     if ((continuationByte & 0xC0) != 0x80) {
                         throw LexerError("Invalid UTF-8 continuation byte detected");
@@ -298,11 +277,56 @@ std::u8string JsonLexer::readString() {
     throw LexerError("Stream closed while reading string");
 }
 
+std::string JsonLexer::readNumber() {
+    std::string result;
+
+    while (stream_.good()) {
+        const int characterInt = stream_.get();
+
+        if (characterInt == -1)
+            return result;
+
+        switch (const char c = static_cast<char>(characterInt)) {
+            case '+':
+            case '-':
+            case '1':
+            case '2':
+            case '3':
+            case '4':
+            case '5':
+            case '6':
+            case '7':
+            case '8':
+            case '9':
+            case '0':
+            case 'e':
+            case 'E':
+            case '.':
+                result += c;
+                character_++;
+                break;
+            case ',':
+            case ' ':
+                stream_.unget();
+                return result;
+            case '\n':
+                line_++;
+                character_ = 0;
+                return result;
+            default:
+                throw LexerError(std::format("Invalid Character: '%c', where number is supposed to be (line: %d, char: %d)", c, line_, character_));
+        }
+    }
+
+    return result;
+}
+
 uint16_t JsonLexer::readNext4HexBytesAsInt16() {
     uint16_t result = 0;
 
     for (int i = 0; i < 4; ++i) {
-        char8_t c = stream_.get();
+        char c = stream_.get();
+        character_++;
 
         if (!stream_.good()) {
             throw LexerError("Stream closed while reading next 4 hex bytes as int");

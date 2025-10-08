@@ -130,6 +130,8 @@ add_executable(json json/jsonArray.cpp json/jsonArray.h
         json/jsonLexer.h
         json/jsonValue.h
         json/jsonToken.h
+        json/jsonValue.cpp
+        json/jsonToken.cpp
 )
 add_executable(JsonTests tests/jsonTests.cpp json/jsonArray.cpp json/jsonArray.h
         json/jsonObject.h json/jsonObject.cpp
@@ -138,6 +140,8 @@ add_executable(JsonTests tests/jsonTests.cpp json/jsonArray.cpp json/jsonArray.h
         json/jsonLexer.cpp
         json/jsonLexer.h
         json/jsonValue.h
-        json/jsonToken.h)
+        json/jsonToken.h
+        json/jsonValue.cpp
+        json/jsonToken.cpp)
 
 add_test(NAME JsonTests COMMAND JsonTests)
