@@ -25,6 +25,7 @@ public:
 
     explicit JsonParser(JsonLexer& lexer) : lexer_(lexer) {}
 
+    JsonValue parseValue(JsonToken token);
     JsonValue parseValue();
 
 private:

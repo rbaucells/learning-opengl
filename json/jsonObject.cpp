@@ -1,7 +1,5 @@
 #include "jsonObject.h"
-
 #include <format>
-
 #include "jsonValue.h"
 
 JsonObject::JsonObject() {

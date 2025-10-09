@@ -20,6 +20,9 @@ public:
         std::string message_;
     };
 
+    JsonArray();
+    JsonArray(const JsonValue& val);
+
     void putNumber(double value);
     void putString(const std::string& value);
     void putBool(bool value);

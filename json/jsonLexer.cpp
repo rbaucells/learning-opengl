@@ -135,7 +135,7 @@ void JsonLexer::throwIfNotExpected(const std::string& expected) {
 }
 
 std::string JsonLexer::readString() {
-    std::string result;
+    std::string result = "";
 
     while (stream_.good()) {
         const int characterInt = stream_.get();
@@ -164,6 +164,9 @@ std::string JsonLexer::readString() {
                         break;
                     case '\\':
                         result += '\\';
+                        break;
+                    case '/':
+                        result += '/';
                         break;
                     case 'b':
                         result += '\b';
@@ -203,8 +206,8 @@ std::string JsonLexer::readString() {
                         else if (codePoint >= 0xDC00 && codePoint <= 0xDFFF) {
                             throw LexerError("Lone low surrogate found in \\u escape");
                         }
-                        // else the codePoint is not the surrogate stuff
 
+                        // else the codePoint is not the surrogate stuff
                         if (codePoint <= 0x7F) { // 1-byte
                             result += static_cast<char>(codePoint);
                         }
@@ -318,6 +321,10 @@ std::string JsonLexer::readNumber() {
             case '\n':
                 line_++;
                 character_ = 0;
+                return result;
+            case ']':
+            case '}':
+                stream_.unget();
                 return result;
             default:
                 throw LexerError(std::format("Invalid Character: '%c', where number is supposed to be (line: %d, char: %d)", c, line_, character_));

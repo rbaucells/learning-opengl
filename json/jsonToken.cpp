@@ -20,5 +20,7 @@ std::string JsonToken::typeToString() const {
             return "null";
         case Type::eof:
             return "eof";
+        default:
+            return "";
     }
 }

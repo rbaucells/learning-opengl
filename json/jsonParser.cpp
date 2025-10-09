@@ -4,9 +4,7 @@
 #include "jsonToken.h"
 #include "jsonValue.h"
 
-JsonValue JsonParser::parseValue() {
-    const JsonToken token = lexer_.nextToken();
-
+JsonValue JsonParser::parseValue(JsonToken token ) {
     JsonValue value;
 
     switch (token.type) {
@@ -43,6 +41,12 @@ JsonValue JsonParser::parseValue() {
         default:
             throw ParserError(std::format("Unexpected Token Type: {}", token.typeToString()));
     }
+}
+
+JsonValue JsonParser::parseValue() {
+    const JsonToken token = lexer_.nextToken();
+
+    return parseValue(token);
 }
 
 JsonObject JsonParser::parseObject() {
@@ -87,7 +91,13 @@ JsonArray JsonParser::parseArray() {
     JsonArray result;
 
     while (true) {
-        JsonValue value = parseValue();
+        const JsonToken token = lexer_.nextToken();
+
+        if (token.type == JsonToken::Type::end_array) {
+            return result;
+        }
+
+        JsonValue value = parseValue(token);
 
         result.putValue(value);
 

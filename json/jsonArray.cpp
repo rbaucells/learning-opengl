@@ -4,6 +4,14 @@
 
 #include "jsonValue.h"
 
+JsonArray::JsonArray() {
+    this->data_ = {};
+}
+
+JsonArray::JsonArray(const JsonValue& val) {
+    *this = std::get<JsonArray>(val.value);
+}
+
 double JsonArray::getNumber(const int index) const {
     auto jsonValue = data_.at(index);
 

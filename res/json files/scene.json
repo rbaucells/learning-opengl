@@ -1,0 +1,44 @@
+{
+  "name": "MyScene1",
+
+  "fps": 60,
+  "fixedUpdatesPerSecond": 60,
+  "windowSize": 5,
+
+  "objects": [
+    {
+      "name": "MyObject1",
+      "tag": 0,
+
+      "transform": {
+        "global position": {
+          "x": 0,
+          "y": 0
+        },
+
+        "global rotation": 0,
+
+        "global scale": {
+          "x": 1,
+          "y": 1
+        },
+
+        "uuid": "123e4567-e89b-12d3-a456-426614174000"
+      },
+
+      "components": [
+        {
+          "testPointer": "dc01d8bc-8770-40fd-8b1f-19ca7d64a73a",
+          "counter": 5,
+          "type": "ComponentExample",
+          "uuid": "b83276f5-6f71-4bde-bd33-b8f57d10476b"
+        },
+        {
+          "player health": 100,
+          "type": "ComponentExample2",
+          "uuid": "dc01d8bc-8770-40fd-8b1f-19ca7d64a73a"
+        }
+      ]
+    }
+  ]
+}
