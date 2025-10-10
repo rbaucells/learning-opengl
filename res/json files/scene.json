@@ -12,14 +12,14 @@
       "uuid": "123abc",
 
       "transform": {
-        "global position": {
+        "position": {
           "x": 0,
           "y": 0
         },
 
-        "global rotation": 0,
+        "rotation": 0,
 
-        "global scale": {
+        "scale": {
           "x": 1,
           "y": 1
         },

@@ -3,7 +3,9 @@
 #include <string>
 
 #include "json/jsonObject.h"
+#include "math/vector2.h"
 
+struct Vector2;
 class Object;
 class Component;
 class Scene;
@@ -29,37 +31,50 @@ public:
      */
     Scene loadSceneFromFile(const std::string& filePath);
 
-    std::function<std::shared_ptr<Component>()> getCreationFunctionFromType(std::string type);
-
 private:
-    struct LaterCreationEntry {
-        std::weak_ptr<Object> objectParent;
-        std::string type;
-        std::vector<std::string> dependenciesToWaitFor;
-        JsonObject jsonObject;
-
-        /**
-         *
-         * @param uuid The uuid of the object that was recently registerd
-         * @return Should this LaterCreationEntry be deleted from the laterCreationList
-         */
-        bool removeFromDependenciesToWaitFor(const std::string& uuid);
+    enum class Type {
+        component,
+        object
     };
 
     struct UuidRegistryEntry {
-        enum Type {
-            component,
-            object
-        };
-
-        void* value;
         Type type;
+        void* data;
     };
 
-    void addToUuidRegistry(const std::string& uuid, void* value, UuidRegistryEntry::Type type);
+    struct PostponeObjectEntry {
+        std::string name;
+        int tag;
 
-    std::vector<LaterCreationEntry> laterCreationEntries_;
+        Vector2 pos;
+        float rot;
+        Vector2 scale;
+
+        Scene* owner;
+
+        std::vector<std::string> dependenciesToWaitFor;
+    };
+
+    struct PostponeComponentEntry {
+        std::string type;
+        Object* owner;
+        JsonObject jsonObject;
+        std::string uuid;
+
+        std::vector<std::string> dependenciesToWaitFor;
+    };
+
+    std::vector<PostponeObjectEntry> postponeObjectEntries_;
+    std::vector<PostponeComponentEntry> postponeComponentEntries_;
+
     std::unordered_map<std::string, UuidRegistryEntry> uuidRegistry_;
+
+    bool isInUuidRegistry(const std::string& uuid) const;
+    void addToUuidRegistry(const std::string& uuid, Type type, void* data);
+    UuidRegistryEntry getFromUuidRegistry(const std::string& uuid);
+
+    void addObjectToPostponeCreation(PostponeObjectEntry entry);
+    void addComponentToPostponeCreation(PostponeComponentEntry entry);
 };
 
 class ComponentRegistry {
@@ -69,24 +84,25 @@ public:
         return factory;
     }
 
-    void registerComponent(const std::string& name, std::function<std::shared_ptr<Component>(const JsonObject&)> func) {
+    void registerComponent(const std::string& name, std::function<std::shared_ptr<Component>(Object* owner, const JsonObject&)> func) {
         registry_[name] = std::move(func);
     }
 
-    std::shared_ptr<Component> create(const std::string& name, const JsonObject& json) const {
-        const auto it = registry_.find(name);
+    std::shared_ptr<Component> create(const std::string& type, Object* owner, const JsonObject& json) const {
+        const auto it = registry_.find(type);
 
         if (it == registry_.end()) {
-            throw std::runtime_error("Component not registered: " + name);
+            throw std::runtime_error("Component not registered: " + type);
         }
 
-        return it->second(json);
+        return it->second(owner, json);
     }
 
 private:
-    std::unordered_map<std::string, std::function<std::shared_ptr<Component>(const JsonObject&)>> registry_;
+    std::unordered_map<std::string, std::function<std::shared_ptr<Component>(Object* owner, const JsonObject&)>> registry_;
 };
 
+// helper macro for registering components before int main()
 #define REGISTER_COMPONENT(NAME, TYPE) \
 namespace { \
     const bool TYPE##_registered = []{ \

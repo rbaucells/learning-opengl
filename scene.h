@@ -34,6 +34,4 @@ public:
 private:
     std::vector<std::shared_ptr<Object>> objects_;
     std::vector<std::shared_ptr<Object>> objectsToDestroy_;
-
-    // friend class Object;
 };

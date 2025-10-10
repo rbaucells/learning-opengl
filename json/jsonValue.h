@@ -20,4 +20,16 @@ struct JsonValue {
 
     [[nodiscard]] std::string typeToString() const;
     [[nodiscard]] std::string valueToString() const;
+
+    operator double() const {
+        return std::get<double>(value);
+    }
+
+    operator std::string() const {
+        return std::get<std::string>(value);
+    }
+
+    operator bool() const {
+        return std::get<bool>(value);
+    }
 };
