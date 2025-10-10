@@ -37,6 +37,9 @@ public:
     [[nodiscard]] bool getBoolField(std::string name) const;
     [[nodiscard]] bool getIsNullField(const std::string& name) const;
     [[nodiscard]] JsonArray getArrayField(std::string name) const;
+    [[nodiscard]] JsonObject getObjectField(std::string name) const;
+
+    JsonValue getValueField(const std::string& name);
 
     [[nodiscard]] std::string toString() const;
 

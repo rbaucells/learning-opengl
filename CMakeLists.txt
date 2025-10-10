@@ -75,6 +75,8 @@ add_executable(OpenGL components/componentExample.cpp components/componentExampl
         "systems/opengl wrappers/Shader.h"
         scene.cpp
         scene.h
+        deserializer.cpp
+        deserializer.h
 )
 
 # add include directory

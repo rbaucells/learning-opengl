@@ -83,6 +83,20 @@ JsonArray JsonObject::getArrayField(std::string name) const {
     return std::get<JsonArray>(jsonValue.value);
 }
 
+JsonObject JsonObject::getObjectField(std::string name) const {
+    const auto jsonValue = data_.at(name);
+
+    if (jsonValue.type != JsonValue::Type::object)
+        throw JsonObjectError(std::format("Tried to access json object field '{}' as a jsonObject, real type was {}", name, jsonValue.typeToString()));
+
+    return std::get<JsonObject>(jsonValue.value);
+}
+
+JsonValue JsonObject::getValueField(const std::string& name) {
+    return data_.at(name);
+}
+
+
 std::string JsonObject::toString() const {
     std::string result = "{\n";
 

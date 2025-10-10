@@ -9,6 +9,7 @@
     {
       "name": "MyObject1",
       "tag": 0,
+      "uuid": "123abc",
 
       "transform": {
         "global position": {
@@ -23,12 +24,16 @@
           "y": 1
         },
 
+        "parent": null,
         "uuid": "123e4567-e89b-12d3-a456-426614174000"
       },
 
       "components": [
         {
-          "testPointer": "dc01d8bc-8770-40fd-8b1f-19ca7d64a73a",
+          "dependencies": [
+            "dc01d8bc-8770-40fd-8b1f-19ca7d64a73a"
+          ],
+
           "counter": 5,
           "type": "ComponentExample",
           "uuid": "b83276f5-6f71-4bde-bd33-b8f57d10476b"

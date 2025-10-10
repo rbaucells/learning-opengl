@@ -1,5 +1,6 @@
 #include "componentExample.h"
 
+#include "../deserializer.h"
 #include "../object.h"
 #include "../systems/input.h"
 

@@ -122,6 +122,19 @@ void JsonArray::putValue(int index, const JsonValue& value) {
     data_.emplace(data_.begin() + index, value);
 }
 
+size_t JsonArray::size() const {
+    return data_.size();
+}
+
+
+std::vector<JsonValue>::iterator JsonArray::begin() {
+    return data_.begin();
+}
+
+std::vector<JsonValue>::iterator JsonArray::end() {
+    return data_.end();
+}
+
 
 std::string JsonArray::toString() const {
     std::string result = "[\n";

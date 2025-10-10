@@ -49,6 +49,12 @@ public:
     [[nodiscard]] JsonObject getObject(int index) const;
 
     [[nodiscard]] std::string toString() const;
+
+    size_t size() const;
+
+    std::vector<JsonValue>::iterator begin();
+    std::vector<JsonValue>::iterator end();
+
 private:
     std::vector<JsonValue> data_ = {};
 };

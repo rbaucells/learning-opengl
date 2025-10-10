@@ -39,6 +39,17 @@ public:
     }
 
     template<IsComponent T>
+    std::weak_ptr<T> addComponent(std::shared_ptr<T> component) {
+        // get a weak ptr and add it to components
+        std::weak_ptr<T> componentPtr(component);
+
+        components_.push_back(component);
+        componentsToStart_.push_back(component);
+
+        return componentPtr;
+    }
+
+    template<IsComponent T>
     std::weak_ptr<T> getComponent() {
         // loop until
         for (const auto& component : components_) {
