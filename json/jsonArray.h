@@ -21,7 +21,6 @@ public:
     };
 
     JsonArray();
-    JsonArray(const JsonValue& val);
 
     void putNumber(double value);
     void putString(const std::string& value);
@@ -48,12 +47,16 @@ public:
     [[nodiscard]] JsonArray getArray(int index) const;
     [[nodiscard]] JsonObject getObject(int index) const;
 
-    [[nodiscard]] std::string toString() const;
+    [[nodiscard]] JsonValue getValue(int index) const;
+    JsonValue operator[](int index);
 
-    size_t size() const;
+    [[nodiscard]] std::string toString() const;
 
     std::vector<JsonValue>::iterator begin();
     std::vector<JsonValue>::iterator end();
+
+    [[nodiscard]] bool empty() const;
+    [[nodiscard]] size_t size() const;
 
 private:
     std::vector<JsonValue> data_ = {};

@@ -135,7 +135,7 @@ void JsonLexer::throwIfNotExpected(const std::string& expected) {
 }
 
 std::string JsonLexer::readString() {
-    std::string result = "";
+    std::string result;
 
     while (stream_.good()) {
         const int characterInt = stream_.get();

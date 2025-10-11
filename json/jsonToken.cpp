@@ -1,4 +1,5 @@
 #include "jsonToken.h"
+#include "jsonError.h"
 
 std::string JsonToken::typeToString() const {
     switch (type) {
@@ -21,6 +22,6 @@ std::string JsonToken::typeToString() const {
         case Type::eof:
             return "eof";
         default:
-            return "";
+            throw JsonError("Tried to typeToString() on JsonToken, type was invalid: " + std::to_string(static_cast<int>(type)));
     }
 }

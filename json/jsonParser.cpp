@@ -1,45 +1,41 @@
 #include "jsonParser.h"
 
+#include "jsonArray.h"
 #include "jsonLexer.h"
+#include "jsonObject.h"
 #include "jsonToken.h"
 #include "jsonValue.h"
 
-JsonValue JsonParser::parseValue(JsonToken token ) {
-    JsonValue value;
+JsonValue JsonParser::parseValue(JsonToken token) {
+    JsonValue jsonValue;
 
     switch (token.type) {
         case JsonToken::Type::start_object:
-            value.type = JsonValue::Type::object;
-            value.value = parseObject();
-            return value;
+            jsonValue = parseObject();
+            return jsonValue;
 
         case JsonToken::Type::start_array:
-            value.type = JsonValue::Type::array;
-            value.value = parseArray();
-            return value;
+            jsonValue = parseArray();
+            return jsonValue;
 
         case JsonToken::Type::number:
-            value.type = JsonValue::Type::number;
-            value.value = stringToDouble(token.value);
-            return value;
+            jsonValue = stringToDouble(token.value);
+            return jsonValue;
 
         case JsonToken::Type::string:
-            value.type = JsonValue::Type::string;
-            value.value = token.value;
-            return value;
+            jsonValue = token.value;
+            return jsonValue;
 
         case JsonToken::Type::boolean:
-            value.type = JsonValue::Type::boolean;
-            value.value = token.value == "true";
-            return value;
+            jsonValue = token.value == "true";
+            return jsonValue;
 
         case JsonToken::Type::null:
-            value.type = JsonValue::Type::null;
-            value.value = std::monostate();
-            return value;
+            jsonValue = std::monostate();
+            return jsonValue;
 
         default:
-            throw ParserError(std::format("Unexpected Token Type: {}", token.typeToString()));
+            throw ParserError("Unexpected Token Type: " + token.typeToString());
     }
 }
 
@@ -112,7 +108,6 @@ JsonArray JsonParser::parseArray() {
         }
     }
 }
-
 
 double JsonParser::stringToDouble(const std::string& string) {
     double result = 0.0;

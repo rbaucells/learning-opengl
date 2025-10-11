@@ -3,22 +3,22 @@
 
 struct JsonToken {
     enum class Type {
-        start_object,//
-        end_object,//
-        start_array,//
-        end_array,//
-        comma, //
-        colon, //
+        start_object,
+        end_object,
+        start_array,
+        end_array,
+        comma,
+        colon,
 
-        null, //
-        boolean, //
-        string, //
-        number, //
-        eof //
+        null,
+        boolean,
+        string,
+        number,
+        eof
     };
 
     Type type = Type::null;
     std::string value;
 
-    std::string typeToString() const;
+    [[nodiscard]] std::string typeToString() const;
 };

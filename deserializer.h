@@ -44,6 +44,7 @@ private:
 
     struct PostponeObjectEntry {
         std::string name;
+        std::string uuid;
         int tag;
 
         Vector2 pos;
@@ -75,6 +76,9 @@ private:
 
     void addObjectToPostponeCreation(PostponeObjectEntry entry);
     void addComponentToPostponeCreation(PostponeComponentEntry entry);
+
+    void objectFromJsonObject(const JsonObject& jsonObject, Scene* owner);
+    void componentFromJsonObject(const JsonObject& jsonComponent, Object* owner);
 };
 
 class ComponentRegistry {

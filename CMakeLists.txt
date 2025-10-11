@@ -77,6 +77,7 @@ add_executable(OpenGL components/componentExample.cpp components/componentExampl
         scene.h
         deserializer.cpp
         deserializer.h
+        json/jsonError.h
 )
 
 # add include directory
@@ -134,6 +135,7 @@ add_executable(json json/jsonArray.cpp json/jsonArray.h
         json/jsonToken.h
         json/jsonValue.cpp
         json/jsonToken.cpp
+        json/jsonError.h
 )
 add_executable(JsonTests tests/jsonTests.cpp json/jsonArray.cpp json/jsonArray.h
         json/jsonObject.h json/jsonObject.cpp
@@ -147,3 +149,17 @@ add_executable(JsonTests tests/jsonTests.cpp json/jsonArray.cpp json/jsonArray.h
         json/jsonToken.cpp)
 
 add_test(NAME JsonTests COMMAND JsonTests)
+
+add_executable(DeserializationTests tests/deserializationTests.cpp json/jsonArray.cpp json/jsonArray.h
+        json/jsonObject.h json/jsonObject.cpp
+        json/jsonParser.h
+        json/jsonParser.cpp
+        json/jsonLexer.cpp
+        json/jsonLexer.h
+        json/jsonValue.h
+        json/jsonToken.h
+        json/jsonValue.cpp
+        json/jsonToken.cpp scene.cpp scene.h object.cpp object.h systems/component.cpp systems/component.h
+        json/jsonError.h)
+
+add_test(NAME DeserializationTests COMMAND DeserializationTests)

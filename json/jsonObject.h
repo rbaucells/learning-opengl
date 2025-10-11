@@ -1,43 +1,29 @@
 #pragma once
 #include <string>
 #include <unordered_map>
-#include <utility>
+#include "../json/jsonValue.h"
 
-struct JsonValue;
 class JsonArray;
 
 class JsonObject {
 public:
-    class JsonObjectError final : public std::exception {
-    public:
-        explicit JsonObjectError(std::string message) : message_(std::move(message)) {};
-
-        [[nodiscard]] const char* what() const noexcept override {
-            return message_.c_str();
-        }
-
-    private:
-        std::string message_;
-    };
-
     JsonObject();
-    JsonObject(const JsonValue& val);
 
     void putNumberField(const std::string& name, double value);
-    void putStringField(const std::string& name, std::string value);
+    void putStringField(const std::string& name, const std::string& value);
     void putBoolField(const std::string& name, bool value);
     void putNullField(const std::string& name);
-    void putArrayField(const std::string& name, JsonArray value);
-    void putObjectField(const std::string& name, JsonObject value);
+    void putArrayField(const std::string& name, const JsonArray& value);
+    void putObjectField(const std::string& name, const JsonObject& value);
 
     void putValueField(const std::string& name, const JsonValue& value);
 
-    [[nodiscard]] double getNumberField(std::string name) const;
-    [[nodiscard]] std::string getStringField(std::string name) const;
-    [[nodiscard]] bool getBoolField(std::string name) const;
+    [[nodiscard]] double getNumberField(const std::string& name) const;
+    [[nodiscard]] std::string getStringField(const std::string& name) const;
+    [[nodiscard]] bool getBoolField(const std::string& name) const;
     [[nodiscard]] bool getIsNullField(const std::string& name) const;
-    [[nodiscard]] JsonArray getArrayField(std::string name) const;
-    [[nodiscard]] JsonObject getObjectField(std::string name) const;
+    [[nodiscard]] JsonArray getArrayField(const std::string& name) const;
+    [[nodiscard]] JsonObject getObjectField(const std::string& name) const;
 
     JsonValue getValueField(const std::string& name);
 
