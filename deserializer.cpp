@@ -1,5 +1,6 @@
 #include "deserializer.h"
 #include "scene.h"
+#include "json/jsonArray.h"
 #include "json/jsonLexer.h"
 #include "json/jsonObject.h"
 #include "json/jsonParser.h"
@@ -67,12 +68,12 @@ Deserializer::UuidRegistryEntry Deserializer::getFromUuidRegistry(const std::str
     return uuidRegistry_[uuid];
 }
 
-void Deserializer::addComponentToPostponeCreation(PostponeComponentEntry entry) {
-    postponeComponentEntries_.push_back(entry);
-}
-
 void Deserializer::addObjectToPostponeCreation(PostponeObjectEntry entry) {
     postponeObjectEntries_.push_back(entry);
+}
+
+void Deserializer::addComponentToPostponeCreation(PostponeComponentEntry entry) {
+    postponeComponentEntries_.push_back(entry);
 }
 
 void Deserializer::objectFromJsonObject(const JsonObject& jsonObject, Scene* owner) {
@@ -150,4 +151,23 @@ void Deserializer::componentFromJsonObject(const JsonObject& jsonComponent, Obje
     else {
         addComponentToPostponeCreation({type, owner, jsonComponent, componentUuid, dependenciesToWaitFor});
     }
+}
+
+ComponentRegistry& ComponentRegistry::instance() {
+    static ComponentRegistry factory;
+    return factory;
+}
+
+void ComponentRegistry::registerComponent(const std::string& name, std::function<std::shared_ptr<Component>(Object* owner, const JsonObject&)> func) {
+    registry_[name] = std::move(func);
+}
+
+std::shared_ptr<Component> ComponentRegistry::create(const std::string& type, Object* owner, const JsonObject& json) const {
+    const auto it = registry_.find(type);
+
+    if (it == registry_.end()) {
+        throw std::runtime_error("Component not registered: " + type);
+    }
+
+    return it->second(owner, json);
 }

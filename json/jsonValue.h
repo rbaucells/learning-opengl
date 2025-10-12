@@ -15,7 +15,7 @@ struct JsonValue {
     };
 
     JsonValue(const JsonValue& other);
-    JsonValue(const JsonValue&& other) noexcept;
+    JsonValue(JsonValue&& other) noexcept;
 
     JsonValue& operator=(const JsonValue& other);
     JsonValue& operator=(JsonValue&& other) noexcept;
@@ -42,4 +42,6 @@ struct JsonValue {
     operator JsonArray() const;
     operator double() const;
     operator bool() const;
+
+    ~JsonValue();
 };

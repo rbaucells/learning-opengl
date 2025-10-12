@@ -18,7 +18,7 @@ void JsonObject::putStringField(const std::string& name, const std::string& valu
 }
 
 void JsonObject::putBoolField(const std::string& name, bool value) {
-    data_.insert_or_assign(name,  value);
+    data_.insert_or_assign(name, value);
 }
 
 void JsonObject::putNullField(const std::string& name) {
@@ -79,7 +79,7 @@ JsonArray JsonObject::getArrayField(const std::string& name) const {
     if (jsonValue.type != JsonValue::Type::array)
         throw JsonError("Tried to access json object field '" + name + "' as a JsonArray, real type was: " + jsonValue.typeToString());
 
-    return jsonValue;
+    return *std::get<std::unique_ptr<JsonArray>>(jsonValue.value);
 }
 
 JsonObject JsonObject::getObjectField(const std::string& name) const {
@@ -88,11 +88,19 @@ JsonObject JsonObject::getObjectField(const std::string& name) const {
     if (jsonValue.type != JsonValue::Type::object)
         throw JsonError("Tried to access json object field '" + name + "' as a JsonObject, real type was: " + jsonValue.typeToString());
 
-    return jsonValue;
+    return *std::get<std::unique_ptr<JsonObject>>(jsonValue.value);
 }
 
 JsonValue JsonObject::getValueField(const std::string& name) {
     return data_.at(name);
+}
+
+const JsonValue& JsonObject::operator[](const std::string& key) const {
+    return data_.at(key);
+}
+
+JsonValue& JsonObject::operator[](const std::string& key) {
+    return data_[key];
 }
 
 std::string JsonObject::toString() const {

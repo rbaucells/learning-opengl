@@ -8,18 +8,6 @@ class JsonObject;
 
 class JsonArray {
 public:
-    class JsonArrayError final : public std::exception {
-    public:
-        explicit JsonArrayError(std::string message) : message_(std::move(message)) {};
-
-        [[nodiscard]] const char* what() const noexcept override {
-            return message_.c_str();
-        }
-
-    private:
-        std::string message_;
-    };
-
     JsonArray();
 
     void putNumber(double value);
@@ -48,7 +36,8 @@ public:
     [[nodiscard]] JsonObject getObject(int index) const;
 
     [[nodiscard]] JsonValue getValue(int index) const;
-    JsonValue operator[](int index);
+    const JsonValue& operator[](int index) const;
+    JsonValue& operator[](int index);
 
     [[nodiscard]] std::string toString() const;
 

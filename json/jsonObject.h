@@ -15,7 +15,6 @@ public:
     void putNullField(const std::string& name);
     void putArrayField(const std::string& name, const JsonArray& value);
     void putObjectField(const std::string& name, const JsonObject& value);
-
     void putValueField(const std::string& name, const JsonValue& value);
 
     [[nodiscard]] double getNumberField(const std::string& name) const;
@@ -24,8 +23,10 @@ public:
     [[nodiscard]] bool getIsNullField(const std::string& name) const;
     [[nodiscard]] JsonArray getArrayField(const std::string& name) const;
     [[nodiscard]] JsonObject getObjectField(const std::string& name) const;
+    [[nodiscard]] JsonValue getValueField(const std::string& name);
 
-    JsonValue getValueField(const std::string& name);
+    const JsonValue& operator[](const std::string& key) const;
+    JsonValue& operator[](const std::string& key);
 
     [[nodiscard]] std::string toString() const;
 

@@ -4,63 +4,39 @@
 #include "jsonObject.h"
 
 JsonValue::JsonValue(const JsonValue& other) {
-    this->type = other.type;
-
-    switch (type) {
+    switch (other.type) {
         case Type::null:
-            value = std::monostate();
+            this->value = std::monostate();
             break;
         case Type::string:
-            value = std::get<std::string>(value);
+            this->value = std::get<std::string>(other.value);
             break;
         case Type::boolean:
-            value = std::get<bool>(value);
+            this->value = std::get<bool>(other.value);
             break;
         case Type::number:
-            value = std::get<double>(value);
+            this->value = std::get<double>(other.value);
             break;
         case Type::object:
-            value = std::make_unique<JsonObject>(*std::get<std::unique_ptr<JsonObject>>(value));
+            this->value = std::make_unique<JsonObject>(*std::get<std::unique_ptr<JsonObject>>(other.value));
             break;
         case Type::array:
-            value = std::make_unique<JsonArray>(*std::get<std::unique_ptr<JsonArray>>(value));
+            this->value = std::make_unique<JsonArray>(*std::get<std::unique_ptr<JsonArray>>(other.value));
             break;
         default:
-            throw JsonError("Tried to copy construct a JsonValue, invalid type found: " + typeToString());
+            throw JsonError("Tried to copy construct a JsonValue, invalid type found: " + other.typeToString());
     }
+
+    this->type = other.type;
 }
 
-JsonValue::JsonValue(const JsonValue&& other) noexcept {
+JsonValue::JsonValue(JsonValue&& other) noexcept {
+    this->value = std::move(other.value);
     this->type = other.type;
-
-    switch (type) {
-        case Type::null:
-            value = std::monostate();
-            break;
-        case Type::string:
-            value = std::move(std::get<std::string>(value));
-            break;
-        case Type::boolean:
-            value = std::get<bool>(value);
-            break;
-        case Type::number:
-            value = std::get<double>(value);
-            break;
-        case Type::object:
-            value = std::move(std::get<std::unique_ptr<JsonObject>>(value));
-            break;
-        case Type::array:
-            value = std::move(std::get<std::unique_ptr<JsonArray>>(value));
-            break;
-        default:
-            throw JsonError("Tried to move construct a JsonValue, invalid type found: " + typeToString());
-    }
 }
 
 JsonValue& JsonValue::operator=(const JsonValue& other) {
     if (*this != other) {
-        this->type = other.type;
-
         switch (type) {
             case Type::null:
                 value = std::monostate();
@@ -81,8 +57,10 @@ JsonValue& JsonValue::operator=(const JsonValue& other) {
                 value = std::make_unique<JsonArray>(*std::get<std::unique_ptr<JsonArray>>(value));
                 break;
             default:
-                throw JsonError("Tried to copy construct a JsonValue, invalid type found: " + typeToString());
+                throw JsonError("Tried to copy construct a JsonValue, invalid type found: " + other.typeToString());
         }
+
+        this->type = other.type;
     }
 
     return *this;
@@ -90,30 +68,8 @@ JsonValue& JsonValue::operator=(const JsonValue& other) {
 
 JsonValue& JsonValue::operator=(JsonValue&& other) noexcept {
     if (*this != other) {
+        this->value = std::move(other.value);
         this->type = other.type;
-
-        switch (type) {
-            case Type::null:
-                value = std::monostate();
-                break;
-            case Type::string:
-                value = std::move(std::get<std::string>(value));
-                break;
-            case Type::boolean:
-                value = std::get<bool>(value);
-                break;
-            case Type::number:
-                value = std::get<double>(value);
-                break;
-            case Type::object:
-                value = std::move(std::get<std::unique_ptr<JsonObject>>(value));
-                break;
-            case Type::array:
-                value = std::move(std::get<std::unique_ptr<JsonArray>>(value));
-                break;
-            default:
-                throw JsonError("Tried to move construct a JsonValue, invalid type found: " + typeToString());
-        }
     }
 
     return *this;
@@ -203,7 +159,7 @@ std::string JsonValue::typeToString() const {
 
 JsonValue::operator std::string() const {
     if (type != Type::string) {
-        throw JsonError("Tried to convert JsonValue to string, type was:" + typeToString());
+        throw JsonError("Tried to convert JsonValue to string, real type was:" + typeToString());
     }
 
     return std::get<std::string>(value);
@@ -211,7 +167,7 @@ JsonValue::operator std::string() const {
 
 JsonValue::operator JsonObject() const {
     if (type != Type::object) {
-        throw JsonError("Tried to convert JsonValue to JsonObject, type was:" + typeToString());
+        throw JsonError("Tried to convert JsonValue to JsonObject, real type was:" + typeToString());
     }
 
     return *std::get<std::unique_ptr<JsonObject>>(value);
@@ -219,7 +175,7 @@ JsonValue::operator JsonObject() const {
 
 JsonValue::operator JsonArray() const {
     if (type != Type::array) {
-        throw JsonError("Tried to convert JsonValue to JsonArray, type was:" + typeToString());
+        throw JsonError("Tried to convert JsonValue to JsonArray, real type was:" + typeToString());
     }
 
     return *std::get<std::unique_ptr<JsonArray>>(value);
@@ -227,7 +183,7 @@ JsonValue::operator JsonArray() const {
 
 JsonValue::operator double() const {
     if (type != Type::number) {
-        throw JsonError("Tried to convert JsonValue to double, type was:" + typeToString());
+        throw JsonError("Tried to convert JsonValue to double, real type was:" + typeToString());
     }
 
     return std::get<double>(value);
@@ -235,8 +191,10 @@ JsonValue::operator double() const {
 
 JsonValue::operator bool() const {
     if (type != Type::boolean) {
-        throw JsonError("Tried to convert JsonValue to bool, type was:" + typeToString());
+        throw JsonError("Tried to convert JsonValue to bool, real type was:" + typeToString());
     }
 
     return std::get<bool>(value);
 }
+
+JsonValue::~JsonValue() = default;

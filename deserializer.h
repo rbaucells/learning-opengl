@@ -3,6 +3,8 @@
 #include <string>
 
 #include "json/jsonObject.h"
+#include "json/jsonArray.h"
+
 #include "math/vector2.h"
 
 struct Vector2;
@@ -83,24 +85,11 @@ private:
 
 class ComponentRegistry {
 public:
-    static ComponentRegistry& instance() {
-        static ComponentRegistry factory;
-        return factory;
-    }
+    static ComponentRegistry& instance();
 
-    void registerComponent(const std::string& name, std::function<std::shared_ptr<Component>(Object* owner, const JsonObject&)> func) {
-        registry_[name] = std::move(func);
-    }
+    void registerComponent(const std::string& name, std::function<std::shared_ptr<Component>(Object* owner, const JsonObject&)> func);
 
-    std::shared_ptr<Component> create(const std::string& type, Object* owner, const JsonObject& json) const {
-        const auto it = registry_.find(type);
-
-        if (it == registry_.end()) {
-            throw std::runtime_error("Component not registered: " + type);
-        }
-
-        return it->second(owner, json);
-    }
+    std::shared_ptr<Component> create(const std::string& type, Object* owner, const JsonObject& json) const;
 
 private:
     std::unordered_map<std::string, std::function<std::shared_ptr<Component>(Object* owner, const JsonObject&)>> registry_;
