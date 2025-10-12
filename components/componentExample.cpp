@@ -4,6 +4,8 @@
 #include "../object.h"
 #include "../systems/input.h"
 
+REGISTER_COMPONENT("ComponentExample", ComponentExample)
+
 ComponentExample::ComponentExample(Object* owner) : Component(owner) {
     printf("Constructor\n");
 }
@@ -48,4 +50,15 @@ void ComponentExample::onLeftClick(const bool state) {
 
 ComponentExample::~ComponentExample() {
     printf("Destructor\n");
+}
+
+
+std::shared_ptr<Component> ComponentExample::deserialize(Object* owner, const JsonObject& data) {
+    std::shared_ptr<ComponentExample> componentExample = std::make_shared<ComponentExample>(owner);
+
+    const float f = static_cast<float>(data.getNumberField("testNumber"));
+
+    componentExample->f = f;
+
+    return componentExample;
 }

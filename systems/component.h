@@ -20,6 +20,7 @@ public:
     virtual void onEnable() {}
     virtual void start() {}
 
+
     // update loop
     virtual void update(float deltaTime) {}
     virtual void lateUpdate(float deltaTime) {}

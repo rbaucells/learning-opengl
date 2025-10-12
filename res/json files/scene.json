@@ -9,39 +9,34 @@
     {
       "name": "MyObject1",
       "tag": 0,
-      "uuid": "123abc",
+      "uuid": "187c7806-8e65-434e-a5d1-102fc0cbb49b",
 
       "transform": {
         "position": {
-          "x": 0,
-          "y": 0
+          "x": 1,
+          "y": -2
         },
 
-        "rotation": 0,
+        "rotation": 3,
 
         "scale": {
-          "x": 1,
-          "y": 1
+          "x": 4,
+          "y": 5
         },
 
         "parent": null,
-        "uuid": "123e4567-e89b-12d3-a456-426614174000"
+        "uuid": "d71ba632-edbc-4192-b08b-2626eeb8e036"
       },
 
       "components": [
         {
-          "dependencies": [
-            "dc01d8bc-8770-40fd-8b1f-19ca7d64a73a"
-          ],
-
-          "counter": 5,
           "type": "ComponentExample",
-          "uuid": "b83276f5-6f71-4bde-bd33-b8f57d10476b"
-        },
-        {
-          "player health": 100,
-          "type": "ComponentExample2",
-          "uuid": "dc01d8bc-8770-40fd-8b1f-19ca7d64a73a"
+          "uuid": "643cb91f-f4ba-4169-89de-dd687ced10fd",
+          "testNumber": 1.23,
+
+          "dependencies": [
+
+          ]
         }
       ]
     }

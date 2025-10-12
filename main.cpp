@@ -7,6 +7,7 @@
 #include <string>
 #include <thread>
 
+#include "deserializer.h"
 #include "list.h"
 #include "object.h"
 #include "scene.h"
@@ -82,35 +83,39 @@ int main() {
     std::shared_ptr<Texture> spriteTexture = std::make_shared<Texture>("/Users/ricardito/Projects/learning-opengl/res/textures/super-mario-transparent-background-20.png", GL_CLAMP, true);
     std::shared_ptr<Texture> spriteSheetTexture = std::make_shared<Texture>("/Users/ricardito/Projects/learning-opengl/res/textures/f1058a91de91f29cd65527cf97cab26b861de9b5_2_1380x896.png", GL_CLAMP, true);
 
-    Scene scene;
+    Deserializer deserializer;
 
-    auto cameraObject = scene.addObject("mainCamera", 69, {0, 0}, 0, {1, 1});
-    cameraObject->addComponent<Camera>();
-    cameraObject->addComponent<AudioListener>();
+    Scene scene = deserializer.loadSceneFromFile("/Users/ricardito/Projects/learning-opengl/res/json files/scene.json");
 
-    auto square =  scene.addObject("square", 0, {0, 0}, 0, {1, 1});
-    square->addComponent<ComponentExample>();
+    // Scene scene;
 
-    // renderers
-    if constexpr (constexpr int renderer = 2; renderer == 0) {
-        std::vector<Vertex> vertices = {
-            {{2, 2}, {1, 1}}, // top right
-            {{-2, 2}, {0, 1}}, // top left
-            {{-2, -2}, {0, 0}}, // bottom left
-            {{2, -2}, {1, 0}} // bottom right
-        };
-
-        std::vector<unsigned int> indices = {
-            0, 1, 2,
-            2, 3, 0
-        };
-
-        square->addComponent<CustomRenderer>(vertices, indices, customTexture, mainProgram, 0);
-    }
-    else if constexpr (renderer == 1)
-        square->addComponent<SpriteRenderer>(100, spriteTexture, mainProgram, 0);
-    else if constexpr (renderer == 2)
-        square->addComponent<SpriteSheetRenderer>(69, 69, 69, 0, spriteSheetTexture, mainProgram, 0);
+    // auto cameraObject = scene.addObject("mainCamera", 69, {0, 0}, 0, {1, 1});
+    // cameraObject->addComponent<Camera>();
+    // cameraObject->addComponent<AudioListener>();
+    //
+    // auto square =  scene.addObject("square", 0, {0, 0}, 0, {1, 1});
+    // square->addComponent<ComponentExample>();
+    //
+    // // renderers
+    // if constexpr (constexpr int renderer = 2; renderer == 0) {
+    //     std::vector<Vertex> vertices = {
+    //         {{2, 2}, {1, 1}}, // top right
+    //         {{-2, 2}, {0, 1}}, // top left
+    //         {{-2, -2}, {0, 0}}, // bottom left
+    //         {{2, -2}, {1, 0}} // bottom right
+    //     };
+    //
+    //     std::vector<unsigned int> indices = {
+    //         0, 1, 2,
+    //         2, 3, 0
+    //     };
+    //
+    //     square->addComponent<CustomRenderer>(vertices, indices, customTexture, mainProgram, 0);
+    // }
+    // else if constexpr (renderer == 1)
+    //     square->addComponent<SpriteRenderer>(100, spriteTexture, mainProgram, 0);
+    // else if constexpr (renderer == 2)
+    //     square->addComponent<SpriteSheetRenderer>(69, 69, 69, 0, spriteSheetTexture, mainProgram, 0);
 
     // empty the buffers to make sure its drawing properly
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);

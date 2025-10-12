@@ -2,6 +2,7 @@
 #include "../systems/events.h"
 #include "../systems/component.h"
 
+class JsonObject;
 class SpriteSheetRenderer;
 
 class ComponentExample final : public Component {
@@ -19,10 +20,13 @@ public:
     void onDisable() override;
     void onDestroy() override;
 
-
     void onLeftClick(bool state);
 
     ~ComponentExample() override;
+
+    static std::shared_ptr<Component> deserialize(Object* owner, const JsonObject& data);
 private:
     Subscription<bool> leftClickSubscription_;
+
+    float f;
 };

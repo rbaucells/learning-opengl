@@ -72,7 +72,7 @@ private:
 
     std::unordered_map<std::string, UuidRegistryEntry> uuidRegistry_;
 
-    bool isInUuidRegistry(const std::string& uuid) const;
+    [[nodiscard]] bool isInUuidRegistry(const std::string& uuid) const;
     void addToUuidRegistry(const std::string& uuid, Type type, void* data);
     UuidRegistryEntry getFromUuidRegistry(const std::string& uuid);
 
@@ -95,8 +95,15 @@ private:
     std::unordered_map<std::string, std::function<std::shared_ptr<Component>(Object* owner, const JsonObject&)>> registry_;
 };
 
+template<typename T>
+concept DeserializableComponent = requires(Object* owner, const JsonObject& json) {
+    { T::deserialize(owner, json) } -> std::same_as<std::shared_ptr<Component>>;
+};
+
 // helper macro for registering components before int main()
 #define REGISTER_COMPONENT(NAME, TYPE) \
+static_assert(DeserializableComponent<TYPE>, \
+#TYPE " must have static std::shared_ptr<Component> deserialize(Object*, const JsonObject&)"); \
 namespace { \
     const bool TYPE##_registered = []{ \
         ComponentRegistry::instance().registerComponent(NAME, TYPE::deserialize); \
