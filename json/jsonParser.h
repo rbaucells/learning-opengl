@@ -30,7 +30,7 @@ public:
 private:
     JsonLexer& lexer_;
 
-    JsonValue parseValue(JsonToken token);
+    JsonValue parseValue(const JsonToken& token);
 
     JsonObject parseObject();
     JsonArray parseArray();

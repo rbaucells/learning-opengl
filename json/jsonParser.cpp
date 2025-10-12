@@ -6,7 +6,7 @@
 #include "jsonToken.h"
 #include "jsonValue.h"
 
-JsonValue JsonParser::parseValue(JsonToken token) {
+JsonValue JsonParser::parseValue(const JsonToken& token) {
     JsonValue jsonValue;
 
     switch (token.type) {

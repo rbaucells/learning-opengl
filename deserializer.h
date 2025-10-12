@@ -36,7 +36,8 @@ public:
 private:
     enum class Type {
         component,
-        object
+        object,
+        transform
     };
 
     struct UuidRegistryEntry {
@@ -45,24 +46,15 @@ private:
     };
 
     struct PostponeObjectEntry {
-        std::string name;
-        std::string uuid;
-        int tag;
-
-        Vector2 pos;
-        float rot;
-        Vector2 scale;
-
+        JsonObject jsonObject;
         Scene* owner;
 
         std::vector<std::string> dependenciesToWaitFor;
     };
 
     struct PostponeComponentEntry {
-        std::string type;
-        Object* owner;
         JsonObject jsonObject;
-        std::string uuid;
+        Object* owner;
 
         std::vector<std::string> dependenciesToWaitFor;
     };

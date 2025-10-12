@@ -158,6 +158,10 @@ std::string JsonValue::typeToString() const {
 }
 
 JsonValue::operator std::string() const {
+    if (type == Type::null) {
+        return "";
+    }
+
     if (type != Type::string) {
         throw JsonError("Tried to convert JsonValue to string, real type was:" + typeToString());
     }
@@ -166,6 +170,10 @@ JsonValue::operator std::string() const {
 }
 
 JsonValue::operator JsonObject() const {
+    if (type == Type::null) {
+        return JsonObject();
+    }
+
     if (type != Type::object) {
         throw JsonError("Tried to convert JsonValue to JsonObject, real type was:" + typeToString());
     }
@@ -174,6 +182,10 @@ JsonValue::operator JsonObject() const {
 }
 
 JsonValue::operator JsonArray() const {
+    if (type == Type::null) {
+        return JsonArray();
+    }
+
     if (type != Type::array) {
         throw JsonError("Tried to convert JsonValue to JsonArray, real type was:" + typeToString());
     }
@@ -182,6 +194,10 @@ JsonValue::operator JsonArray() const {
 }
 
 JsonValue::operator double() const {
+    if (type == Type::null) {
+        return 0.0;
+    }
+
     if (type != Type::number) {
         throw JsonError("Tried to convert JsonValue to double, real type was:" + typeToString());
     }
@@ -190,6 +206,10 @@ JsonValue::operator double() const {
 }
 
 JsonValue::operator bool() const {
+    if (type == Type::null) {
+        return false;
+    }
+
     if (type != Type::boolean) {
         throw JsonError("Tried to convert JsonValue to bool, real type was:" + typeToString());
     }

@@ -40,6 +40,10 @@ void JsonObject::putValueField(const std::string& name, const JsonValue& value) 
 double JsonObject::getNumberField(const std::string& name) const {
     const auto jsonValue = data_.at(name);
 
+    if (jsonValue.type == JsonValue::Type::null) {
+        return 0.0;
+    }
+
     if (jsonValue.type != JsonValue::Type::number)
         throw JsonError("Tried to access json object field '" + name + "' as a number, real type was: " + jsonValue.typeToString());
 
@@ -49,6 +53,10 @@ double JsonObject::getNumberField(const std::string& name) const {
 std::string JsonObject::getStringField(const std::string& name) const {
     const auto jsonValue = data_.at(name);
 
+    if (jsonValue.type == JsonValue::Type::null) {
+        return "";
+    }
+
     if (jsonValue.type != JsonValue::Type::string)
         throw JsonError("Tried to access json object field '" + name + "' as a string, real type was: " + jsonValue.typeToString());
 
@@ -57,6 +65,10 @@ std::string JsonObject::getStringField(const std::string& name) const {
 
 bool JsonObject::getBoolField(const std::string& name) const {
     const auto jsonValue = data_.at(name);
+
+    if (jsonValue.type == JsonValue::Type::null) {
+        return false;
+    }
 
     if (jsonValue.type != JsonValue::Type::boolean)
         throw JsonError("Tried to access json object field '" + name + "' as a bool, real type was: " + jsonValue.typeToString());
@@ -76,6 +88,10 @@ bool JsonObject::getIsNullField(const std::string& name) const {
 JsonArray JsonObject::getArrayField(const std::string& name) const {
     const auto jsonValue = data_.at(name);
 
+    if (jsonValue.type == JsonValue::Type::null) {
+        return JsonArray();
+    }
+
     if (jsonValue.type != JsonValue::Type::array)
         throw JsonError("Tried to access json object field '" + name + "' as a JsonArray, real type was: " + jsonValue.typeToString());
 
@@ -84,6 +100,10 @@ JsonArray JsonObject::getArrayField(const std::string& name) const {
 
 JsonObject JsonObject::getObjectField(const std::string& name) const {
     const auto jsonValue = data_.at(name);
+
+    if (jsonValue.type == JsonValue::Type::null) {
+        return JsonObject();
+    }
 
     if (jsonValue.type != JsonValue::Type::object)
         throw JsonError("Tried to access json object field '" + name + "' as a JsonObject, real type was: " + jsonValue.typeToString());

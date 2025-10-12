@@ -35,8 +35,15 @@
           "testNumber": 1.23,
 
           "dependencies": [
-
+            "17d18ad8-d285-4682-8853-e0abcce28891"
           ]
+        },
+        {
+          "type": "ComponentExample",
+          "uuid": "17d18ad8-d285-4682-8853-e0abcce28891",
+          "testNumber": 4.56,
+
+          "dependencies": null
         }
       ]
     }
