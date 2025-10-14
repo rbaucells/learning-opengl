@@ -5,8 +5,6 @@
 #include "json/jsonObject.h"
 #include "json/jsonArray.h"
 
-#include "math/vector2.h"
-
 struct Vector2;
 class Object;
 class Component;
@@ -14,9 +12,9 @@ class Scene;
 
 class Deserializer {
 public:
-    class SceneLoaderError final : public std::exception {
+    class DeserializerError final : public std::exception {
     public:
-        explicit SceneLoaderError(std::string message) : message_(std::move(message)) {};
+        explicit DeserializerError(std::string message) : message_(std::move(message)) {};
 
         [[nodiscard]] const char* what() const noexcept override {
             return message_.c_str();
@@ -68,8 +66,8 @@ private:
     void addToUuidRegistry(const std::string& uuid, Type type, void* data);
     UuidRegistryEntry getFromUuidRegistry(const std::string& uuid);
 
-    void addObjectToPostponeCreation(PostponeObjectEntry entry);
-    void addComponentToPostponeCreation(PostponeComponentEntry entry);
+    void addObjectToPostponeCreation(const PostponeObjectEntry& entry);
+    void addComponentToPostponeCreation(const PostponeComponentEntry& entry);
 
     void objectFromJsonObject(const JsonObject& jsonObject, Scene* owner);
     void componentFromJsonObject(const JsonObject& jsonComponent, Object* owner);

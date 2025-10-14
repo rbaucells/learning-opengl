@@ -23,6 +23,10 @@ Scene Deserializer::loadSceneFromFile(const std::string& filePath) {
         objectFromJsonObject(jsonObject, &scene);
     }
 
+    if (!postponeComponentEntries_.empty() || !postponeObjectEntries_.empty()) {
+        throw DeserializerError("Circular dependency detected in 2 components/objects");
+    }
+
     return scene;
 }
 
@@ -35,7 +39,7 @@ void Deserializer::addToUuidRegistry(const std::string& uuid, const Type type, v
 
     // iterate through component entries
     for (auto postponeObjectIt = postponeObjectEntries_.begin(); postponeObjectIt != postponeObjectEntries_.end();) {
-        // iterate through the uuids to check if its the one
+        // iterate through the uuids to check if it's the one
         for (auto it = postponeObjectIt->dependenciesToWaitFor.begin(); it != postponeObjectIt->dependenciesToWaitFor.end();) {
             // if it is remove that uuid form the dependencies
             if (*it == uuid) {
@@ -55,7 +59,7 @@ void Deserializer::addToUuidRegistry(const std::string& uuid, const Type type, v
 
     // iterate through component entries
     for (auto postponeComponentIt = postponeComponentEntries_.begin(); postponeComponentIt != postponeComponentEntries_.end();) {
-        // iterate through the uuids to check if its the one
+        // iterate through the uuids to check if it's the one
         for (auto it = postponeComponentIt->dependenciesToWaitFor.begin(); it != postponeComponentIt->dependenciesToWaitFor.end();) {
             // if it is remove that uuid form the dependencies
             if (*it == uuid) {
@@ -83,11 +87,11 @@ Deserializer::UuidRegistryEntry Deserializer::getFromUuidRegistry(const std::str
     return uuidRegistry_[uuid];
 }
 
-void Deserializer::addObjectToPostponeCreation(PostponeObjectEntry entry) {
+void Deserializer::addObjectToPostponeCreation(const PostponeObjectEntry& entry) {
     postponeObjectEntries_.push_back(entry);
 }
 
-void Deserializer::addComponentToPostponeCreation(PostponeComponentEntry entry) {
+void Deserializer::addComponentToPostponeCreation(const PostponeComponentEntry& entry) {
     postponeComponentEntries_.push_back(entry);
 }
 
@@ -107,7 +111,7 @@ void Deserializer::objectFromJsonObject(const JsonObject& jsonObject, Scene* own
     if (!jsonTransform.getIsNullField("parent")) {
         std::string parentUuid = jsonTransform.getStringField("parent");
 
-        // if that parent doesnt exist yet, we have to delay this entire objects creation
+        // if that parent doesn't exist yet, we have to delay this entire objects creation
         if (!isInUuidRegistry(parentUuid)) {
             addObjectToPostponeCreation({jsonObject, owner, {parentUuid}});
             return;

@@ -52,7 +52,6 @@ ComponentExample::~ComponentExample() {
     printf("Destructor\n");
 }
 
-
 std::shared_ptr<Component> ComponentExample::deserialize(Object* owner, const JsonObject& data) {
     std::shared_ptr<ComponentExample> componentExample = std::make_shared<ComponentExample>(owner);
 

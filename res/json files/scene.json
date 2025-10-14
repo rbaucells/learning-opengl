@@ -1,10 +1,5 @@
 {
-  "name": "MyScene1",
-
-  "fps": 60,
-  "fixedUpdatesPerSecond": 60,
-  "windowSize": 5,
-
+  "uuid": "5b88a396-bf4b-47bf-a33c-2ab2fd70fdc3",
   "objects": [
     {
       "name": "MyObject1",
