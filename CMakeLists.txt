@@ -34,6 +34,6 @@ target_link_libraries(OpenGL PRIVATE OpenAL::OpenAL)
 
 enable_testing()
 
-add_executable(NanoIdTests tests/nanoIdTests.cpp idGenerators.cpp)
+add_executable(NanoIdTests tests/nanoIdTests.cpp nanoId.cpp)
 
 add_test(NAME NanoIdTests COMMAND NanoIdTests)

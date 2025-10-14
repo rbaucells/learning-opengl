@@ -1,42 +1,76 @@
 {
-  "uuid": "5b88a396-bf4b-47bf-a33c-2ab2fd70fdc3",
+  "uuid": "5wUCcmAOCcav4vSK_JAam",
   "objects": [
     {
       "name": "MyObject1",
       "tag": 0,
-      "uuid": "187c7806-8e65-434e-a5d1-102fc0cbb49b",
+      "uuid": "aaDI8WnRIJspGIX6L9vaX",
 
       "transform": {
+        "uuid": "bgIVkR9DjYnmuOLi_VA3n",
+
         "position": {
-          "x": 1,
-          "y": -2
+          "x": 2,
+          "y": 2
         },
 
-        "rotation": 3,
+        "rotation": 90,
 
         "scale": {
-          "x": 4,
-          "y": 5
+          "x": 0.5,
+          "y": 0.5
         },
 
-        "parent": null,
-        "uuid": "d71ba632-edbc-4192-b08b-2626eeb8e036"
+        "parent": "B0fg9eOArvIMZb7gqjZ6h"
       },
 
       "components": [
         {
           "type": "ComponentExample",
-          "uuid": "643cb91f-f4ba-4169-89de-dd687ced10fd",
+          "uuid": "nKZQeGaF3rMacWJSy7i6i",
           "testNumber": 1.23,
 
           "dependencies": [
-            "17d18ad8-d285-4682-8853-e0abcce28891"
+            "wfTZ9q2-Z1J5FzB_Cfeoy"
           ]
         },
         {
           "type": "ComponentExample",
-          "uuid": "17d18ad8-d285-4682-8853-e0abcce28891",
+          "uuid": "wfTZ9q2-Z1J5FzB_Cfeoy",
           "testNumber": 4.56,
+
+          "dependencies": null
+        }
+      ]
+    },
+    {
+      "name": "MyObject2",
+      "tag": 5,
+      "uuid": "iq-ettOnIw0_BMIB4kgu1",
+
+      "transform": {
+        "uuid": "B0fg9eOArvIMZb7gqjZ6h",
+
+        "position": {
+          "x": 3,
+          "y": 3
+        },
+
+        "rotation": -90,
+
+        "scale": {
+          "x": 2,
+          "y": 4
+        },
+
+        "parent": null
+      },
+
+      "components": [
+        {
+          "type": "ComponentExample",
+          "uuid": "qTVY4j2q1H9roqMA_d0Gx",
+          "testNumber": 1.23,
 
           "dependencies": null
         }

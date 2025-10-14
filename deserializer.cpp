@@ -51,7 +51,13 @@ void Deserializer::addToUuidRegistry(const std::string& uuid, const Type type, v
         }
 
         // if there are no more dependencies, create it
-        if (postponeObjectIt->dependenciesToWaitFor.empty()) {}
+        if (postponeObjectIt->dependenciesToWaitFor.empty()) {
+            JsonObject jsonObject = postponeObjectIt->jsonObject;
+            Scene* owner = postponeObjectIt->owner;
+
+            postponeObjectIt = postponeObjectEntries_.erase(postponeObjectIt);
+            objectFromJsonObject(jsonObject, owner);
+        }
         else {
             ++postponeObjectIt;
         }
