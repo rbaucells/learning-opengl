@@ -1,7 +1,8 @@
 #include "componentExample.h"
 
-#include "../deserializer.h"
 #include "../object.h"
+#include "../serializationAndDeserialization/componentRegistry.h"
+#include "../serializationAndDeserialization/deserializer.h"
 #include "../systems/input.h"
 
 REGISTER_COMPONENT("ComponentExample", ComponentExample)
@@ -44,7 +45,7 @@ void ComponentExample::onDestroy() {
     printf("OnDestroy\n");
 }
 
-void ComponentExample::onLeftClick(const bool state) {
+void ComponentExample::onLeftClick(const bool state) const {
     this->object->transform.localPosition.x += 1;
 }
 
@@ -52,7 +53,7 @@ ComponentExample::~ComponentExample() {
     printf("Destructor\n");
 }
 
-std::shared_ptr<Component> ComponentExample::deserialize(Object* owner, const JsonObject& data) {
+std::shared_ptr<Component> ComponentExample::deserialize(Object* owner, const JsonObject& data, std::function<Deserializer::UuidRegistryEntry(const std::string& uuid)> registryLookupFunc) {
     std::shared_ptr<ComponentExample> componentExample = std::make_shared<ComponentExample>(owner);
 
     const float f = static_cast<float>(data.getNumberField("testNumber"));

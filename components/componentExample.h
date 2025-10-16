@@ -1,4 +1,5 @@
 #pragma once
+#include "../serializationAndDeserialization/deserializer.h"
 #include "../systems/events.h"
 #include "../systems/component.h"
 
@@ -20,11 +21,11 @@ public:
     void onDisable() override;
     void onDestroy() override;
 
-    void onLeftClick(bool state);
+    void onLeftClick(bool state) const;
 
     ~ComponentExample() override;
 
-    static std::shared_ptr<Component> deserialize(Object* owner, const JsonObject& data);
+    static std::shared_ptr<Component> deserialize(Object* owner, const JsonObject& data, const std::function<Deserializer::UuidRegistryEntry(const std::string& uuid)> registryLookupFunc);
 private:
     Subscription<bool> leftClickSubscription_;
 
