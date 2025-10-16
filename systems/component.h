@@ -20,7 +20,6 @@ public:
     virtual void onEnable() {}
     virtual void start() {}
 
-
     // update loop
     virtual void update(float deltaTime) {}
     virtual void lateUpdate(float deltaTime) {}
@@ -44,7 +43,9 @@ public:
     void queueDestruction();
 
     // fine to use raw ptr as component is "owned" by object
-    Object* object = nullptr;
+    Object* const object;
+
+    const std::string id;
 
 protected:
     std::vector<std::unique_ptr<QueueEntry>> queue_;

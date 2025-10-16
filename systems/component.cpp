@@ -1,11 +1,10 @@
 #include "component.h"
 
+#include "../nanoId.h"
 #include "../object.h"
 #include "tweens/tween.h"
 
-Component::Component(Object* owner) {
-    this->object = owner;
-};
+Component::Component(Object* const owner) : object(owner), id(NanoId::nanoIdGen()) {}
 
 void Component::manageQueue(const float deltaTime) {
     for (auto it = queue_.begin(); it != queue_.end();) {

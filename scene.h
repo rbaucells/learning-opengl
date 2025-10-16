@@ -9,6 +9,8 @@ class Object;
 
 class Scene {
 public:
+    const std::string id;
+
     explicit Scene(bool main = true);
 
     void update(float deltaTime) const;
@@ -25,8 +27,45 @@ public:
     void removeObject(const std::shared_ptr<Object>& objectPtr);
     void removeObjectByTag(int tag);
     void removeObjectByName(const std::string& name);
+    void removeObjectById(const std::string& id);
     void removeObjectBy(const std::function<bool(const Object&)>& predicate);
+
+#pragma region Component things
+
+    std::weak_ptr<Component> getComponentById(const std::string& id) const;
+
+    template<IsComponent T>
+    std::vector<std::weak_ptr<T>> getComponents() const {
+        // same as getComponent only it adds it to a vector then returns it
+        std::vector<std::weak_ptr<T>> foundComponents;
+
+        for (const auto& object : objects_) {
+            for (const auto& component : object->components_) {
+                if (auto comp = std::dynamic_pointer_cast<T>(component)) {
+                    foundComponents.push_back(std::weak_ptr<T>(component));
+                }
+            }
+        }
+
+        return foundComponents;
+    }
+
+    template<IsComponent T>
+    // ReSharper disable once CppMemberFunctionMayBeConst
+    void removeAllComponents() {
+        for (const auto& object : objects_) {
+            for (auto& component : object->components_) {
+                if (std::dynamic_pointer_cast<T>(component)) {
+                    object->componentsToDestroy_.push_back(component);
+                }
+            }
+        }
+    }
+
+    void removeComponentBy(const std::function<bool(const Component&)>& predicate);
 #pragma endregion
+#pragma endregion
+
     void setMain();
 
     static Scene* mainScene;

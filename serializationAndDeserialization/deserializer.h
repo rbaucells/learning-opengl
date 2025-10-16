@@ -30,7 +30,7 @@ public:
         transform
     };
 
-    struct UuidRegistryEntry {
+    struct IdRegistryEntry {
         Type type;
         void* data;
     };
@@ -50,7 +50,7 @@ private:
         std::vector<std::string> dependenciesToWaitFor;
     };
 
-    struct PostponeComponent {
+    struct PostponedComponent {
         JsonObject jsonObject;
         Object* owner;
 
@@ -58,17 +58,17 @@ private:
     };
 
     std::vector<PostponedObject> postponedObjects_;
-    std::vector<PostponeComponent> postponedComponents_;
+    std::vector<PostponedComponent> postponedComponents_;
 
-    std::unordered_map<std::string, UuidRegistryEntry> idRegistry_;
+    std::unordered_map<std::string, IdRegistryEntry> idRegistry_;
 
     [[nodiscard]] bool isInIdRegistry(const std::string& uuid) const;
     void addToIdRegistry(const std::string& uuid, Type type, void* data);
-    UuidRegistryEntry getFromIdRegistry(const std::string& uuid);
+    IdRegistryEntry getFromIdRegistry(const std::string& uuid);
 
     void postponeObjectCreation(const PostponedObject& entry);
-    void postponeComponentCreation(const PostponeComponent& entry);
+    void postponeComponentCreation(const PostponedComponent& entry);
 
-    void objectFromJsonObject(const JsonObject& jsonObject, Scene* owner);
-    void componentFromJsonObject(const JsonObject& jsonComponent, Object* owner);
+    void createObjectFromJsonObject(const JsonObject& jsonObject, Scene* owner);
+    void createComponentFromJsonObject(const JsonObject& jsonComponent, Object* owner);
 };

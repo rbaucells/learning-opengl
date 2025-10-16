@@ -10,6 +10,7 @@ class Scene;
 class Object : public std::enable_shared_from_this<Object> {
 public:
     const std::string name;
+    const std::string id;
     const int tag;
 
     Transform transform;
@@ -50,7 +51,7 @@ public:
     }
 
     template<IsComponent T>
-    std::weak_ptr<T> getComponent() {
+    std::weak_ptr<T> getComponent() const {
         // loop until
         for (const auto& component : components_) {
             // the component raw pointer is of type T
@@ -63,7 +64,7 @@ public:
     }
 
     template<IsComponent T>
-    std::vector<std::weak_ptr<T>> getComponents() {
+    std::vector<std::weak_ptr<T>> getComponents() const {
         // same as getComponent only it adds it to a vector then returns it
         std::vector<std::weak_ptr<T>> foundComponents;
 
@@ -75,6 +76,8 @@ public:
 
         return foundComponents;
     }
+
+    std::weak_ptr<Component> getComponentById(const std::string& id) const;
 
     template<IsComponent T>
     void removeComponent() {

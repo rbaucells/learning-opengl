@@ -1,7 +1,9 @@
 #include "scene.h"
+
+#include "nanoId.h"
 #include "object.h"
 
-Scene::Scene(const bool main) {
+Scene::Scene(const bool main) : id(NanoId::nanoIdGen()) {
     if (main)
         setMain();
 }
@@ -89,6 +91,13 @@ void Scene::removeObjectByName(const std::string& name) {
     });
 }
 
+void Scene::removeObjectById(const std::string& id) {
+    removeObjectBy([id](const Object& obj) {
+    return obj.id == id;
+});
+}
+
+
 void Scene::removeObjectBy(const std::function<bool(const Object&)>& predicate) {
     for (auto& obj : objects_) {
         if (predicate(*obj)) {
@@ -101,4 +110,27 @@ void Scene::setMain() {
     mainScene = this;
 }
 
-Scene* Scene::mainScene = nullptr;
+std::weak_ptr<Component> Scene::getComponentById(const std::string& id) const {
+    for (const auto& object : objects_) {
+        for (const auto& component : object->components_) {
+            if (component->id == id) {
+                return std::weak_ptr(component);
+            }
+        }
+    }
+
+    return std::weak_ptr<Component>();
+}
+
+void Scene::removeComponentBy(const std::function<bool(const Component&)>& predicate) {
+    for (const auto& object : objects_) {
+        for (const auto& component : object->components_) {
+            if (predicate(*component)) {
+                object->componentsToDestroy_.push_back(component);
+            }
+        }
+    }
+}
+
+
+Scene* Scene::mainScene;

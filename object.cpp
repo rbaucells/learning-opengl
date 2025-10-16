@@ -4,6 +4,7 @@
 #include <utility>
 #include <vector>
 
+#include "nanoId.h"
 #include "scene.h"
 
 void Object::manageStarts() {
@@ -23,6 +24,7 @@ void Object::manageStarts() {
 
     componentsToStart_.clear();
 }
+
 void Object::manageDestructions() {
     for (const auto& comp : componentsToDestroy_) {
         if (enabled_) {
@@ -86,6 +88,17 @@ void Object::queueDestruction() {
     scene->removeObject(shared_from_this());
 }
 
+std::weak_ptr<Component> Object::getComponentById(const std::string& id) const {
+    for (const auto& component : components_) {
+        if (component->id == id) {
+            return std::weak_ptr(component);
+        }
+    }
+
+    // nothing was found
+    return std::weak_ptr<Component>();
+}
+
 void Object::removeComponent(const std::shared_ptr<Component>& compPtr) {
     // if its not alr in there
     if (std::ranges::find(componentsToDestroy_, compPtr) != componentsToDestroy_.end()) {
@@ -124,6 +137,6 @@ bool Object::getActive() const {
     return enabled_;
 }
 
-Object::Object(Scene* scene, std::string objectName, const int objectTag, const Vector2 pos, const float rot, const Vector2 scale) : name(std::move(objectName)), tag(objectTag), transform(this, pos, rot, scale), scene(scene) {}
+Object::Object(Scene* scene, std::string objectName, const int objectTag, const Vector2 pos, const float rot, const Vector2 scale) : name(std::move(objectName)), tag(objectTag), transform(this, pos, rot, scale), scene(scene), id(NanoId::nanoIdGen()) {}
 
-Object::Object(Scene* scene, std::string objectName, const int objectTag, Vector2 pos, float rot, Vector2 scale, Transform* parent) : name(std::move(objectName)), tag(objectTag), transform(this, pos, rot, scale, parent), scene(scene) {}
+Object::Object(Scene* scene, std::string objectName, const int objectTag, Vector2 pos, float rot, Vector2 scale, Transform* parent) : name(std::move(objectName)), tag(objectTag), transform(this, pos, rot, scale, parent), scene(scene), id(NanoId::nanoIdGen()) {}

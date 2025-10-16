@@ -25,7 +25,7 @@ public:
 
     ~ComponentExample() override;
 
-    static std::shared_ptr<Component> deserialize(Object* owner, const JsonObject& data, const std::function<Deserializer::UuidRegistryEntry(const std::string& uuid)> registryLookupFunc);
+    static std::shared_ptr<Component> deserialize(Object* owner, const JsonObject& data);
 private:
     Subscription<bool> leftClickSubscription_;
 

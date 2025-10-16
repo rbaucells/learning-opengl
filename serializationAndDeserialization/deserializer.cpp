@@ -22,7 +22,7 @@ Scene Deserializer::loadSceneFromFile(const std::string& filePath) {
 
     // loop through objects
     for (JsonObject jsonObject : jsonScene.getArrayField("objects")) {
-        objectFromJsonObject(jsonObject, &scene);
+        createObjectFromJsonObject(jsonObject, &scene);
     }
 
     if (!postponedComponents_.empty() || !postponedObjects_.empty()) {
@@ -58,7 +58,7 @@ void Deserializer::addToIdRegistry(const std::string& uuid, const Type type, voi
             Scene* owner = postponeObjectIt->owner;
 
             postponeObjectIt = postponedObjects_.erase(postponeObjectIt);
-            objectFromJsonObject(jsonObject, owner);
+            createObjectFromJsonObject(jsonObject, owner);
         }
         else {
             ++postponeObjectIt;
@@ -83,7 +83,7 @@ void Deserializer::addToIdRegistry(const std::string& uuid, const Type type, voi
             JsonObject jsonObject = postponeComponentIt->jsonObject;
             Object* owner = postponeComponentIt->owner;
             postponeComponentIt = postponedComponents_.erase(postponeComponentIt);
-            componentFromJsonObject(jsonObject, owner);
+            createComponentFromJsonObject(jsonObject, owner);
         }
         else {
             ++postponeComponentIt;
@@ -91,7 +91,7 @@ void Deserializer::addToIdRegistry(const std::string& uuid, const Type type, voi
     }
 }
 
-Deserializer::UuidRegistryEntry Deserializer::getFromIdRegistry(const std::string& uuid) {
+Deserializer::IdRegistryEntry Deserializer::getFromIdRegistry(const std::string& uuid) {
     return idRegistry_[uuid];
 }
 
@@ -99,11 +99,11 @@ void Deserializer::postponeObjectCreation(const PostponedObject& entry) {
     postponedObjects_.push_back(entry);
 }
 
-void Deserializer::postponeComponentCreation(const PostponeComponent& entry) {
+void Deserializer::postponeComponentCreation(const PostponedComponent& entry) {
     postponedComponents_.push_back(entry);
 }
 
-void Deserializer::objectFromJsonObject(const JsonObject& jsonObject, Scene* owner) {
+void Deserializer::createObjectFromJsonObject(const JsonObject& jsonObject, Scene* owner) {
     // get fields for constructing object
     std::string name = jsonObject.getStringField("name");
     int tag = static_cast<int>(jsonObject.getNumberField("tag"));
@@ -154,11 +154,11 @@ void Deserializer::objectFromJsonObject(const JsonObject& jsonObject, Scene* own
 
     // loop through components
     for (JsonObject jsonComponent : jsonObject.getArrayField("components")) {
-        componentFromJsonObject(jsonComponent, object.get());
+        createComponentFromJsonObject(jsonComponent, object.get());
     }
 }
 
-void Deserializer::componentFromJsonObject(const JsonObject& jsonComponent, Object* owner) {
+void Deserializer::createComponentFromJsonObject(const JsonObject& jsonComponent, Object* owner) {
     const std::string componentUuid = jsonComponent.getStringField("uuid");
     const std::string type = jsonComponent.getStringField("type");
 
@@ -173,9 +173,7 @@ void Deserializer::componentFromJsonObject(const JsonObject& jsonComponent, Obje
     }
 
     if (dependenciesToWaitFor.empty()) {
-        const std::shared_ptr<Component> component = ComponentRegistry::create(type, owner, jsonComponent, [this](const std::string& id) {
-            return getFromIdRegistry(id);
-        });
+        const std::shared_ptr<Component> component = ComponentRegistry::create(type, owner, jsonComponent);
 
         owner->addComponent(component);
         addToIdRegistry(componentUuid, Type::component, component.get());
