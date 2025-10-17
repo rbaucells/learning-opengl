@@ -2,6 +2,8 @@
 
 #include "nanoId.h"
 #include "object.h"
+#include "json/jsonArray.h"
+#include "json/jsonObject.h"
 
 Scene::Scene(const bool main) : id(NanoId::nanoIdGen()) {
     if (main)
@@ -93,10 +95,9 @@ void Scene::removeObjectByName(const std::string& name) {
 
 void Scene::removeObjectById(const std::string& id) {
     removeObjectBy([id](const Object& obj) {
-    return obj.id == id;
-});
+        return obj.id == id;
+    });
 }
-
 
 void Scene::removeObjectBy(const std::function<bool(const Object&)>& predicate) {
     for (auto& obj : objects_) {
@@ -130,6 +131,22 @@ void Scene::removeComponentBy(const std::function<bool(const Component&)>& predi
             }
         }
     }
+}
+
+JsonObject Scene::serialize() const {
+    JsonObject jsonResult;
+
+    jsonResult.putStringField("uuid", id);
+
+    JsonArray jsonObjects;
+
+    for (const auto& object: objects_) {
+        jsonObjects.putObject(object->serialize());
+    }
+
+    jsonResult.putArrayField("objects", jsonObjects);
+
+    return jsonResult;
 }
 
 

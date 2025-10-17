@@ -24,6 +24,8 @@ public:
 
     void queueDestruction();
 
+    JsonObject serialize() const;
+
 #pragma region Component stuff
     template<IsComponent T, typename... ARGS>
     std::weak_ptr<T> addComponent(ARGS&&... args) {

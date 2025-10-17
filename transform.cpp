@@ -54,16 +54,12 @@ Transform::Transform(Object *owner, const Vector2 pos, const float rot, const Ve
     this->localPosition = pos;
     this->localRotation = rot;
     this->localScale = scale;
-
-    object = owner;
 }
 
 Transform::Transform(Object *owner, const Vector2 pos, const float rot, const Vector2 scale) : Component(owner) {
     setGlobalPosition(pos);
     setGlobalRotation(rot);
     setGlobalScale(scale);
-
-    object = owner;
 }
 
 Transform::~Transform() {

@@ -24,17 +24,6 @@ public:
         std::string message_;
     };
 
-    enum class Type {
-        component,
-        object,
-        transform
-    };
-
-    struct IdRegistryEntry {
-        Type type;
-        void* data;
-    };
-
     /**
      * @note Can be ran asynchronously (on other thread)
      * @param filePath Where is the scenes .json file located
@@ -55,6 +44,17 @@ private:
         Object* owner;
 
         std::vector<std::string> dependenciesToWaitFor;
+    };
+
+    enum class Type {
+        component,
+        object,
+        transform
+    };
+
+    struct IdRegistryEntry {
+        Type type;
+        void* data;
     };
 
     std::vector<PostponedObject> postponedObjects_;

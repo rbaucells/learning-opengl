@@ -3,6 +3,7 @@
 #include "workQueue.h"
 #include "tweens/tween.h"
 
+class JsonObject;
 template<typename T>
 concept DerivesFromTweenBase = std::is_base_of_v<TweenBase, T>;
 
@@ -27,6 +28,8 @@ public:
 
     void manageQueue(float deltaTime);
     void manageTweens(float deltaTime);
+
+    virtual JsonObject serialize() const;
 
     // de-initialization
     virtual void onDisable() {}

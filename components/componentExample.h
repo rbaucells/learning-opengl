@@ -25,6 +25,8 @@ public:
 
     ~ComponentExample() override;
 
+    JsonObject serialize() const override;
+
     static std::shared_ptr<Component> deserialize(Object* owner, const JsonObject& data);
 private:
     Subscription<bool> leftClickSubscription_;

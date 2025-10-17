@@ -6,6 +6,8 @@
 
 #include "nanoId.h"
 #include "scene.h"
+#include "json/jsonArray.h"
+#include "json/jsonObject.h"
 
 void Object::manageStarts() {
     for (const auto& componentPtr : componentsToStart_) {
@@ -140,3 +142,23 @@ bool Object::getActive() const {
 Object::Object(Scene* scene, std::string objectName, const int objectTag, const Vector2 pos, const float rot, const Vector2 scale) : name(std::move(objectName)), tag(objectTag), transform(this, pos, rot, scale), scene(scene), id(NanoId::nanoIdGen()) {}
 
 Object::Object(Scene* scene, std::string objectName, const int objectTag, Vector2 pos, float rot, Vector2 scale, Transform* parent) : name(std::move(objectName)), tag(objectTag), transform(this, pos, rot, scale, parent), scene(scene), id(NanoId::nanoIdGen()) {}
+
+JsonObject Object::serialize() const {
+    JsonObject jsonObject;
+
+    jsonObject.putStringField("uuid", id);
+    jsonObject.putStringField("name", name);
+    jsonObject.putNumberField("tag", tag);
+
+    jsonObject.putObjectField("transform", transform.serialize());
+
+    JsonArray jsonComponents;
+
+    for (const auto& component : components_) {
+        jsonComponents.putObject(component->serialize());
+    }
+
+    jsonObject.putArrayField("components", jsonComponents);
+
+    return jsonObject;
+}

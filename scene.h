@@ -17,6 +17,8 @@ public:
     void fixedUpdate(float fixedDeltaTime) const;
     void lateUpdate(float lateDeltaTime) const;
 
+    JsonObject serialize() const;
+
     void manageStarts() const;
     void manageDestructions();
 
