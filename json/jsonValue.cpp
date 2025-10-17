@@ -130,7 +130,7 @@ std::string JsonValue::valueToString() const {
             return std::to_string(std::get<double>(value));
         }
         case Type::array:
-            return std::get<std::unique_ptr<JsonObject>>(value)->toString();
+            return std::get<std::unique_ptr<JsonArray>>(value)->toString();
         case Type::null:
             return "null";
         default:

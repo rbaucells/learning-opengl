@@ -5,10 +5,6 @@
 #include "jsonError.h"
 #include "jsonValue.h"
 
-JsonObject::JsonObject() {
-    this->data_ = {};
-}
-
 void JsonObject::putNumberField(const std::string& name, double value) {
     data_.insert_or_assign(name, value);
 }
@@ -89,7 +85,7 @@ JsonArray JsonObject::getArrayField(const std::string& name) const {
     const auto jsonValue = data_.at(name);
 
     if (jsonValue.type == JsonValue::Type::null) {
-        return JsonArray();
+        return {};
     }
 
     if (jsonValue.type != JsonValue::Type::array)
@@ -102,7 +98,7 @@ JsonObject JsonObject::getObjectField(const std::string& name) const {
     const auto jsonValue = data_.at(name);
 
     if (jsonValue.type == JsonValue::Type::null) {
-        return JsonObject();
+        return {};
     }
 
     if (jsonValue.type != JsonValue::Type::object)
@@ -133,9 +129,11 @@ std::string JsonObject::toString() const {
             result += "\"" + key + "\": " + value.valueToString() + ",\n";
         }
         else {
-            result += "\"" + key + "\": " + value.valueToString() + "\n}";
+            result += "\"" + key + "\": " + value.valueToString();
         }
     }
+
+    result += "\n}";
 
     return result;
 }

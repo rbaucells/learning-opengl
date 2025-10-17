@@ -58,6 +58,13 @@ JsonObject ComponentExample::serialize() const {
 
     jsonComponent.putNumberField("f", f);
     jsonComponent.putStringField("uuid", id);
+
+    JsonArray dependencies;
+
+    dependencies.putString("wfTZ9q2-Z1J5FzB_Cfeoy");
+    jsonComponent.putArrayField("dependencies", dependencies);
+
+    return jsonComponent;
 }
 
 std::shared_ptr<Component> ComponentExample::deserialize(Object* owner, const JsonObject& data) {

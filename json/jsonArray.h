@@ -8,6 +8,7 @@ class JsonObject;
 class JsonArray {
 public:
     JsonArray();
+    JsonArray(std::initializer_list<JsonValue> initializers);
 
     void putNumber(double value);
     void putString(const std::string& value);

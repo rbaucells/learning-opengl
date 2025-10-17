@@ -6,8 +6,12 @@
 #include "jsonObject.h"
 #include "jsonValue.h"
 
-JsonArray::JsonArray() {
-    this->data_ = {};
+JsonArray::JsonArray() {}
+
+JsonArray::JsonArray(std::initializer_list<JsonValue> initializers) {
+    for (auto value : initializers) {
+        putValue(value);
+    }
 }
 
 void JsonArray::putNumber(const double value) {
@@ -133,7 +137,7 @@ JsonValue& JsonArray::operator[](const int index) {
 }
 
 std::string JsonArray::toString() const {
-    std::string result = "{\n";
+    std::string result = "[\n";
 
     for (auto it = data_.begin(); it != data_.end(); ++it) {
         const auto& value = *it;
@@ -142,9 +146,11 @@ std::string JsonArray::toString() const {
             result += value.valueToString() + ",\n";
         }
         else {
-            result += value.valueToString() + "\n}";
+            result += value.valueToString();
         }
     }
+
+    result += "\n]";
 
     return result;
 }

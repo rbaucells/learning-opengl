@@ -7,8 +7,6 @@ class JsonArray;
 
 class JsonObject {
 public:
-    JsonObject();
-
     void putNumberField(const std::string& name, double value);
     void putStringField(const std::string& name, const std::string& value);
     void putBoolField(const std::string& name, bool value);
@@ -31,5 +29,5 @@ public:
     [[nodiscard]] std::string toString() const;
 
 private:
-    std::unordered_map<std::string, JsonValue> data_;
+    std::unordered_map<std::string, JsonValue> data_ = {};
 };

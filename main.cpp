@@ -87,6 +87,8 @@ int main() {
 
     Scene scene = deserializer.loadSceneFromFile("/Users/ricardito/Projects/learning-opengl/res/json files/scene.json");
 
+    std::cout << scene.serialize().toString();
+
     // Scene scene;
 
     // auto cameraObject = scene.addObject("mainCamera", 69, {0, 0}, 0, {1, 1});
@@ -190,6 +192,9 @@ int main() {
 
 void drawCalls() {
     // iterate through all the renderers in reverse. AKA: from back to front
+    if (!Camera::mainCamera)
+        return;
+
     const Matrix<4, 4> cameraViewMatrix = Camera::mainCamera->getViewMatrix();
     const Matrix<4, 4> projectionViewMatrix = Window::mainWindow->getProjectionMatrix();
 

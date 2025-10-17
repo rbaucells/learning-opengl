@@ -1,4 +1,6 @@
 #include "component.h"
+#include "../json/jsonObject.h"
+#include "../json/jsonArray.h"
 
 #include "../nanoId.h"
 #include "../object.h"
@@ -24,6 +26,10 @@ void Component::manageTweens(const float deltaTime) {
             ++it;
         }
     }
+}
+
+JsonObject Component::serialize() const {
+    return JsonObject();
 }
 
 void Component::queueDestruction() {
