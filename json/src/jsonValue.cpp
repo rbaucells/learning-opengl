@@ -1,6 +1,6 @@
 #include "jsonValue.h"
 #include "jsonArray.h"
-#include "jsonError.h"
+#include "../jsonError.h"
 #include "jsonObject.h"
 
 JsonValue::JsonValue(const JsonValue& other) {

@@ -29,7 +29,7 @@ void Component::manageTweens(const float deltaTime) {
 }
 
 JsonObject Component::serialize() const {
-    return JsonObject();
+    return {};
 }
 
 void Component::queueDestruction() {

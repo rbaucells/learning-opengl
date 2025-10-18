@@ -3,7 +3,7 @@
 #include "jsonArray.h"
 #include "jsonLexer.h"
 #include "jsonObject.h"
-#include "jsonToken.h"
+#include "../jsonToken.h"
 #include "jsonValue.h"
 
 JsonValue JsonParser::parseValue() {

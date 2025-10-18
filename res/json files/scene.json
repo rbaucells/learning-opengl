@@ -1,12 +1,12 @@
 {
-  "uuid": "5wUCcmAOCcav4vSK_JAam",
+  "id": "5wUCcmAOCcav4vSK_JAam",
   "objects": [
     {
       "name": "MyObject1",
       "tag": 0,
-      "uuid": "aaDI8WnRIJspGIX6L9vaX",
+      "id": "aaDI8WnRIJspGIX6L9vaX",
       "transform": {
-        "uuid": "bgIVkR9DjYnmuOLi_VA3n",
+        "id": "bgIVkR9DjYnmuOLi_VA3n",
         "position": {
           "x": 2,
           "y": 2
@@ -21,7 +21,7 @@
       "components": [
         {
           "type": "ComponentExample",
-          "uuid": "nKZQeGaF3rMacWJSy7i6i",
+          "id": "nKZQeGaF3rMacWJSy7i6i",
           "testNumber": 1.23,
           "dependencies": null
         }
@@ -30,9 +30,9 @@
     {
       "name": "MyObject2",
       "tag": 5,
-      "uuid": "iq-ettOnIw0_BMIB4kgu1",
+      "id": "iq-ettOnIw0_BMIB4kgu1",
       "transform": {
-        "uuid": "B0fg9eOArvIMZb7gqjZ6h",
+        "id": "B0fg9eOArvIMZb7gqjZ6h",
         "position": {
           "x": 3,
           "y": 3
@@ -45,6 +45,35 @@
         "parent": null
       },
       "components": null
+    }
+  ],
+  "resources": [
+    {
+      "type": "Texture",
+      "id": "mt0o-FxLZg4CvN-VE73TL",
+      "filePath": "/Users/ricardito/Projects/learning-opengl/res/textures/box.jpg",
+      "clamp": "GL_CLAMP",
+      "flipVertically": true
+    },
+    {
+      "type": "Shader",
+      "id": "4y0m3PjwhjE5OraBo_M-G",
+      "filePath": "/Users/ricardito/Projects/learning-opengl/res/shaders/mainFragment.shader",
+      "shaderType": "fragment"
+    },
+    {
+      "type": "Shader",
+      "id": "ovCxEyzQJiMfLfMbDty91",
+      "filePath": "/Users/ricardito/Projects/learning-opengl/res/shaders/mainVertex.shader",
+      "shaderType": "vertex"
+    },
+    {
+      "type": "shaderProgram",
+      "id": "rZgow0yttZOWjeJCxT8lk",
+      "dependencies": [
+        "ovCxEyzQJiMfLfMbDty91",
+        "4y0m3PjwhjE5OraBo_M-G"
+      ]
     }
   ]
 }

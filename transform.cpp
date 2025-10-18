@@ -1,7 +1,7 @@
 #include "transform.h"
 #include "object.h"
-#include "json/jsonArray.h"
-#include "json/jsonObject.h"
+#include "json/src/jsonArray.h"
+#include "json/src/jsonObject.h"
 
 struct Decomposed2D {
     Vector2 position{};

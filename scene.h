@@ -27,14 +27,14 @@ public:
     std::shared_ptr<Object> addObject(const std::string& objectName, int objectTag, Vector2 pos, float rot, Vector2 scale, Transform* parent);
 
     void removeObject(const std::shared_ptr<Object>& objectPtr);
-    void removeObjectByTag(int tag);
-    void removeObjectByName(const std::string& name);
-    void removeObjectById(const std::string& id);
+    void removeObjectByTag(int objectTag);
+    void removeObjectByName(const std::string& objectName);
+    void removeObjectById(const std::string& objectId);
     void removeObjectBy(const std::function<bool(const Object&)>& predicate);
 
 #pragma region Component things
 
-    std::weak_ptr<Component> getComponentById(const std::string& id) const;
+    std::weak_ptr<Component> getComponentById(const std::string& componentid) const;
 
     template<IsComponent T>
     std::vector<std::weak_ptr<T>> getComponents() const {

@@ -2,8 +2,8 @@
 #include <functional>
 #include <string>
 
-#include "../json/jsonObject.h"
-#include "../json/jsonArray.h"
+#include "../json/src/jsonArray.h"
+#include "../json/src/jsonObject.h"
 
 struct Vector2;
 class Object;
@@ -62,9 +62,9 @@ private:
 
     std::unordered_map<std::string, IdRegistryEntry> idRegistry_;
 
-    [[nodiscard]] bool isInIdRegistry(const std::string& uuid) const;
-    void addToIdRegistry(const std::string& uuid, Type type, void* data);
-    IdRegistryEntry getFromIdRegistry(const std::string& uuid);
+    [[nodiscard]] bool isInIdRegistry(const std::string& id) const;
+    void addToIdRegistry(const std::string& id, Type type, void* data);
+    IdRegistryEntry getFromIdRegistry(const std::string& id);
 
     void postponeObjectCreation(const PostponedObject& entry);
     void postponeComponentCreation(const PostponedComponent& entry);

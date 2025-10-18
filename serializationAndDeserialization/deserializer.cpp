@@ -2,11 +2,11 @@
 
 #include "componentRegistry.h"
 #include "../scene.h"
-#include "../json/jsonArray.h"
-#include "../json/jsonLexer.h"
+#include "../json/src/jsonArray.h"
+#include "../json/src/jsonLexer.h"
 #include "../json/jsonObject.h"
-#include "../json/jsonParser.h"
-#include "../json/jsonValue.h"
+#include "../json/src/jsonParser.h"
+#include "../json/src/jsonValue.h"
 
 Scene Deserializer::loadSceneFromFile(const std::string& filePath) {
     // open stream and things
@@ -32,19 +32,19 @@ Scene Deserializer::loadSceneFromFile(const std::string& filePath) {
     return scene;
 }
 
-bool Deserializer::isInIdRegistry(const std::string& uuid) const {
-    return idRegistry_.contains(uuid);
+bool Deserializer::isInIdRegistry(const std::string& id) const {
+    return idRegistry_.contains(id);
 }
 
-void Deserializer::addToIdRegistry(const std::string& uuid, const Type type, void* data) {
-    idRegistry_[uuid] = {type, data};
+void Deserializer::addToIdRegistry(const std::string& id, const Type type, void* data) {
+    idRegistry_[id] = {type, data};
 
     // iterate through component entries
     for (auto postponeObjectIt = postponedObjects_.begin(); postponeObjectIt != postponedObjects_.end();) {
-        // iterate through the uuids to check if it's the one
+        // iterate through the ids to check if it's the one
         for (auto it = postponeObjectIt->dependenciesToWaitFor.begin(); it != postponeObjectIt->dependenciesToWaitFor.end();) {
-            // if it is remove that uuid form the dependencies
-            if (*it == uuid) {
+            // if it is remove that id form the dependencies
+            if (*it == id) {
                 it = postponeObjectIt->dependenciesToWaitFor.erase(it);
             }
             else {
@@ -67,10 +67,10 @@ void Deserializer::addToIdRegistry(const std::string& uuid, const Type type, voi
 
     // iterate through component entries
     for (auto postponeComponentIt = postponedComponents_.begin(); postponeComponentIt != postponedComponents_.end();) {
-        // iterate through the uuids to check if it's the one
+        // iterate through the ids to check if it's the one
         for (auto it = postponeComponentIt->dependenciesToWaitFor.begin(); it != postponeComponentIt->dependenciesToWaitFor.end();) {
-            // if it is remove that uuid form the dependencies
-            if (*it == uuid) {
+            // if it is remove that id form the dependencies
+            if (*it == id) {
                 it = postponeComponentIt->dependenciesToWaitFor.erase(it);
             }
             else {
@@ -91,8 +91,8 @@ void Deserializer::addToIdRegistry(const std::string& uuid, const Type type, voi
     }
 }
 
-Deserializer::IdRegistryEntry Deserializer::getFromIdRegistry(const std::string& uuid) {
-    return idRegistry_[uuid];
+Deserializer::IdRegistryEntry Deserializer::getFromIdRegistry(const std::string& id) {
+    return idRegistry_[id];
 }
 
 void Deserializer::postponeObjectCreation(const PostponedObject& entry) {
@@ -107,26 +107,26 @@ void Deserializer::createObjectFromJsonObject(const JsonObject& jsonObject, Scen
     // get fields for constructing object
     std::string name = jsonObject.getStringField("name");
     int tag = static_cast<int>(jsonObject.getNumberField("tag"));
-    std::string objectUuid = jsonObject.getStringField("uuid");
+    std::string objectid = jsonObject.getStringField("id");
 
     // get transform
     JsonObject jsonTransform = jsonObject.getObjectField("transform");
-    std::string transformUuid = jsonTransform.getStringField("uuid");
+    std::string transformid = jsonTransform.getStringField("id");
 
     Transform* transformParent = nullptr;
 
     // if we have a parent
     if (!jsonTransform.getIsNullField("parent")) {
-        std::string parentUuid = jsonTransform.getStringField("parent");
+        std::string parentid = jsonTransform.getStringField("parent");
 
         // if that parent doesn't exist yet, we have to delay this entire objects creation
-        if (!isInIdRegistry(parentUuid)) {
-            postponeObjectCreation({jsonObject, owner, {parentUuid}});
+        if (!isInIdRegistry(parentid)) {
+            postponeObjectCreation({jsonObject, owner, {parentid}});
             return;
         }
 
         // if we are here that means we have a parent that already exists
-        transformParent = static_cast<Transform*>(getFromIdRegistry(parentUuid).data);
+        transformParent = static_cast<Transform*>(getFromIdRegistry(parentid).data);
     }
 
     // get the position
@@ -149,8 +149,8 @@ void Deserializer::createObjectFromJsonObject(const JsonObject& jsonObject, Scen
         object = owner->addObject(name, tag, pos, rot, scale);
     }
 
-    addToIdRegistry(objectUuid, Type::object, object.get());
-    addToIdRegistry(transformUuid, Type::transform, &object->transform);
+    addToIdRegistry(objectid, Type::object, object.get());
+    addToIdRegistry(transformid, Type::transform, &object->transform);
 
     // loop through components
     for (JsonObject jsonComponent : jsonObject.getArrayField("components")) {
@@ -159,16 +159,16 @@ void Deserializer::createObjectFromJsonObject(const JsonObject& jsonObject, Scen
 }
 
 void Deserializer::createComponentFromJsonObject(const JsonObject& jsonComponent, Object* owner) {
-    const std::string componentUuid = jsonComponent.getStringField("uuid");
+    const std::string componentid = jsonComponent.getStringField("id");
     const std::string type = jsonComponent.getStringField("type");
 
     JsonArray dependencies = jsonComponent.getArrayField("dependencies");
 
     std::vector<std::string> dependenciesToWaitFor;
 
-    for (std::string dependencyUuid : dependencies) {
-        if (!isInIdRegistry(dependencyUuid)) {
-            dependenciesToWaitFor.push_back(dependencyUuid);
+    for (std::string dependencyid : dependencies) {
+        if (!isInIdRegistry(dependencyid)) {
+            dependenciesToWaitFor.push_back(dependencyid);
         }
     }
 
@@ -176,7 +176,7 @@ void Deserializer::createComponentFromJsonObject(const JsonObject& jsonComponent
         const std::shared_ptr<Component> component = ComponentRegistry::create(type, owner, jsonComponent);
 
         owner->addComponent(component);
-        addToIdRegistry(componentUuid, Type::component, component.get());
+        addToIdRegistry(componentid, Type::component, component.get());
     }
     else {
         postponeComponentCreation({jsonComponent, owner, dependenciesToWaitFor});

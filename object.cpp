@@ -6,8 +6,8 @@
 
 #include "nanoId.h"
 #include "scene.h"
-#include "json/jsonArray.h"
-#include "json/jsonObject.h"
+#include "json/src/jsonArray.h"
+#include "json/src/jsonObject.h"
 
 void Object::manageStarts() {
     for (const auto& componentPtr : componentsToStart_) {
@@ -146,7 +146,7 @@ Object::Object(Scene* scene, std::string objectName, const int objectTag, Vector
 JsonObject Object::serialize() const {
     JsonObject jsonObject;
 
-    jsonObject.putStringField("uuid", id);
+    jsonObject.putStringField("id", id);
     jsonObject.putStringField("name", name);
     jsonObject.putNumberField("tag", tag);
 

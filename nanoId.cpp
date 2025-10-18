@@ -20,11 +20,11 @@ std::string NanoId::nanoIdGen(const std::string& alphabet, const int size) {
     std::mt19937_64 gen(std::random_device{}());
 
     // for uniformity
-    const int mask = roundUpToNearestPowOfTwo(alphabet.length());
+    const uint32_t mask = roundUpToNearestPowOfTwo(alphabet.length());
     // estimate how many numbers will need to be generated before we finally reach the target SIZE
-    const int step = std::ceil(1.6 * mask * size / alphabet.length());
+    const int step = std::ceil(1.6 * mask * size / static_cast<double>(alphabet.length()));
 
-    std::uniform_int_distribution<> distrib(0, mask);
+    std::uniform_int_distribution<> distrib(0, static_cast<int>(mask));
 
     std::string result("", size);
 
@@ -32,9 +32,7 @@ std::string NanoId::nanoIdGen(const std::string& alphabet, const int size) {
 
     while (true) {
         for (int i = 0; i < step; i++) {
-            const char alphabetIndex = distrib(gen);
-
-            if (alphabetIndex < alphabet.length()) {
+            if (const char alphabetIndex = static_cast<char>(distrib(gen)); alphabetIndex < alphabet.length()) {
                 result[count] = alphabet[alphabetIndex];
 
                 if (++count == DEFAULT_NANOID_SIZE) {

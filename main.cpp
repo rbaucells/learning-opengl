@@ -15,6 +15,8 @@
 #include "glad/gl.h"
 #include "GLFW/glfw3.h"
 #include "systems/input.h"
+#include "systems/audio/audioListener.h"
+#include "systems/audio/sound.h"
 #include "systems/opengl wrappers/shader.h"
 #include "systems/opengl wrappers/texture.h"
 #include "systems/opengl wrappers/window.h"

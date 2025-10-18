@@ -2,8 +2,8 @@
 
 #include "nanoId.h"
 #include "object.h"
-#include "json/jsonArray.h"
-#include "json/jsonObject.h"
+#include "json/src/jsonArray.h"
+#include "json/src/jsonObject.h"
 
 Scene::Scene(const bool main) : id(NanoId::nanoIdGen()) {
     if (main)
@@ -81,21 +81,21 @@ void Scene::removeObject(const std::shared_ptr<Object>& objectPtr) {
     objectsToDestroy_.push_back(objectPtr);
 }
 
-void Scene::removeObjectByTag(int tag) {
-    removeObjectBy([tag](const Object& obj) {
-        return obj.tag == tag;
+void Scene::removeObjectByTag(int objectTag) {
+    removeObjectBy([objectTag](const Object& obj) {
+        return obj.tag == objectTag;
     });
 }
 
-void Scene::removeObjectByName(const std::string& name) {
-    removeObjectBy([name](const Object& obj) {
-        return obj.name == name;
+void Scene::removeObjectByName(const std::string& objectName) {
+    removeObjectBy([objectName](const Object& obj) {
+        return obj.name == objectName;
     });
 }
 
-void Scene::removeObjectById(const std::string& id) {
-    removeObjectBy([id](const Object& obj) {
-        return obj.id == id;
+void Scene::removeObjectById(const std::string& objectId) {
+    removeObjectBy([objectId](const Object& obj) {
+        return obj.id == objectId;
     });
 }
 
@@ -111,16 +111,16 @@ void Scene::setMain() {
     mainScene = this;
 }
 
-std::weak_ptr<Component> Scene::getComponentById(const std::string& id) const {
+std::weak_ptr<Component> Scene::getComponentById(const std::string& componentid) const {
     for (const auto& object : objects_) {
         for (const auto& component : object->components_) {
-            if (component->id == id) {
-                return std::weak_ptr(component);
+            if (component->id == componentid) {
+                return component;
             }
         }
     }
 
-    return std::weak_ptr<Component>();
+    return {};
 }
 
 void Scene::removeComponentBy(const std::function<bool(const Component&)>& predicate) {
@@ -136,7 +136,7 @@ void Scene::removeComponentBy(const std::function<bool(const Component&)>& predi
 JsonObject Scene::serialize() const {
     JsonObject jsonResult;
 
-    jsonResult.putStringField("uuid", id);
+    jsonResult.putStringField("id", id);
 
     JsonArray jsonObjects;
 
