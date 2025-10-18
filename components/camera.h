@@ -1,26 +1,29 @@
 #pragma once
-#include "../systems/component.h"
 #include "../math/matrix.h"
+#include "../systems/component.h"
 
 class Camera final : public Component {
 public:
     struct AspectRatio {
         float width, height;
+
+        static AspectRatio sixteenByNine;
+        static AspectRatio oneByOne;
+        static AspectRatio twentyOneByNine;
+        static AspectRatio fourByThree;
     };
 
-    Camera(Object* owner, bool main = true);
+    explicit Camera(Object* owner, bool main = true);
     void awake() override;
     void setMain();
     Matrix<4, 4> getViewMatrix();
 
-    float getVerticalWidth() const {
-        return verticalWidth_;
-    }
-
-    float verticalSize = 5;
-    AspectRatio aspectRatio;
+    float height = 5;
+    AspectRatio aspectRatio = AspectRatio::sixteenByNine;
 
     static Camera* mainCamera;
+
+    ~Camera() override;
 
 private:
     Matrix<4, 4> lastLocalToWorldMatrix_;
@@ -28,6 +31,4 @@ private:
     Matrix<4, 4> viewMatrix_;
 
     [[nodiscard]] Matrix<4, 4> calculateCameraLocalToWorld() const;
-
-    float verticalWidth_;
 };

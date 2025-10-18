@@ -1,6 +1,11 @@
 #include "camera.h"
 #include "../object.h"
 
+Camera::AspectRatio Camera::AspectRatio::sixteenByNine = {16, 9};
+Camera::AspectRatio Camera::AspectRatio::fourByThree = {4, 3};
+Camera::AspectRatio Camera::AspectRatio::twentyOneByNine = {21, 9};
+Camera::AspectRatio Camera::AspectRatio::oneByOne = {1, 1};
+
 Camera::Camera(Object* owner, const bool main) : Component(owner) {
     if (main)
         setMain();
@@ -15,18 +20,24 @@ void Camera::setMain() {
 }
 
 Matrix<4, 4> Camera::getViewMatrix() {
-    if (auto localToWorldMatrix = calculateCameraLocalToWorld(); lastLocalToWorldMatrix_ != localToWorldMatrix) {
+    if (const auto localToWorldMatrix = calculateCameraLocalToWorld(); lastLocalToWorldMatrix_ != localToWorldMatrix) {
         lastLocalToWorldMatrix_ = localToWorldMatrix;
         viewMatrix_ = localToWorldMatrix;
     }
 
-    return viewMatrix_;
+    return lastLocalToWorldMatrix_;
 }
 
 Camera* Camera::mainCamera = nullptr;
 
+Camera::~Camera() {
+    if (mainCamera == this) {
+        mainCamera = nullptr;
+    }
+}
+
 Matrix<4, 4> Camera::calculateCameraLocalToWorld() const {
-    auto localToWorldMatrix = Matrix<4,4>::identity();
+    auto localToWorldMatrix = Matrix<4, 4>::identity();
 
     localToWorldMatrix = localToWorldMatrix.translate(-object->transform.localPosition.x, -object->transform.localPosition.y, -1);
     localToWorldMatrix = localToWorldMatrix.rotateZ(object->transform.localRotation);

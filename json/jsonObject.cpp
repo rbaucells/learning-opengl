@@ -121,19 +121,21 @@ JsonValue& JsonObject::operator[](const std::string& key) {
 
 std::string JsonObject::toString() const {
     std::string result = "{\n";
+    int i = 0;
 
-    for (auto it = data_.begin(); it != data_.end(); ++it) {
-        const auto& [key, value] = *it;
+    for (const auto& [key, value] : data_) {
+        i++;
 
-        if (it != data_.end()) {
-            result += "\"" + key + "\": " + value.valueToString() + ",\n";
+        result += "\"" + key + "\": " + value.valueToString();
+
+        if (i < data_.size()) {
+            result += ",\n";
         }
         else {
-            result += "\"" + key + "\": " + value.valueToString();
+            result += "\n";
         }
     }
 
-    result += "\n}";
-
+    result += "}";
     return result;
 }

@@ -58,6 +58,8 @@ public:
     std::weak_ptr<FunctionalTween<Vector2>> globalScaleTween(Vector2 target, float duration, const Curve& curve);
     std::weak_ptr<FunctionalTween<Vector2>> globalScaleTween(Vector2 start, Vector2 end, float duration, const Curve& curve);
 
+    JsonObject serialize() const override;
+
     Vector2 localPosition = {0, 0};
     float localRotation = 0;
     Vector2 localScale = {0, 0};

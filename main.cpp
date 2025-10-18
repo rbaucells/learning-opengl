@@ -8,20 +8,16 @@
 #include <thread>
 
 #include "serializationAndDeserialization/deserializer.h"
-#include "list.h"
-#include "object.h"
 #include "scene.h"
 #include "components/camera.h"
 #include "components/componentExample.h"
 #include "components/renderer/renderer.h"
 #include "glad/gl.h"
 #include "GLFW/glfw3.h"
-#include "math/vertex.h"
 #include "systems/input.h"
 #include "systems/opengl wrappers/shader.h"
 #include "systems/opengl wrappers/texture.h"
 #include "systems/opengl wrappers/window.h"
-#include "systems/audio/audioListener.h"
 #include "systems/opengl wrappers/shaderProgram.h"
 
 // callbacks
@@ -29,7 +25,7 @@ void errorCallback(const int error, const char* description) {
     std::printf("Error with code'%d': %s\n", error, description);
 }
 
-void debugErrorCallback(GLenum source, GLenum type, GLuint id, const GLenum severity, const GLsizei length, const GLchar* message, const void* userParam) {
+void debugErrorCallback(GLenum source, GLenum type, const GLuint id, const GLenum severity, const GLsizei length, const GLchar* message, const void* userParam) {
     switch (severity) {
         case GL_DEBUG_SEVERITY_HIGH:
             std::cerr << "HIGH: Debug message (" << id << "): " << message << std::endl;
@@ -67,7 +63,7 @@ int main() {
 
     if (gladLoadGL(glfwGetProcAddress) == 0) {
         printf("Failed to initialize OpenGL context\n");
-        exit(1);
+        return 1;
     }
 
     window.reCalculateProjectionMatrix();
@@ -87,7 +83,9 @@ int main() {
 
     Scene scene = deserializer.loadSceneFromFile("/Users/ricardito/Projects/learning-opengl/res/json files/scene.json");
 
-    std::cout << scene.serialize().toString();
+    std::string jsonString = scene.serialize().toString();;
+
+    std::cout << jsonString;
 
     // Scene scene;
 
@@ -186,18 +184,18 @@ int main() {
 
     // clean up things
     glfwTerminate();
-    // and exit
-    exit(EXIT_SUCCESS);
+    return 0;
 }
 
 void drawCalls() {
-    // iterate through all the renderers in reverse. AKA: from back to front
+    // why render if there is no camera
     if (!Camera::mainCamera)
         return;
 
     const Matrix<4, 4> cameraViewMatrix = Camera::mainCamera->getViewMatrix();
     const Matrix<4, 4> projectionViewMatrix = Window::mainWindow->getProjectionMatrix();
 
+    // iterate through all the renderers in reverse. AKA: from back to front
     for (auto& [layer, publisher] : std::ranges::reverse_view(renderersDrawPublishers)) {
         publisher->invoke(cameraViewMatrix, projectionViewMatrix);
     }

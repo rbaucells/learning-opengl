@@ -5,40 +5,24 @@
       "name": "MyObject1",
       "tag": 0,
       "uuid": "aaDI8WnRIJspGIX6L9vaX",
-
       "transform": {
         "uuid": "bgIVkR9DjYnmuOLi_VA3n",
-
         "position": {
           "x": 2,
           "y": 2
         },
-
         "rotation": 90,
-
         "scale": {
           "x": 0.5,
           "y": 0.5
         },
-
         "parent": "B0fg9eOArvIMZb7gqjZ6h"
       },
-
       "components": [
         {
           "type": "ComponentExample",
           "uuid": "nKZQeGaF3rMacWJSy7i6i",
           "testNumber": 1.23,
-
-          "dependencies": [
-            "wfTZ9q2-Z1J5FzB_Cfeoy"
-          ]
-        },
-        {
-          "type": "ComponentExample",
-          "uuid": "wfTZ9q2-Z1J5FzB_Cfeoy",
-          "testNumber": 4.56,
-
           "dependencies": null
         }
       ]
@@ -47,34 +31,20 @@
       "name": "MyObject2",
       "tag": 5,
       "uuid": "iq-ettOnIw0_BMIB4kgu1",
-
       "transform": {
         "uuid": "B0fg9eOArvIMZb7gqjZ6h",
-
         "position": {
           "x": 3,
           "y": 3
         },
-
         "rotation": -90,
-
         "scale": {
           "x": 2,
           "y": 4
         },
-
         "parent": null
       },
-
-      "components": [
-        {
-          "type": "ComponentExample",
-          "uuid": "qTVY4j2q1H9roqMA_d0Gx",
-          "testNumber": 1.23,
-
-          "dependencies": null
-        }
-      ]
+      "components": null
     }
   ]
 }

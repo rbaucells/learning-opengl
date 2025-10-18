@@ -1,5 +1,7 @@
 #include "transform.h"
 #include "object.h"
+#include "json/jsonArray.h"
+#include "json/jsonObject.h"
 
 struct Decomposed2D {
     Vector2 position{};
@@ -295,4 +297,35 @@ std::weak_ptr<FunctionalTween<Vector2>> Transform::globalScaleTween(const Vector
 
 std::weak_ptr<FunctionalTween<Vector2>> Transform::globalScaleTween(const Vector2 start, const Vector2 end, float duration, const Curve& curve) {
     return addTween(std::make_shared<FunctionalTween<Vector2>>([this](const Vector2& scale){setGlobalScale(scale);}, start, end, duration, curve));
+}
+
+JsonObject Transform::serialize() const {
+    JsonObject jsonTransform;
+
+    jsonTransform.putStringField("uuid", id);
+
+    JsonObject jsonPosition;
+
+    jsonPosition.putNumberField("x", localPosition.x);
+    jsonPosition.putNumberField("y", localPosition.y);
+
+    jsonTransform.putObjectField("position", jsonPosition);
+
+    jsonTransform.putNumberField("rotation", localRotation);
+
+    JsonObject jsonScale;
+
+    jsonScale.putNumberField("x", localScale.x);
+    jsonScale.putNumberField("y", localScale.y);
+
+    jsonTransform.putObjectField("scale", jsonScale);
+
+    if (parent_) {
+        jsonTransform.putStringField("parent", parent_->id);
+    }
+    else {
+        jsonTransform.putNullField("parent");
+    }
+
+    return jsonTransform;
 }

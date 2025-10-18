@@ -138,20 +138,21 @@ JsonValue& JsonArray::operator[](const int index) {
 
 std::string JsonArray::toString() const {
     std::string result = "[\n";
+    int i = 0;
 
-    for (auto it = data_.begin(); it != data_.end(); ++it) {
-        const auto& value = *it;
+    for (const auto& value : data_) {
+        i++;
+        result += value.valueToString();
 
-        if (it != data_.end()) {
-            result += value.valueToString() + ",\n";
+        if (i < data_.size()) {
+            result += ",\n";
         }
         else {
-            result += value.valueToString();
+            result += "\n";
         }
     }
 
-    result += "\n]";
-
+    result += "]";
     return result;
 }
 
