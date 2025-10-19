@@ -11,7 +11,7 @@ class Scene {
 public:
     const std::string id;
 
-    explicit Scene(bool main = true);
+    Scene();
 
     void update(float deltaTime) const;
     void fixedUpdate(float fixedDeltaTime) const;
@@ -69,8 +69,6 @@ public:
 #pragma endregion
 
     void setMain();
-
-    static Scene* mainScene;
 
 private:
     std::vector<std::shared_ptr<Object>> objects_;

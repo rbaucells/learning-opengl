@@ -1,5 +1,7 @@
 #pragma once
 #include <ostream>
+
+#include "scene.h"
 #include "glad/gl.h"
 #include "systems/opengl-wrappers/window.h"
 
@@ -23,7 +25,8 @@ public:
 
     ~Application();
 
-    std::unique_ptr<Window> window;
+    static std::unique_ptr<Window> mainWindow;
+    static std::unique_ptr<Scene> mainScene;
 
 private:
     // callbacks

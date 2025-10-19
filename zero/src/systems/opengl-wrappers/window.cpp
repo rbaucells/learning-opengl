@@ -4,16 +4,10 @@
 #include <iostream>
 
 #include "../input.h"
-
-Window* Window::mainWindow = nullptr;
+#include "../../application.h"
 
 // Window::Window(const int width, const int height, const std::string& title, GLFWmonitor* monitor, GLFWwindow* share) {
 Window::Window(const float size, const std::string& title, GLFWmonitor* monitor, GLFWwindow* share) {
-    if (mainWindow)
-        throw std::runtime_error("Window already exists");
-    else
-        mainWindow = this;
-
     coordinateSystemHeight_ = size;
 
     coordinateSystemWidth_ = coordinateSystemHeight_ * (curWindowAspectRatio_.width / curWindowAspectRatio_.height);
@@ -88,13 +82,13 @@ Window::~Window() {
 }
 
 void Window::updateWindowSize([[maybe_unused]] GLFWwindow* glfwWindow, const int width, const int height) {
-    mainWindow->curWindowWidth_ = width;
-    mainWindow->curWindowHeight_ = height;
-    mainWindow->curWindowAspectRatio_ = {width, height};
+    Application::mainWindow->curWindowWidth_ = width;
+    Application::mainWindow->curWindowHeight_ = height;
+    Application::mainWindow->curWindowAspectRatio_ = {width, height};
 
     glViewport(0, 0, width, height);
 
-    mainWindow->reCalculateProjectionMatrix();
+    Application::mainWindow->reCalculateProjectionMatrix();
 }
 
 void Window::closeCallback(GLFWwindow* window) {

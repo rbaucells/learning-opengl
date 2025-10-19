@@ -10,7 +10,7 @@ add_subdirectory(json++)
 add_subdirectory(zero)
 
 # Add executable
-add_executable(myGame1 main.cpp)
+add_executable(learningOpenGl main.cpp componentExample.cpp)
 
 # Link myGame1 to Zero
-target_link_libraries(myGame1 PRIVATE Zero)
+target_link_libraries(learningOpenGl PRIVATE zero)

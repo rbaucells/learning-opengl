@@ -8,8 +8,6 @@ inline constexpr int WINDOW_HEIGHT = 720;
 
 class Window {
 public:
-    static Window* mainWindow;
-
     Window(float size, const std::string& title, GLFWmonitor* monitor = nullptr, GLFWwindow* share = nullptr);
 
     void reCalculateProjectionMatrix();

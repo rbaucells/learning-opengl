@@ -4,10 +4,7 @@
 #include "object.h"
 #include "json++/json.h"
 
-Scene::Scene(const bool main) : id(NanoId::nanoIdGen()) {
-    if (main)
-        setMain();
-}
+Scene::Scene() : id(NanoId::nanoIdGen()) {}
 
 void Scene::update(const float deltaTime) const {
     for (const auto& objectPtr : objects_)
@@ -106,10 +103,6 @@ void Scene::removeObjectBy(const std::function<bool(const Object&)>& predicate) 
     }
 }
 
-void Scene::setMain() {
-    mainScene = this;
-}
-
 std::weak_ptr<Component> Scene::getComponentById(const std::string& componentid) const {
     for (const auto& object : objects_) {
         for (const auto& component : object->components_) {
@@ -139,7 +132,7 @@ JsonObject Scene::serialize() const {
 
     JsonArray jsonObjects;
 
-    for (const auto& object: objects_) {
+    for (const auto& object : objects_) {
         jsonObjects.putObject(object->serialize());
     }
 
@@ -147,6 +140,3 @@ JsonObject Scene::serialize() const {
 
     return jsonResult;
 }
-
-
-Scene* Scene::mainScene;

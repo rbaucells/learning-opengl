@@ -4,7 +4,7 @@
 #include "../scene.h"
 #include "json++/json.h"
 
-Scene Deserializer::loadSceneFromFile(const std::string& filePath) {
+std::unique_ptr<Scene> Deserializer::loadSceneFromFile(const std::string& filePath) {
     // open stream and things
     std::ifstream stream(filePath);
     JsonLexer lexer(stream);
@@ -14,18 +14,18 @@ Scene Deserializer::loadSceneFromFile(const std::string& filePath) {
     JsonObject jsonScene = parser.parseValue();
 
     // make a scene for us to return
-    Scene scene;
+    std::unique_ptr<Scene> scene = std::make_unique<Scene>();
 
     // loop through objects
     for (JsonObject jsonObject : jsonScene.getArrayField("objects")) {
-        createObjectFromJsonObject(jsonObject, &scene);
+        createObjectFromJsonObject(jsonObject, scene.get());
     }
 
     if (!postponedComponents_.empty() || !postponedObjects_.empty()) {
         throw DeserializerError("Circular dependency detected in 2 components/objects");
     }
 
-    return scene;
+    return std::move(scene);
 }
 
 bool Deserializer::isInIdRegistry(const std::string& id) const {

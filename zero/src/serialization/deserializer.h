@@ -27,7 +27,7 @@ public:
      * @param filePath Where is the scenes .json file located
      * @return Scene constructed from .json file
      */
-    Scene loadSceneFromFile(const std::string& filePath);
+    std::unique_ptr<Scene> loadSceneFromFile(const std::string& filePath);
 
 private:
     struct PostponedObject {
