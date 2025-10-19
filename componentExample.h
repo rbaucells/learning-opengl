@@ -3,5 +3,5 @@
 
 class ComponentExample {
 public:
-    std::function<std::shared_ptr<Component>(Object* owner, const JsonObject&)> deserialize;
+    static std::shared_ptr<Component> deserialize(Object* owner, const JsonObject&);
 };

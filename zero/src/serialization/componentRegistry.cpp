@@ -2,13 +2,13 @@
 
 // registry is only available in this file
 namespace {
-    auto& getRegistry() {
-        static std::unordered_map<std::string, std::function<std::shared_ptr<Component>(Object* owner, const JsonObject&)>> registry = {};
+    std::unordered_map<std::string, std::function<std::shared_ptr<Component>(Object* owner, const JsonObject&)>>& getRegistry() {
+        static std::unordered_map<std::string, std::function<std::shared_ptr<Component>(Object* owner, const JsonObject&)>> registry;
         return registry;
     }
 
-    auto& getRegistryMutex() {
-        static std::mutex registryMutex = {};
+    std::mutex& getRegistryMutex() {
+        static std::mutex registryMutex;
         return registryMutex;
     }
 }

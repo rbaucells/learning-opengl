@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.12)
-project(Json++)
+project(json++)
 
 # using cpp 20
 set(CMAKE_CXX_STANDARD 20)
@@ -9,6 +9,6 @@ set(CMAKE_CXX_STANDARD 20)
 file(GLOB_RECURSE SOURCES CONFIGURE_DEPENDS "src/*.cpp")
 
 # json++ lib
-add_library(Json++ STATIC ${SOURCES})
+add_library(json++ STATIC ${SOURCES})
 
-target_include_directories(Json++ PUBLIC include)
+target_include_directories(json++ PUBLIC include)
