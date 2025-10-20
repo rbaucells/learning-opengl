@@ -2,7 +2,6 @@
 #include <vector>
 
 #include "object.h"
-#include "transform.h"
 #include "math++/math.h"
 
 class Object;
@@ -23,8 +22,7 @@ public:
     void manageDestructions();
 
 #pragma region Object things
-    std::shared_ptr<Object> addObject(const std::string& objectName, int objectTag, Vector2 pos, float rot, Vector2 scale);
-    std::shared_ptr<Object> addObject(const std::string& objectName, int objectTag, Vector2 pos, float rot, Vector2 scale, Transform* parent);
+    std::shared_ptr<Object> addObject(const std::string& objectName, int objectTag);
 
     void removeObject(const std::shared_ptr<Object>& objectPtr);
     void removeObjectByTag(int objectTag);
@@ -33,20 +31,15 @@ public:
     void removeObjectBy(const std::function<bool(const Object&)>& predicate);
 
 #pragma region Component things
-
-    std::weak_ptr<Component> getComponentById(const std::string& componentid) const;
+    void removeComponentBy(const std::function<bool(const Component& component)>& predicate);
+    std::weak_ptr<Component> getComponentById(const std::string& componentId) const;
 
     template<IsComponent T>
     std::vector<std::weak_ptr<T>> getComponents() const {
-        // same as getComponent only it adds it to a vector then returns it
         std::vector<std::weak_ptr<T>> foundComponents;
 
         for (const auto& object : objects_) {
-            for (const auto& component : object->components_) {
-                if (auto comp = std::dynamic_pointer_cast<T>(component)) {
-                    foundComponents.push_back(std::weak_ptr<T>(component));
-                }
-            }
+            foundComponents.push_back(object->getComponents<T>());
         }
 
         return foundComponents;
@@ -56,19 +49,11 @@ public:
     // ReSharper disable once CppMemberFunctionMayBeConst
     void removeAllComponents() {
         for (const auto& object : objects_) {
-            for (auto& component : object->components_) {
-                if (std::dynamic_pointer_cast<T>(component)) {
-                    object->componentsToDestroy_.push_back(component);
-                }
-            }
+            object->removeAllComponents<T>();
         }
     }
-
-    void removeComponentBy(const std::function<bool(const Component&)>& predicate);
 #pragma endregion
 #pragma endregion
-
-    void setMain();
 
 private:
     std::vector<std::shared_ptr<Object>> objects_;

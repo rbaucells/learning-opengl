@@ -8,15 +8,8 @@
 class Object;
 
 class Transform final : public Component {
-    // both raw pointers are fine because non owning
-    Transform *parent_ = nullptr;
-    std::vector<Transform *> children_;
-
 public:
-    Transform(Object *owner, Vector2 pos, float rot, Vector2 scale, Transform *parent);
-    Transform(Object *owner, Vector2 pos, float rot, Vector2 scale);
-
-    ~Transform() override;
+    Transform(Object* owner, Vector2 pos, float rot, Vector2 scale, Transform* parent);
 
     [[nodiscard]] Matrix<4, 4> localToWorldMatrix() const;
     [[nodiscard]] Matrix<4, 4> worldToLocalMatrix() const;
@@ -29,15 +22,18 @@ public:
     [[nodiscard]] float getGlobalRotation() const;
     [[nodiscard]] Vector2 getGlobalScale() const;
 
-    void addChild(Transform *child);
-    void removeChild(Transform *child);
+    void addChild(Transform* child);
+
+    void removeChild(Transform* child);
     void removeAllChildren();
-    std::vector<Transform *> getChildren();
     void deleteAllChildren();
 
-    void setParent(Transform *newParent);
-    [[nodiscard]] Transform *getParent() const;
+    std::vector<Transform*> getChildren();
 
+    void setParent(Transform* newParent);
+    [[nodiscard]] Transform* getParent() const;
+
+#pragma region tweens
     std::weak_ptr<Tween<Vector2>> localPosTween(Vector2 target, float duration, const Curve& curve);
     std::weak_ptr<Tween<Vector2>> localPosTween(Vector2 start, Vector2 end, float duration, const Curve& curve);
 
@@ -55,10 +51,17 @@ public:
 
     std::weak_ptr<FunctionalTween<Vector2>> globalScaleTween(Vector2 target, float duration, const Curve& curve);
     std::weak_ptr<FunctionalTween<Vector2>> globalScaleTween(Vector2 start, Vector2 end, float duration, const Curve& curve);
-
+#pragma endregion
     JsonObject serialize() const override;
+
+    ~Transform() override;
 
     Vector2 localPosition = {0, 0};
     float localRotation = 0;
     Vector2 localScale = {0, 0};
+
+private:
+    // both raw pointers are fine because non owning
+    Transform* parent_ = nullptr;
+    std::vector<Transform*> children_;
 };

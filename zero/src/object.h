@@ -13,7 +13,7 @@ public:
     const std::string id;
     const int tag;
 
-    Transform transform;
+    std::shared_ptr<Transform> transform;
 
     void manageStarts();
     void manageDestructions();
@@ -79,7 +79,7 @@ public:
         return foundComponents;
     }
 
-    std::weak_ptr<Component> getComponentById(const std::string& id) const;
+    std::weak_ptr<Component> getComponentById(const std::string& componentId) const;
 
     template<IsComponent T>
     void removeComponent() {
@@ -104,11 +104,12 @@ public:
         }
     }
 #pragma endregion
+
     void setActive(bool state);
     [[nodiscard]] bool getActive() const;
 
     // fine to use raw ptr as object is "owned" by scene
-    Scene* scene = nullptr;
+    Scene* const scene;
 
 private:
     bool enabled_ = true;
@@ -117,8 +118,7 @@ private:
     std::vector<std::shared_ptr<Component>> componentsToDestroy_;
     std::vector<std::shared_ptr<Component>> componentsToStart_;
 
-    Object(Scene* scene, std::string objectName, int objectTag, Vector2 pos, float rot, Vector2 scale);
-    Object(Scene* scene, std::string objectName, int objectTag, Vector2 pos, float rot, Vector2 scale, Transform* parent);
+    Object(Scene* scene, std::string objectName, int objectTag);
 
     // for access to object constructor and private fields to clean up
     friend class Scene;

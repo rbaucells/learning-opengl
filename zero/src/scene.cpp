@@ -31,21 +31,17 @@ void Scene::manageDestructions() {
         objectPtr->manageDestructions();
     }
 
-    for (auto& objectPtr : objectsToDestroy_) {
+    for (const auto& objectPtr : objectsToDestroy_) {
         // we need to deactivate before destroying
-        if (objectPtr->enabled_) {
-            objectPtr->transform.onDisable();
-        }
+        const bool enabled = objectPtr->enabled_;
 
         for (const auto& comp : objectPtr->components_) {
-            if (objectPtr->enabled_) {
+            if (enabled) {
                 comp->onDisable();
             }
 
             comp->onDestroy();
         }
-
-        objectPtr->transform.onDestroy();
 
         objectPtr->components_.clear();
         objectPtr->componentsToDestroy_.clear();
@@ -60,12 +56,8 @@ void Scene::manageDestructions() {
     objectsToDestroy_.clear();
 }
 
-std::shared_ptr<Object> Scene::addObject(const std::string& objectName, const int objectTag, const Vector2 pos, const float rot, const Vector2 scale) {
-    return objects_.emplace_back(new Object(this, objectName, objectTag, pos, rot, scale));
-}
-
-std::shared_ptr<Object> Scene::addObject(const std::string& objectName, const int objectTag, const Vector2 pos, const float rot, const Vector2 scale, Transform* parent) {
-    return objects_.emplace_back(new Object(this, objectName, objectTag, pos, rot, scale, parent));
+std::shared_ptr<Object> Scene::addObject(const std::string& objectName, const int objectTag) {
+    return objects_.emplace_back(new Object(this, objectName, objectTag));
 }
 
 void Scene::removeObject(const std::shared_ptr<Object>& objectPtr) {
@@ -103,10 +95,10 @@ void Scene::removeObjectBy(const std::function<bool(const Object&)>& predicate) 
     }
 }
 
-std::weak_ptr<Component> Scene::getComponentById(const std::string& componentid) const {
+std::weak_ptr<Component> Scene::getComponentById(const std::string& componentId) const {
     for (const auto& object : objects_) {
         for (const auto& component : object->components_) {
-            if (component->id == componentid) {
+            if (component->id == componentId) {
                 return component;
             }
         }

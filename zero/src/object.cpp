@@ -52,19 +52,13 @@ void Object::update(const float deltaTime) {
         component->update(deltaTime);
     }
 
-    transform.update(deltaTime);
-
     for (const auto& component : components_) {
         component->manageTweens(deltaTime);
     }
 
-    transform.manageTweens(deltaTime);
-
     for (const auto& component : components_) {
         component->manageQueue(deltaTime);
     }
-
-    transform.manageQueue(deltaTime);
 }
 
 void Object::fixedUpdate(const float fixedDeltaTime) const {
@@ -89,9 +83,9 @@ void Object::queueDestruction() {
     scene->removeObject(shared_from_this());
 }
 
-std::weak_ptr<Component> Object::getComponentById(const std::string& id) const {
+std::weak_ptr<Component> Object::getComponentById(const std::string& componentId) const {
     for (const auto& component : components_) {
-        if (component->id == id) {
+        if (component->id == componentId) {
             return std::weak_ptr(component);
         }
     }
@@ -138,9 +132,7 @@ bool Object::getActive() const {
     return enabled_;
 }
 
-Object::Object(Scene* scene, std::string objectName, const int objectTag, const Vector2 pos, const float rot, const Vector2 scale) : name(std::move(objectName)), tag(objectTag), transform(this, pos, rot, scale), scene(scene), id(NanoId::nanoIdGen()) {}
-
-Object::Object(Scene* scene, std::string objectName, const int objectTag, Vector2 pos, float rot, Vector2 scale, Transform* parent) : name(std::move(objectName)), tag(objectTag), transform(this, pos, rot, scale, parent), scene(scene), id(NanoId::nanoIdGen()) {}
+Object::Object(Scene* scene, std::string objectName, const int objectTag) : name(std::move(objectName)), id(NanoId::nanoIdGen()), tag(objectTag), scene(scene) {}
 
 JsonObject Object::serialize() const {
     JsonObject jsonObject;
@@ -148,8 +140,6 @@ JsonObject Object::serialize() const {
     jsonObject.putStringField("id", id);
     jsonObject.putStringField("name", name);
     jsonObject.putNumberField("tag", tag);
-
-    jsonObject.putObjectField("transform", transform.serialize());
 
     JsonArray jsonComponents;
 

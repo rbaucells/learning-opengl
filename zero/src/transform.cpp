@@ -8,7 +8,7 @@ struct Decomposed2D {
     Vector2 scale{};
 };
 
-Decomposed2D decompose2D(const Matrix<4, 4> &m) {
+Decomposed2D decompose2D(const Matrix<4, 4>& m) {
     // TODO: what did chatgpt do in here?
     Decomposed2D out;
 
@@ -50,22 +50,18 @@ Decomposed2D decompose2D(const Matrix<4, 4> &m) {
     return out;
 }
 
-Transform::Transform(Object *owner, const Vector2 pos, const float rot, const Vector2 scale, Transform *parent) : Component(owner) {
-    setParent(parent);
-    this->localPosition = pos;
-    this->localRotation = rot;
-    this->localScale = scale;
-}
-
-Transform::Transform(Object *owner, const Vector2 pos, const float rot, const Vector2 scale) : Component(owner) {
-    setGlobalPosition(pos);
-    setGlobalRotation(rot);
-    setGlobalScale(scale);
-}
-
-Transform::~Transform() {
-    deleteAllChildren();
-    setParent(nullptr);
+Transform::Transform(Object* owner, const Vector2 pos, const float rot, const Vector2 scale, Transform* parent) : Component(owner) {
+    if (parent) {
+        setParent(parent);
+        this->localPosition = pos;
+        this->localRotation = rot;
+        this->localScale = scale;
+    }
+    else {
+        setGlobalPosition(pos);
+        setGlobalRotation(rot);
+        setGlobalScale(scale);
+    }
 }
 
 Matrix<4, 4> Transform::localToWorldMatrix() const {
@@ -186,7 +182,7 @@ Vector2 Transform::getGlobalScale() const {
  * @note Will not set childs parent, you must do that yourself
  * @param child Child* to add to children list
  */
-void Transform::addChild(Transform *child) {
+void Transform::addChild(Transform* child) {
     children_.push_back(child);
 }
 
@@ -195,7 +191,7 @@ void Transform::addChild(Transform *child) {
  * @note Will not set childs parent to nothing, you must do that yourself
  * @param child Child* to remove from children list
  */
-void Transform::removeChild(Transform *child) {
+void Transform::removeChild(Transform* child) {
     std::erase(children_, child);
 }
 
@@ -204,8 +200,16 @@ void Transform::removeChild(Transform *child) {
  * @note Will set child's parent to nothing
  */
 void Transform::removeAllChildren() {
-    for (Transform *child: children_) {
+    for (Transform* child : children_) {
         child->setParent(nullptr);
+    }
+
+    children_.clear();
+}
+
+void Transform::deleteAllChildren() {
+    for (const Transform* child : children_) {
+        child->object->queueDestruction();
     }
 
     children_.clear();
@@ -215,23 +219,15 @@ void Transform::removeAllChildren() {
  *
  * @return std::vector of Transform pointers. All children
  */
-std::vector<Transform *> Transform::getChildren() {
+std::vector<Transform*> Transform::getChildren() {
     return children_;
-}
-
-void Transform::deleteAllChildren() {
-    for (const Transform *child: children_) {
-        child->object->queueDestruction();
-    }
-
-    children_.clear();
 }
 
 /**
  * @brief Sets parent, will keep global position/rotation/scale
  * @param newParent The new parent
  */
-void Transform::setParent(Transform *newParent) {
+void Transform::setParent(Transform* newParent) {
     // tell the parents good bye
     if (newParent != nullptr)
         newParent->removeChild(this);
@@ -246,7 +242,8 @@ void Transform::setParent(Transform *newParent) {
     setGlobalRotation(globalRot);
     setGlobalScale(globalScale);
 }
-Transform *Transform::getParent() const {
+
+Transform* Transform::getParent() const {
     return parent_;
 }
 
@@ -275,27 +272,27 @@ std::weak_ptr<Tween<Vector2>> Transform::localScaleTween(const Vector2 start, co
 }
 
 std::weak_ptr<FunctionalTween<Vector2>> Transform::globalPosTween(const Vector2 target, float duration, const Curve& curve) {
-    return addTween(std::make_shared<FunctionalTween<Vector2>>([this](const Vector2& pos){setGlobalPosition(pos);}, getGlobalPosition(), target, duration, curve));
+    return addTween(std::make_shared<FunctionalTween<Vector2>>([this](const Vector2& pos) { setGlobalPosition(pos); }, getGlobalPosition(), target, duration, curve));
 }
 
 std::weak_ptr<FunctionalTween<Vector2>> Transform::globalPosTween(const Vector2 start, const Vector2 end, float duration, const Curve& curve) {
-    return addTween(std::make_shared<FunctionalTween<Vector2>>([this](const Vector2& pos){setGlobalPosition(pos);}, start, end, duration, curve));
+    return addTween(std::make_shared<FunctionalTween<Vector2>>([this](const Vector2& pos) { setGlobalPosition(pos); }, start, end, duration, curve));
 }
 
 std::weak_ptr<FunctionalTween<float>> Transform::globalRotationTween(const float target, float duration, const Curve& curve) {
-    return addTween(std::make_shared<FunctionalTween<float>>([this](const float rot){setGlobalRotation(rot);}, getGlobalRotation(), target, duration, curve));
+    return addTween(std::make_shared<FunctionalTween<float>>([this](const float rot) { setGlobalRotation(rot); }, getGlobalRotation(), target, duration, curve));
 }
 
 std::weak_ptr<FunctionalTween<float>> Transform::globalRotationTween(const float start, const float end, float duration, const Curve& curve) {
-    return addTween(std::make_shared<FunctionalTween<float>>([this](const float rot){setGlobalRotation(rot);}, start, end, duration, curve));
+    return addTween(std::make_shared<FunctionalTween<float>>([this](const float rot) { setGlobalRotation(rot); }, start, end, duration, curve));
 }
 
 std::weak_ptr<FunctionalTween<Vector2>> Transform::globalScaleTween(const Vector2 target, float duration, const Curve& curve) {
-    return addTween(std::make_shared<FunctionalTween<Vector2>>([this](const Vector2& scale){setGlobalScale(scale);}, getGlobalScale(), target, duration, curve));
+    return addTween(std::make_shared<FunctionalTween<Vector2>>([this](const Vector2& scale) { setGlobalScale(scale); }, getGlobalScale(), target, duration, curve));
 }
 
 std::weak_ptr<FunctionalTween<Vector2>> Transform::globalScaleTween(const Vector2 start, const Vector2 end, float duration, const Curve& curve) {
-    return addTween(std::make_shared<FunctionalTween<Vector2>>([this](const Vector2& scale){setGlobalScale(scale);}, start, end, duration, curve));
+    return addTween(std::make_shared<FunctionalTween<Vector2>>([this](const Vector2& scale) { setGlobalScale(scale); }, start, end, duration, curve));
 }
 
 JsonObject Transform::serialize() const {
@@ -327,4 +324,9 @@ JsonObject Transform::serialize() const {
     }
 
     return jsonTransform;
+}
+
+Transform::~Transform() {
+    deleteAllChildren();
+    setParent(nullptr);
 }
