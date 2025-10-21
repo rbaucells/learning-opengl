@@ -131,12 +131,12 @@ void AudioListener::queryErrors() const {
 }
 
 void AudioListener::setListenerPos() const {
-    Vector2 globalPos = object->transform.getGlobalPosition();
+    Vector2 globalPos = object->transform->getGlobalPosition();
     alListener3f(AL_POSITION, globalPos.x, globalPos.y, 0);
 }
 
 void AudioListener::setListenerVelocity(const float deltaTime) {
-    const Vector2 globalPos = object->transform.getGlobalPosition();
+    const Vector2 globalPos = object->transform->getGlobalPosition();
     const Vector2 velocity = (globalPos - lastPos_) / deltaTime;
     lastPos_ = globalPos;
 

@@ -1,5 +1,7 @@
 #include "componentExample.h"
-#include "zero.h"
+
+#include "json++/json.h"
+#include "zero/zero.h"
 
 REGISTER_COMPONENT("ComponentExample", ComponentExample);
 

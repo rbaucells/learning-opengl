@@ -1,7 +1,7 @@
 #pragma once
 #include <memory>
 
-#include "zero.h"
+#include "zero/zero.h"
 
 class ComponentExample final : public Component {
 public:

@@ -15,20 +15,20 @@ public:
 
     std::shared_ptr<Transform> transform;
 
-    void manageStarts();
-    void manageDestructions();
-
-    void update(float deltaTime);
-    void fixedUpdate(float fixedDeltaTime) const;
-    void lateUpdate(float deltaTime) const;
-
     void queueDestruction();
 
     JsonObject serialize() const;
 
-#pragma region Component stuff
+    void setActive(bool state);
+    [[nodiscard]] bool getActive() const;
+
+    // fine to use raw ptr as object is "owned" by scene
+    Scene* const scene;
+
     template<IsComponent T, typename... ARGS>
     std::weak_ptr<T> addComponent(ARGS&&... args) {
+        static_assert(!std::is_same_v<T, Transform>, "Cannot add component of type 'Transform'. Objects always already have one");
+
         // make the component
         std::shared_ptr<T> newComponent = std::make_shared<T>(this, std::forward<ARGS>(args)...);
 
@@ -40,47 +40,95 @@ public:
 
     template<IsComponent T>
     std::weak_ptr<T> addComponent(std::shared_ptr<T> component) {
+        static_assert(!std::is_same_v<T, Transform>, "Cannot add component of type 'Transform'. Objects always already have one");
+
         components_.push_back(component);
         componentsToStart_.push_back(component);
 
         return component;
     }
 
-    void removeComponentsBy(const std::function<bool(const std::shared_ptr<Component>&)>& predicate);
+    std::weak_ptr<Component> getComponentBy(const std::function<bool(const std::shared_ptr<Component>&)>& predicate) const;
+
+    std::vector<std::weak_ptr<Component>> getAllComponentsBy(const std::function<bool(const std::shared_ptr<Component>&)>& predicate) const;
 
     template<IsComponent T>
-    void removeAllComponents() {
-        removeComponentsBy([](const std::shared_ptr<Component>& component) {
-            return std::dynamic_pointer_cast<T>(component);
-        });
+    std::weak_ptr<T> getComponent() const {
+        for (const auto& component : components_) {
+            if (auto castComponent = std::dynamic_pointer_cast<T>(component)) {
+                return castComponent;
+            }
+        }
+
+        return {};
     }
+
+    template<IsComponent T = Component>
+    std::weak_ptr<T> getComponentById(const std::string& componentId) const {
+        for (const auto& component : components_) {
+            if (component->id == componentId) {
+                return component;
+            }
+        }
+
+        return {};
+    }
+
+    template<IsComponent T>
+    std::vector<std::weak_ptr<T>> getAllComponents() const {
+        std::vector<std::weak_ptr<T>> foundComponents;
+
+        for (const auto& component : components_) {
+            if (auto castComponent = std::dynamic_pointer_cast<T>(component))
+                foundComponents.push_back(castComponent);
+        }
+
+        return foundComponents;
+    }
+
+    void removeComponentBy(const std::function<bool(const std::shared_ptr<Component>&)>& predicate);
+
+    void removeAllComponentsBy(const std::function<bool(const std::shared_ptr<Component>&)>& predicate);
 
     template<IsComponent T>
     void removeComponent() {
-        for (const auto& component: components_) {
-            if (std::dynamic_pointer_cast<T>(component)) {
-                componentsToDestroy_.push_back(component);
-            }
-        }
+        static_assert(!std::is_same_v<T, Transform>, "Cannot remove component of type 'Transform'");
+
+        removeComponentBy([](const std::shared_ptr<Component>& component) {
+            if (std::dynamic_pointer_cast<T>(component))
+                return true;
+
+            return false;
+        });
     }
+
+    void removeComponent(const std::shared_ptr<Component>& component);
 
     template<IsComponent T>
-    std::vector<std::weak_ptr<T>>> getAllComponents() {
+    void removeAllComponents() {
+        static_assert(!std::is_same_v<T, Transform>, "Cannot remove component of type 'Transform'");
 
+        removeAllComponentsBy([](const std::shared_ptr<Component>& component) {
+            if (std::dynamic_pointer_cast<T>(component))
+                return true;
+
+            return false;
+        });
     }
 
-#pragma endregion
-
-    void setActive(bool state);
-    [[nodiscard]] bool getActive() const;
-
-    // fine to use raw ptr as object is "owned" by scene
-    Scene* const scene;
+    void removeComponentById(const std::string& componentId);
 
 private:
     std::vector<std::shared_ptr<Component>> componentsToStart_;
     std::vector<std::shared_ptr<Component>> components_;
     std::vector<std::shared_ptr<Component>> componentsToDestroy_;
+
+    void manageStarts();
+    void manageDestructions();
+
+    void update(float deltaTime);
+    void fixedUpdate(float fixedDeltaTime) const;
+    void lateUpdate(float deltaTime) const;
 
     bool enabled_ = true;
 

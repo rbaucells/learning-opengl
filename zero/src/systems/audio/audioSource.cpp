@@ -105,7 +105,7 @@ AudioSource::~AudioSource() {
 
 void AudioSource::setSourcePos() const {
     // for directional audio
-    auto [x, y] = object->transform.getGlobalPosition();
+    auto [x, y] = object->transform->getGlobalPosition();
 
     // std::cout << "Got Global Position: " << x << ", " << y << std::endl;
 
@@ -113,7 +113,7 @@ void AudioSource::setSourcePos() const {
 }
 
 void AudioSource::setSourceVelocity(const float deltaTime) {
-    const Vector2 globalPos = object->transform.getGlobalPosition();
+    const Vector2 globalPos = object->transform->getGlobalPosition();
     const Vector2 velocity = (globalPos - lastPos_) / deltaTime;
     lastPos_ = globalPos;
 

@@ -8,13 +8,9 @@
 #include "settings.h"
 #include "components/camera.h"
 #include "components/renderer/renderer.h"
-#include "serialization/deserializer.h"
 #include "systems/input.h"
 
 Application::Application(const std::string& scenePath) {
-    Deserializer deserializer;
-    mainScene = deserializer.loadSceneFromFile(scenePath);
-
     // when we get an glfwError, lmk
     glfwSetErrorCallback(errorCallback);
 

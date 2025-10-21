@@ -19,10 +19,10 @@ public:
     void manageStarts() const;
     void manageDestructions();
 
-#pragma region Object Stuff
     [[nodiscard]] std::weak_ptr<Object> addObject(const std::string& objectName, int objectTag);
 
     [[nodiscard]] std::weak_ptr<Object> getObjectBy(const std::function<bool(const std::shared_ptr<Object>&)>& predicate) const;
+
     [[nodiscard]] std::weak_ptr<Object> getObjectByName(const std::string& objectName) const;
     [[nodiscard]] std::weak_ptr<Object> getObjectById(const std::string& objectId) const;
     [[nodiscard]] std::weak_ptr<Object> getObjectByTag(int objectTag) const;
@@ -32,46 +32,76 @@ public:
     void removeObjectByName(const std::string& objectName);
     void removeObjectById(const std::string& objectId);
     void removeObjectByTag(int objectTag);
-#pragma endregion
-#pragma region Component Stuff
+
+    void removeObject(const std::shared_ptr<Object>& object);
+
+    std::weak_ptr<Component> getComponentBy(const std::function<bool(const std::shared_ptr<Component>&)>& predicate) const;
+    std::vector<std::weak_ptr<Component>> getAllComponentsBy(const std::function<bool(const std::shared_ptr<Component>&)>& predicate) const;
+
     template<IsComponent T>
-    std::vector<std::weak_ptr<T>> getAllComponents() {
+    std::weak_ptr<T> getComponent() const {
+        for (const auto& object : objects_) {
+            for (const auto& component : object->components_) {
+                if (auto castComponent = std::dynamic_pointer_cast<T>(component)) {
+                    return castComponent;
+                }
+            }
+        }
+
+        return {};
+    }
+
+    template<IsComponent T = Component>
+    std::weak_ptr<T> getComponentById(const std::string& componentId) const {
+        for (const auto& object : objects_) {
+            for (const auto& component : object->components_) {
+                if (component->id == componentId) {
+                    return component;
+                }
+            }
+        }
+
+        return {};
+    }
+
+    template<IsComponent T>
+    std::vector<std::weak_ptr<T>> getAllComponents() const {
         std::vector<std::weak_ptr<T>> foundComponents;
 
         for (const auto& object : objects_) {
-            foundComponents.push_back(object->getAllComponents<T>());
+            for (const auto& component : object->components_) {
+                if (auto castComponent = std::dynamic_pointer_cast<T>(component))
+                    foundComponents.push_back(castComponent);
+            }
         }
 
         return foundComponents;
     }
 
-    [[nodiscard]] std::weak_ptr<Component> getComponentBy(const std::function<bool(const std::shared_ptr<Component>&)>& predicate) const;
-
-    template<IsComponent T = Component>
-    std::weak_ptr<T> getComponentById(const std::string& componentId) {
-        return std::dynamic_pointer_cast<T>(getComponentBy([componentId](const std::shared_ptr<Component>& component) {
-            return component->id == componentId;
-        }));
-    }
+    void removeComponentBy(const std::function<bool(const std::shared_ptr<Component>&)>& predicate);
+    void removeAllComponentsBy(const std::function<bool(const std::shared_ptr<Component>&)>& predicate);
 
     template<IsComponent T>
-    std::weak_ptr<T> removeAllComponents() {
-        for (const auto& object : objects_) {
-            object->removeAllComponents<T>();
-        }
+    void removeComponent() {
+        removeComponentBy([](const std::shared_ptr<T>& component) {
+            if (std::dynamic_pointer_cast<T>(component))
+                return true;
+
+            return false;
+        });
     }
-
-    void removeComponentBy(const std::function<bool(const std::shared_ptr<Component>&)>& predicate) const;
-
-    void removeComponentById(const std::string& componentId);
-#pragma endregion
 
     template<IsComponent T>
     void removeAllComponents() {
-        for (const auto& object : objects_) {
-            object->removeAllComponents<T>();
-        }
+        removeAllComponentsBy([](const std::shared_ptr<T>& component) {
+            if (std::dynamic_pointer_cast<T>(component))
+                return true;
+
+            return false;
+        });
     }
+
+    void removeComponentById(const std::string& componentId);
 
     [[nodiscard]] JsonObject serialize() const;
 

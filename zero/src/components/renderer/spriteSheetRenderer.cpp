@@ -84,7 +84,7 @@ SpriteSheetRenderer::SpriteSheetRenderer(Object* owner, const float pixelsPerUni
 
 void SpriteSheetRenderer::draw(const Matrix<4, 4>& view, const Matrix<4, 4>& projection) const {
     // create the model matrix from the transform
-    const Matrix<4, 4> model = object->transform.localToWorldMatrix();
+    const Matrix<4, 4> model = object->transform->localToWorldMatrix();
 
     // combine the matrices into a single MVP matrix
     const Matrix<4, 4> mvp = projection * (view * model);

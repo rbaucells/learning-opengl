@@ -9,7 +9,7 @@ class Object;
 
 class Transform final : public Component {
 public:
-    Transform(Object* owner, Vector2 pos, float rot, Vector2 scale, Transform* parent);
+    explicit Transform(Object* owner, Vector2 pos = {0, 0}, float rot = 0, Vector2 scale = {0, 0}, Transform* parent = nullptr);
 
     [[nodiscard]] Matrix<4, 4> localToWorldMatrix() const;
     [[nodiscard]] Matrix<4, 4> worldToLocalMatrix() const;

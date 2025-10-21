@@ -83,32 +83,22 @@ void Object::queueDestruction() {
     scene->removeObject(shared_from_this());
 }
 
-std::weak_ptr<Component> Object::getComponentById(const std::string& componentId) const {
+JsonObject Object::serialize() const {
+    JsonObject jsonObject;
+
+    jsonObject.putStringField("id", id);
+    jsonObject.putStringField("name", name);
+    jsonObject.putNumberField("tag", tag);
+
+    JsonArray jsonComponents;
+
     for (const auto& component : components_) {
-        if (component->id == componentId) {
-            return std::weak_ptr(component);
-        }
+        jsonComponents.putObject(component->serialize());
     }
 
-    // nothing was found
-    return std::weak_ptr<Component>();
-}
+    jsonObject.putArrayField("components", jsonComponents);
 
-void Object::removeComponent(const std::shared_ptr<Component>& compPtr) {
-    // if its not alr in there
-    if (std::ranges::find(componentsToDestroy_, compPtr) != componentsToDestroy_.end()) {
-        return;
-    }
-
-    componentsToDestroy_.push_back(compPtr);
-}
-
-void Object::removeComponentBy(const std::function<bool(const Component&)>& predicate) {
-    for (auto& comp : components_) {
-        if (predicate(*comp)) {
-            removeComponent(comp);
-        }
-    }
+    return jsonObject;
 }
 
 void Object::setActive(const bool state) {
@@ -132,22 +122,57 @@ bool Object::getActive() const {
     return enabled_;
 }
 
-Object::Object(Scene* scene, std::string objectName, const int objectTag) : name(std::move(objectName)), id(NanoId::nanoIdGen()), tag(objectTag), scene(scene) {}
-
-JsonObject Object::serialize() const {
-    JsonObject jsonObject;
-
-    jsonObject.putStringField("id", id);
-    jsonObject.putStringField("name", name);
-    jsonObject.putNumberField("tag", tag);
-
-    JsonArray jsonComponents;
-
+std::weak_ptr<Component> Object::getComponentBy(const std::function<bool(const std::shared_ptr<Component>&)>& predicate) const {
     for (const auto& component : components_) {
-        jsonComponents.putObject(component->serialize());
+        if (predicate(component)) {
+            return component;
+        }
     }
 
-    jsonObject.putArrayField("components", jsonComponents);
+    return {};
+}
 
-    return jsonObject;
+std::vector<std::weak_ptr<Component>> Object::getAllComponentsBy(const std::function<bool(const std::shared_ptr<Component>&)>& predicate) const {
+    std::vector<std::weak_ptr<Component>> foundComponents;
+
+    for (const auto& component : components_) {
+        if (predicate(component))
+            foundComponents.push_back(component);
+    }
+
+    return foundComponents;
+}
+
+void Object::removeComponentBy(const std::function<bool(const std::shared_ptr<Component>&)>& predicate) {
+    for (const auto& component : components_) {
+        if (predicate(component)) {
+            componentsToDestroy_.push_back(component);
+            return;
+        }
+    }
+}
+
+void Object::removeAllComponentsBy(const std::function<bool(const std::shared_ptr<Component>&)>& predicate) {
+    for (const auto& component : components_) {
+        if (predicate(component)) {
+            componentsToDestroy_.push_back(component);
+        }
+    }
+}
+
+void Object::removeComponent(const std::shared_ptr<Component>& component) {
+    componentsToDestroy_.push_back(component);
+}
+
+void Object::removeComponentById(const std::string& componentId) {
+    removeComponentBy([componentId](const std::shared_ptr<Component>& component) {
+        return component->id == componentId;
+    });
+}
+
+Object::Object(Scene* scene, std::string objectName, const int objectTag) : name(std::move(objectName)), id(NanoId::nanoIdGen()), tag(objectTag), scene(scene) {
+    transform = std::make_shared<Transform>(this);
+
+    components_.push_back(transform);
+    componentsToStart_.push_back(transform);
 }
