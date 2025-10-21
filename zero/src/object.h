@@ -32,77 +32,43 @@ public:
         // make the component
         std::shared_ptr<T> newComponent = std::make_shared<T>(this, std::forward<ARGS>(args)...);
 
-        // get a weak ptr and add it to components
-        std::weak_ptr<T> componentPtr(newComponent);
-
         components_.push_back(newComponent);
         componentsToStart_.push_back(newComponent);
 
-        return componentPtr;
+        return newComponent;
     }
 
     template<IsComponent T>
     std::weak_ptr<T> addComponent(std::shared_ptr<T> component) {
-        // get a weak ptr and add it to components
-        std::weak_ptr<T> componentPtr(component);
-
         components_.push_back(component);
         componentsToStart_.push_back(component);
 
-        return componentPtr;
+        return component;
     }
 
-    template<IsComponent T>
-    std::weak_ptr<T> getComponent() const {
-        // loop until
-        for (const auto& component : components_) {
-            // the component raw pointer is of type T
-            if (auto comp = std::dynamic_pointer_cast<T>(component)) {
-                return std::weak_ptr<T>(comp);
-            }
-        }
-        // nothing was found
-        return std::weak_ptr<T>();
-    }
-
-    template<IsComponent T>
-    std::vector<std::weak_ptr<T>> getComponents() const {
-        // same as getComponent only it adds it to a vector then returns it
-        std::vector<std::weak_ptr<T>> foundComponents;
-
-        for (const auto& component : components_) {
-            if (auto comp = std::dynamic_pointer_cast<T>(component)) {
-                foundComponents.push_back(std::weak_ptr<T>(component));
-            }
-        }
-
-        return foundComponents;
-    }
-
-    std::weak_ptr<Component> getComponentById(const std::string& componentId) const;
-
-    template<IsComponent T>
-    void removeComponent() {
-        for (auto& component : components_) {
-            if (std::dynamic_pointer_cast<T>(component)) {
-                componentsToDestroy_.push_back(component);
-                return;
-            }
-        }
-    }
-
-    void removeComponent(const std::shared_ptr<Component>& compPtr);
-
-    void removeComponentBy(const std::function<bool(const Component&)>& predicate);
+    void removeComponentsBy(const std::function<bool(const std::shared_ptr<Component>&)>& predicate);
 
     template<IsComponent T>
     void removeAllComponents() {
-        for (auto& component : components_) {
+        removeComponentsBy([](const std::shared_ptr<Component>& component) {
+            return std::dynamic_pointer_cast<T>(component);
+        });
+    }
+
+    template<IsComponent T>
+    void removeComponent() {
+        for (const auto& component: components_) {
             if (std::dynamic_pointer_cast<T>(component)) {
                 componentsToDestroy_.push_back(component);
             }
         }
     }
+
+    template<IsComponent T>
+    std::vector<std::weak_ptr<T>>> getAllComponents() {
+
+    }
+
 #pragma endregion
 
     void setActive(bool state);
@@ -112,11 +78,11 @@ public:
     Scene* const scene;
 
 private:
-    bool enabled_ = true;
-    std::vector<std::shared_ptr<Component>> components_;
-
-    std::vector<std::shared_ptr<Component>> componentsToDestroy_;
     std::vector<std::shared_ptr<Component>> componentsToStart_;
+    std::vector<std::shared_ptr<Component>> components_;
+    std::vector<std::shared_ptr<Component>> componentsToDestroy_;
+
+    bool enabled_ = true;
 
     Object(Scene* scene, std::string objectName, int objectTag);
 

@@ -56,65 +56,60 @@ void Scene::manageDestructions() {
     objectsToDestroy_.clear();
 }
 
-std::shared_ptr<Object> Scene::addObject(const std::string& objectName, const int objectTag) {
+std::weak_ptr<Object> Scene::addObject(const std::string& objectName, const int objectTag) {
     return objects_.emplace_back(new Object(this, objectName, objectTag));
 }
 
-void Scene::removeObject(const std::shared_ptr<Object>& objectPtr) {
-    // if its not alr in there
-    if (std::ranges::find(objectsToDestroy_, objectPtr) != objectsToDestroy_.end()) {
-        return;
-    }
-
-    objectsToDestroy_.push_back(objectPtr);
-}
-
-void Scene::removeObjectByTag(int objectTag) {
-    removeObjectBy([objectTag](const Object& obj) {
-        return obj.tag == objectTag;
-    });
-}
-
-void Scene::removeObjectByName(const std::string& objectName) {
-    removeObjectBy([objectName](const Object& obj) {
-        return obj.name == objectName;
-    });
-}
-
-void Scene::removeObjectById(const std::string& objectId) {
-    removeObjectBy([objectId](const Object& obj) {
-        return obj.id == objectId;
-    });
-}
-
-void Scene::removeObjectBy(const std::function<bool(const Object&)>& predicate) {
-    for (auto& obj : objects_) {
-        if (predicate(*obj)) {
-            removeObject(obj);
-        }
-    }
-}
-
-std::weak_ptr<Component> Scene::getComponentById(const std::string& componentId) const {
-    for (const auto& object : objects_) {
-        for (const auto& component : object->components_) {
-            if (component->id == componentId) {
-                return component;
-            }
-        }
+std::weak_ptr<Object> Scene::getObjectBy(const std::function<bool(const std::shared_ptr<Object>&)>& predicate) const {
+    for (const auto& objectPtr : objects_) {
+        if (predicate(objectPtr))
+            return objectPtr;
     }
 
     return {};
 }
 
-void Scene::removeComponentBy(const std::function<bool(const Component&)>& predicate) {
-    for (const auto& object : objects_) {
-        for (const auto& component : object->components_) {
-            if (predicate(*component)) {
-                object->componentsToDestroy_.push_back(component);
-            }
-        }
+std::weak_ptr<Object> Scene::getObjectById(const std::string& objectId) const {
+    return getObjectBy([objectId](const std::shared_ptr<Object>& object) {
+        return object->id == objectId;
+    });
+}
+
+std::weak_ptr<Object> Scene::getObjectByTag(int objectTag) const {
+    return getObjectBy([objectTag](const std::shared_ptr<Object>& object) {
+        return object->tag == objectTag;
+    });
+}
+
+std::weak_ptr<Object> Scene::getObjectByName(const std::string& objectName) const {
+    return getObjectBy([objectName](const std::shared_ptr<Object>& object) {
+        return object->name == objectName;
+    });
+}
+
+void Scene::removeObjectBy(const std::function<bool(const std::shared_ptr<Object>&)>& predicate) {
+    for (const auto& objectPtr : objects_) {
+        if (predicate(objectPtr))
+            objectsToDestroy_.push_back(objectPtr);
     }
+}
+
+void Scene::removeObjectByTag(int objectTag) {
+    removeObjectBy([objectTag](const std::shared_ptr<Object>& obj) {
+        return obj->tag == objectTag;
+    });
+}
+
+void Scene::removeObjectByName(const std::string& objectName) {
+    removeObjectBy([objectName](const std::shared_ptr<Object>& obj) {
+        return obj->name == objectName;
+    });
+}
+
+void Scene::removeObjectById(const std::string& objectId) {
+    removeObjectBy([objectId](const std::shared_ptr<Object>& obj) {
+        return obj->id == objectId;
+    });
 }
 
 JsonObject Scene::serialize() const {
@@ -131,4 +126,10 @@ JsonObject Scene::serialize() const {
     jsonResult.putArrayField("objects", jsonObjects);
 
     return jsonResult;
+}
+
+void Scene::removeComponentById(const std::string& componentId) {
+    removeComponentBy([componentId](const std::shared_ptr<Component>& component) {
+        return component->id == componentId;
+    });
 }
