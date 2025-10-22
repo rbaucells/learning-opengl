@@ -6,7 +6,7 @@
 #include "../../systems/opengl-wrappers/texture.h"
 #include "glad/gl.h"
 
-SpriteSheetRenderer::SpriteSheetRenderer(Object* owner, Vector2 size, const int gridWidth, const int gridHeight, const int padding, const std::shared_ptr<Texture>& texture, const std::shared_ptr<ShaderProgram>& shader, const int renderingLayer, const Usage usage, const DrawMode drawMode) : RendererBase(owner) {
+SpriteSheetRenderer::SpriteSheetRenderer(const ComponentParams& params, Vector2 size, const int gridWidth, const int gridHeight, const int padding, const std::shared_ptr<Texture>& texture, const std::shared_ptr<ShaderProgram>& shader, const int renderingLayer, const Usage usage, const DrawMode drawMode) : RendererBase(params) {
     this->texture_ = texture;
     this->gridWidth_ = gridWidth;
     this->gridHeight_ = gridHeight;
@@ -78,8 +78,8 @@ SpriteSheetRenderer::SpriteSheetRenderer(Object* owner, Vector2 size, const int 
     addToAllRenderers(renderingLayer_);
 }
 
-SpriteSheetRenderer::SpriteSheetRenderer(Object* owner, const float pixelsPerUnit, const int gridWidth, const int gridHeight, const int padding, const std::shared_ptr<Texture>& texture, const std::shared_ptr<ShaderProgram>& shader, const int renderingLayer, const Usage usage, const DrawMode drawMode)
-    : SpriteSheetRenderer(owner, Vector2(static_cast<float>(gridWidth) / pixelsPerUnit, static_cast<float>(gridHeight) / pixelsPerUnit), gridWidth, gridHeight, padding, texture, shader, renderingLayer, usage, drawMode) {
+SpriteSheetRenderer::SpriteSheetRenderer(const ComponentParams& params, const float pixelsPerUnit, const int gridWidth, const int gridHeight, const int padding, const std::shared_ptr<Texture>& texture, const std::shared_ptr<ShaderProgram>& shader, const int renderingLayer, const Usage usage, const DrawMode drawMode)
+    : SpriteSheetRenderer(params, Vector2(static_cast<float>(gridWidth) / pixelsPerUnit, static_cast<float>(gridHeight) / pixelsPerUnit), gridWidth, gridHeight, padding, texture, shader, renderingLayer, usage, drawMode) {
 }
 
 void SpriteSheetRenderer::draw(const Matrix<4, 4>& view, const Matrix<4, 4>& projection) const {

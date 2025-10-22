@@ -7,6 +7,7 @@
       "id": "aaDI8WnRIJspGIX6L9vaX",
       "components": [
         {
+          "type": "Transform",
           "id": "bgIVkR9DjYnmuOLi_VA3n",
           "position": {
             "x": 2,
@@ -33,6 +34,7 @@
       "id": "iq-ettOnIw0_BMIB4kgu1",
       "components": [
         {
+          "type": "Transform",
           "id": "B0fg9eOArvIMZb7gqjZ6h",
           "position": {
             "x": 3,

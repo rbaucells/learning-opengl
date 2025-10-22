@@ -8,7 +8,7 @@
 #include "effects/audioEffect.h"
 #include "filters/audioFilter.h"
 
-AudioSource::AudioSource(Object* owner, const std::string& filePath) : Component(owner), sound_(filePath) {
+AudioSource::AudioSource(const ComponentParams& params, const std::string& filePath) : Component(params), sound_(filePath) {
     std::printf("Constructing AudioSource\n");
     // create source and buffer
     alGenSources(1, &source_);

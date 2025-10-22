@@ -13,7 +13,7 @@ public:
         static AspectRatio fourByThree;
     };
 
-    explicit Camera(Object* owner, bool main = true);
+    explicit Camera(const ComponentParams& params, bool main = true);
     void awake() override;
     void setMain();
     Matrix<4, 4> getViewMatrix();

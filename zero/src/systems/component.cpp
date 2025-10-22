@@ -5,7 +5,7 @@
 #include "../object.h"
 #include "tweens/tween.h"
 
-Component::Component(Object* const owner) : object(owner), id(NanoId::nanoIdGen()) {}
+Component::Component(const ComponentParams& params) : object(params.owner), id(params.id) {}
 
 void Component::manageQueue(const float deltaTime) {
     for (auto it = queue_.begin(); it != queue_.end();) {

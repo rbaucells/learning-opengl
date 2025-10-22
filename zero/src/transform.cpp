@@ -50,7 +50,7 @@ Decomposed2D decompose2D(const Matrix<4, 4>& m) {
     return out;
 }
 
-Transform::Transform(Object* owner, const Vector2 pos, const float rot, const Vector2 scale, Transform* parent) : Component(owner) {
+Transform::Transform(const ComponentParams& params, const Vector2 pos, const float rot, const Vector2 scale, Transform* parent) : Component(params) {
     if (parent) {
         setParent(parent);
         this->localPosition = pos;

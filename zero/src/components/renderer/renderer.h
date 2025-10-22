@@ -52,13 +52,13 @@ protected:
 
     int renderingLayer_ = 0;
 
-    Subscription<const Matrix<4,4>&, const Matrix<4,4>&> drawSubscription_;
+    Subscription<const Matrix<4, 4>&, const Matrix<4, 4>&> drawSubscription_;
 };
 
 class SpriteSheetRenderer final : public RendererBase {
 public:
-    SpriteSheetRenderer(Object* owner, Vector2 size, int gridWidth, int gridHeight, int padding, const std::shared_ptr<Texture>& texture, const std::shared_ptr<ShaderProgram>& shader, int renderingLayer, Usage usage = dynamic_draw, DrawMode drawMode = triangles);
-    SpriteSheetRenderer(Object* owner, float pixelsPerUnit, int gridWidth, int gridHeight, int padding, const std::shared_ptr<Texture>& texture, const std::shared_ptr<ShaderProgram>& shader, int renderingLayer, Usage usage = dynamic_draw, DrawMode drawMode = triangles);
+    SpriteSheetRenderer(const ComponentParams& params, Vector2 size, int gridWidth, int gridHeight, int padding, const std::shared_ptr<Texture>& texture, const std::shared_ptr<ShaderProgram>& shader, int renderingLayer, Usage usage = dynamic_draw, DrawMode drawMode = triangles);
+    SpriteSheetRenderer(const ComponentParams& params, float pixelsPerUnit, int gridWidth, int gridHeight, int padding, const std::shared_ptr<Texture>& texture, const std::shared_ptr<ShaderProgram>& shader, int renderingLayer, Usage usage = dynamic_draw, DrawMode drawMode = triangles);
 
     void draw(const Matrix<4, 4>& view, const Matrix<4, 4>& projection) const override;
 
@@ -123,8 +123,8 @@ private:
 
 class SpriteRenderer final : public RendererBase {
 public:
-    SpriteRenderer(Object* owner, Vector2 size, const std::shared_ptr<Texture>& texture, const std::shared_ptr<ShaderProgram>& shader, int renderingLayer, Usage usage = static_draw, DrawMode drawMode = triangles);
-    SpriteRenderer(Object* owner, float pixelsPerUnit, const std::shared_ptr<Texture>& texture, const std::shared_ptr<ShaderProgram>& shader, int renderingLayer, Usage usage = static_draw, DrawMode drawMode = triangles);
+    SpriteRenderer(const ComponentParams& params, Vector2 size, const std::shared_ptr<Texture>& texture, const std::shared_ptr<ShaderProgram>& shader, int renderingLayer, Usage usage = static_draw, DrawMode drawMode = triangles);
+    SpriteRenderer(const ComponentParams& params, float pixelsPerUnit, const std::shared_ptr<Texture>& texture, const std::shared_ptr<ShaderProgram>& shader, int renderingLayer, Usage usage = static_draw, DrawMode drawMode = triangles);
 
     void draw(const Matrix<4, 4>& view, const Matrix<4, 4>& projection) const override;
 
@@ -172,7 +172,7 @@ private:
 
 class CustomRenderer final : public RendererBase {
 public:
-    CustomRenderer(Object* owner, const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices, const std::shared_ptr<Texture>& texture, const std::shared_ptr<ShaderProgram>& shader, int renderingLayer, Usage usage = static_draw, DrawMode drawMode = triangles);
+    CustomRenderer(const ComponentParams& params, const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices, const std::shared_ptr<Texture>& texture, const std::shared_ptr<ShaderProgram>& shader, int renderingLayer, Usage usage = static_draw, DrawMode drawMode = triangles);
 
     void draw(const Matrix<4, 4>& view, const Matrix<4, 4>& projection) const override;
 
@@ -209,4 +209,4 @@ private:
     std::vector<unsigned int> indices_ = {};
 };
 
-inline std::map<unsigned int, std::shared_ptr<Publisher<const Matrix<4,4>&, const Matrix<4,4>&>>> renderersDrawPublishers;
+inline std::map<unsigned int, std::shared_ptr<Publisher<const Matrix<4, 4>&, const Matrix<4, 4>&>>> renderersDrawPublishers;

@@ -6,7 +6,7 @@
 #include "../../systems/opengl-wrappers/texture.h"
 #include "glad/gl.h"
 
-SpriteRenderer::SpriteRenderer(Object* owner, const Vector2 size, const std::shared_ptr<Texture>& texture, const std::shared_ptr<ShaderProgram>& shader, int renderingLayer, const Usage usage, const DrawMode drawMode) : RendererBase(owner) {
+SpriteRenderer::SpriteRenderer(const ComponentParams& params, const Vector2 size, const std::shared_ptr<Texture>& texture, const std::shared_ptr<ShaderProgram>& shader, int renderingLayer, const Usage usage, const DrawMode drawMode) : RendererBase(params) {
     this->size_ = size;
     this->vertices_ = {
         {{-size_.x / 2, -size_.y / 2}, {0, 0}}, // bottom left
@@ -56,8 +56,8 @@ SpriteRenderer::SpriteRenderer(Object* owner, const Vector2 size, const std::sha
     alphaLocation_ = shader->getUniformLocation("alpha");
 }
 
-SpriteRenderer::SpriteRenderer(Object* owner, const float pixelsPerUnit, const std::shared_ptr<Texture>& texture, const std::shared_ptr<ShaderProgram>& shader, const int renderingLayer, const Usage usage, const DrawMode drawMode)
-    : SpriteRenderer(owner, Vector2(static_cast<float>(texture->getWidth()) / pixelsPerUnit, static_cast<float>(texture->getHeight()) / pixelsPerUnit), texture, shader, renderingLayer, usage, drawMode) {
+SpriteRenderer::SpriteRenderer(const ComponentParams& params, const float pixelsPerUnit, const std::shared_ptr<Texture>& texture, const std::shared_ptr<ShaderProgram>& shader, const int renderingLayer, const Usage usage, const DrawMode drawMode)
+    : SpriteRenderer(params, Vector2(static_cast<float>(texture->getWidth()) / pixelsPerUnit, static_cast<float>(texture->getHeight()) / pixelsPerUnit), texture, shader, renderingLayer, usage, drawMode) {
 }
 
 void SpriteRenderer::draw(const Matrix<4, 4>& view, const Matrix<4, 4>& projection) const {

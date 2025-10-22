@@ -6,7 +6,7 @@ Camera::AspectRatio Camera::AspectRatio::fourByThree = {4, 3};
 Camera::AspectRatio Camera::AspectRatio::twentyOneByNine = {21, 9};
 Camera::AspectRatio Camera::AspectRatio::oneByOne = {1, 1};
 
-Camera::Camera(Object* owner, const bool main) : Component(owner) {
+Camera::Camera(const ComponentParams& params, const bool main) : Component(params) {
     if (main)
         setMain();
 }

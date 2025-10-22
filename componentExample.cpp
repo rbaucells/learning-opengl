@@ -6,7 +6,8 @@
 REGISTER_COMPONENT("ComponentExample", ComponentExample);
 
 std::shared_ptr<Component> ComponentExample::deserialize(Object* owner, const JsonObject& jsonComponent) {
-    std::shared_ptr componentExample = std::make_unique<ComponentExample>(owner);
+    std::string id = jsonComponent.getStringField("id");
+    std::shared_ptr<ComponentExample> componentExample = std::make_shared<ComponentExample>(ComponentParams(owner, id));
     componentExample->testNumber = jsonComponent.getNumberField("testNumber");
     return componentExample;
 }

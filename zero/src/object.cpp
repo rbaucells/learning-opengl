@@ -170,8 +170,8 @@ void Object::removeComponentById(const std::string& componentId) {
     });
 }
 
-Object::Object(Scene* scene, std::string objectName, const int objectTag) : name(std::move(objectName)), id(NanoId::nanoIdGen()), tag(objectTag), scene(scene) {
-    transform = std::make_shared<Transform>(this);
+Object::Object(Scene* scene, std::string objectName, const int objectTag, const std::string& id) : name(std::move(objectName)), id(id.empty() ? NanoId::nanoIdGen() : id), tag(objectTag), scene(scene) {
+    transform = std::make_shared<Transform>(ComponentParams(this, NanoId::nanoIdGen()));
 
     components_.push_back(transform);
     componentsToStart_.push_back(transform);

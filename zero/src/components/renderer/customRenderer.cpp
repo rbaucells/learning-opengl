@@ -7,7 +7,7 @@
 #include "glad/gl.h"
 #include "math++/math.h"
 
-CustomRenderer::CustomRenderer(Object* owner, const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices, const std::shared_ptr<Texture>& texture, const std::shared_ptr<ShaderProgram>& shader, const int renderingLayer, const Usage usage, const DrawMode drawMode) : RendererBase(owner) {
+CustomRenderer::CustomRenderer(const ComponentParams& params, const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices, const std::shared_ptr<Texture>& texture, const std::shared_ptr<ShaderProgram>& shader, const int renderingLayer, const Usage usage, const DrawMode drawMode) : RendererBase(params) {
     this->vertices_ = vertices;
     this->indices_ = indices;
     this->shader_ = shader;

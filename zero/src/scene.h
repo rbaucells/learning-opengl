@@ -2,6 +2,7 @@
 #include <vector>
 
 #include "object.h"
+#include "json++/json.h"
 #include "math++/math.h"
 
 class Object;
@@ -10,7 +11,7 @@ class Scene {
 public:
     const std::string id;
 
-    Scene();
+    explicit Scene(const std::string& id = "");
 
     void update(float deltaTime) const;
     void fixedUpdate(float fixedDeltaTime) const;
@@ -104,6 +105,8 @@ public:
     void removeComponentById(const std::string& componentId);
 
     [[nodiscard]] JsonObject serialize() const;
+
+    static std::shared_ptr<Scene> deserialize(const JsonObject& jsonScene);
 
 private:
     std::vector<std::shared_ptr<Object>> objects_;

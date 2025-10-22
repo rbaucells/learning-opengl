@@ -12,7 +12,7 @@ struct AudioEffect;
 
 class AudioSource final : public Component {
 public:
-    AudioSource(Object* owner, const std::string& filePath);
+    AudioSource(const ComponentParams& params, const std::string& filePath);
 
     void play() const;
     void stop() const;

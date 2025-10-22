@@ -9,7 +9,7 @@ AudioListener* AudioListener::mainListener = nullptr;
  * @warning PLS DONT MAKE MULTIPLE AUDIO LISTENERS
  * @param owner Owner
  */
-AudioListener::AudioListener(Object* owner) : Component(owner) {
+AudioListener::AudioListener(const ComponentParams& params) : Component(params) {
     if (!mainListener)
         mainListener = this;
     else {

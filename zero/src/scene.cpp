@@ -4,7 +4,7 @@
 #include "object.h"
 #include "json++/json.h"
 
-Scene::Scene() : id(NanoId::nanoIdGen()) {}
+Scene::Scene(const std::string& id) : id(id.empty() ? NanoId::nanoIdGen() : id) {}
 
 void Scene::update(const float deltaTime) const {
     for (const auto& objectPtr : objects_)
@@ -112,22 +112,6 @@ void Scene::removeObjectByTag(int objectTag) {
     });
 }
 
-JsonObject Scene::serialize() const {
-    JsonObject jsonResult;
-
-    jsonResult.putStringField("id", id);
-
-    JsonArray jsonObjects;
-
-    for (const auto& object : objects_) {
-        jsonObjects.putObject(object->serialize());
-    }
-
-    jsonResult.putArrayField("objects", jsonObjects);
-
-    return jsonResult;
-}
-
 void Scene::removeObject(const std::shared_ptr<Object>& object) {
     objectsToDestroy_.push_back(object);
 }
@@ -182,4 +166,26 @@ void Scene::removeComponentById(const std::string& componentId) {
     removeComponentBy([componentId](const std::shared_ptr<Component>& component) {
         return component->id == componentId;
     });
+}
+
+JsonObject Scene::serialize() const {
+    JsonObject jsonResult;
+
+    jsonResult.putStringField("id", id);
+
+    JsonArray jsonObjects;
+
+    for (const auto& object : objects_) {
+        jsonObjects.putObject(object->serialize());
+    }
+
+    jsonResult.putArrayField("objects", jsonObjects);
+
+    return jsonResult;
+}
+
+std::shared_ptr<Scene> Scene::deserialize(const JsonObject& jsonScene) {
+    std::string id = jsonScene.getStringField("id");
+    std::shared_ptr<Scene> scene = std::make_shared<Scene>(id);
+    return scene;
 }

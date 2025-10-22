@@ -9,7 +9,7 @@ class AudioListener final : public Component {
 public:
     static AudioListener* mainListener;
 
-    explicit AudioListener(Object* owner);
+    explicit AudioListener(const ComponentParams& params);
 
     void update(float deltaTime) override;
 

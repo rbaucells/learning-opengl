@@ -2,6 +2,8 @@
 #include <map>
 #include <memory>
 #include <vector>
+
+#include "nanoId.h"
 #include "transform.h"
 #include "systems/component.h"
 
@@ -30,7 +32,7 @@ public:
         static_assert(!std::is_same_v<T, Transform>, "Cannot add component of type 'Transform'. Objects always already have one");
 
         // make the component
-        std::shared_ptr<T> newComponent = std::make_shared<T>(this, std::forward<ARGS>(args)...);
+        std::shared_ptr<T> newComponent = std::make_shared<T>({this, NanoId::nanoIdGen()}, std::forward<ARGS>(args)...);
 
         components_.push_back(newComponent);
         componentsToStart_.push_back(newComponent);
@@ -132,7 +134,7 @@ private:
 
     bool enabled_ = true;
 
-    Object(Scene* scene, std::string objectName, int objectTag);
+    Object(Scene* scene, std::string objectName, int objectTag = 0, const std::string& id = "");
 
     // for access to object constructor and private fields to clean up
     friend class Scene;

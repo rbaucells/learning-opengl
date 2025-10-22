@@ -4,6 +4,8 @@
 #include "tweens/tween.h"
 
 class JsonObject;
+class JsonArray;
+
 template<typename T>
 concept DerivesFromTweenBase = std::is_base_of_v<TweenBase, T>;
 
@@ -13,9 +15,15 @@ concept IsComponent = std::is_base_of_v<Component, T>;
 // forward declaration
 class Object;
 
+struct ComponentParams {
+    ComponentParams(Object* owner, std::string id) : owner(owner), id(std::move(id)) {}
+    Object* owner;
+    std::string id;
+};
+
 class Component : public std::enable_shared_from_this<Component> {
 public:
-    explicit Component(Object* owner);
+    explicit Component(const ComponentParams& params);
     // initialization
     virtual void awake() {}
     virtual void onEnable() {}
@@ -38,7 +46,7 @@ public:
     virtual ~Component() = default;
 
     template<DerivesFromTweenBase T>
-    std::weak_ptr<T> addTween(std::shared_ptr<T> tween) {
+    std::weak_ptr<T> addTween(const std::shared_ptr<T>& tween) {
         tweens_.push_back(tween);
         return tween;
     }
