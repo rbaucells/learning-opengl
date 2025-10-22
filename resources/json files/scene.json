@@ -18,7 +18,10 @@
             "x": 0.5,
             "y": 0.5
           },
-          "parent": "B0fg9eOArvIMZb7gqjZ6h"
+          "parent": "B0fg9eOArvIMZb7gqjZ6h",
+          "dependencies": [
+            "B0fg9eOArvIMZb7gqjZ6h"
+          ]
         },
         {
           "type": "ComponentExample",
@@ -45,7 +48,8 @@
             "x": 2,
             "y": 4
           },
-          "parent": null
+          "parent": null,
+          "dependencies": null
         }
       ]
     }

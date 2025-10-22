@@ -20,7 +20,7 @@ public:
     void manageStarts() const;
     void manageDestructions();
 
-    [[nodiscard]] std::weak_ptr<Object> addObject(const std::string& objectName, int objectTag);
+    [[nodiscard]] std::weak_ptr<Object> addObject(const std::string& objectName, int objectTag, const std::string& id = "");
 
     [[nodiscard]] std::weak_ptr<Object> getObjectBy(const std::function<bool(const std::shared_ptr<Object>&)>& predicate) const;
 
@@ -57,7 +57,12 @@ public:
         for (const auto& object : objects_) {
             for (const auto& component : object->components_) {
                 if (component->id == componentId) {
-                    return component;
+                    if (auto comp = std::dynamic_pointer_cast<T>(component)) {
+                        return comp;
+                    }
+                    else {
+                        throw "Tried to get component by id with specific type, but component was not of that type";
+                    }
                 }
             }
         }
@@ -106,7 +111,7 @@ public:
 
     [[nodiscard]] JsonObject serialize() const;
 
-    static std::shared_ptr<Scene> deserialize(const JsonObject& jsonScene);
+    static std::unique_ptr<Scene> deserialize(const std::string& jsonScene);
 
 private:
     std::vector<std::shared_ptr<Object>> objects_;

@@ -1,6 +1,7 @@
 #pragma once
 #include <vector>
 
+#include "json++/json.h"
 #include "math++/math.h"
 #include "systems/component.h"
 #include "systems/tweens/tween.h"
@@ -59,6 +60,8 @@ public:
     Vector2 localPosition = {0, 0};
     float localRotation = 0;
     Vector2 localScale = {0, 0};
+
+    static std::shared_ptr<Component> deserialize(Object* owner, const JsonObject& jsonTransform);
 
 private:
     // both raw pointers are fine because non owning

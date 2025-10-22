@@ -42,7 +42,7 @@ public:
 
     template<IsComponent T>
     std::weak_ptr<T> addComponent(std::shared_ptr<T> component) {
-        static_assert(!std::is_same_v<T, Transform>, "Cannot add component of type 'Transform'. Objects always already have one");
+        static_assert(!std::is_same_v<T, std::shared_ptr<Transform>>, "Cannot add component of type 'Transform'. Objects always already have one");
 
         components_.push_back(component);
         componentsToStart_.push_back(component);

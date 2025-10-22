@@ -1,6 +1,10 @@
 #include "transform.h"
 #include "object.h"
+#include "scene.h"
 #include "json++/json.h"
+#include "serialization/componentRegistry.h"
+
+REGISTER_COMPONENT("Transform", Transform)
 
 struct Decomposed2D {
     Vector2 position{};
@@ -329,4 +333,27 @@ JsonObject Transform::serialize() const {
 Transform::~Transform() {
     deleteAllChildren();
     setParent(nullptr);
+}
+
+std::shared_ptr<Component> Transform::deserialize(Object* owner, const JsonObject& jsonTransform) {
+    const std::string id = jsonTransform.getStringField("id");
+
+    Vector2 pos = Vector2(jsonTransform.getObjectField("position").getNumberField("x"), jsonTransform.getObjectField("position").getNumberField("y"));
+    float rot = jsonTransform.getNumberField("rotation");
+    Vector2 scale = Vector2(jsonTransform.getObjectField("scale").getNumberField("x"), jsonTransform.getObjectField("scale").getNumberField("y"));
+
+    Transform* parent = nullptr;
+
+    if (!jsonTransform.getIsNullField("parent")) {
+        const std::string parentId = jsonTransform.getStringField("parent");
+        auto weakParent = owner->scene->getComponentById<Transform>(parentId);
+
+        if (auto sharedParent = weakParent.lock()) {
+            parent = sharedParent.get();
+        }
+    }
+
+    std::shared_ptr<Transform> transform = std::make_shared<Transform>(ComponentParams(owner, id), pos, rot, scale, parent);
+
+    return transform;
 }

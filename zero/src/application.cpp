@@ -11,6 +11,7 @@
 #include "systems/input.h"
 
 Application::Application(const std::string& scenePath) {
+    mainScene = Scene::deserialize(scenePath);
     // when we get an glfwError, lmk
     glfwSetErrorCallback(errorCallback);
 
