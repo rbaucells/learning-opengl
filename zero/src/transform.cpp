@@ -4,8 +4,6 @@
 #include "json++/json.h"
 #include "serialization/componentRegistry.h"
 
-REGISTER_COMPONENT("Transform", Transform)
-
 struct Decomposed2D {
     Vector2 position{};
     float rotation{}; // degrees
@@ -335,7 +333,7 @@ Transform::~Transform() {
     setParent(nullptr);
 }
 
-std::shared_ptr<Component> Transform::deserialize(Object* owner, const JsonObject& jsonTransform) {
+void Transform::deserialize(Object* owner, const JsonObject& jsonTransform) {
     const std::string id = jsonTransform.getStringField("id");
 
     Vector2 pos = Vector2(jsonTransform.getObjectField("position").getNumberField("x"), jsonTransform.getObjectField("position").getNumberField("y"));
@@ -353,7 +351,11 @@ std::shared_ptr<Component> Transform::deserialize(Object* owner, const JsonObjec
         }
     }
 
-    std::shared_ptr<Transform> transform = std::make_shared<Transform>(ComponentParams(owner, id), pos, rot, scale, parent);
+    if (parent) {
+        owner->transform->setParent(parent);
+    }
 
-    return transform;
+    owner->transform->setGlobalPosition(pos);
+    owner->transform->setGlobalRotation(rot);
+    owner->transform->setGlobalScale(scale);
 }

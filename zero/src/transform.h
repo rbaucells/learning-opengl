@@ -61,7 +61,12 @@ public:
     float localRotation = 0;
     Vector2 localScale = {0, 0};
 
-    static std::shared_ptr<Component> deserialize(Object* owner, const JsonObject& jsonTransform);
+    /**
+     * @note A little special because not done with normal component registry because objects already have transform
+     * @param owner
+     * @param jsonTransform
+     */
+    static void deserialize(Object* owner, const JsonObject& jsonTransform);
 
 private:
     // both raw pointers are fine because non owning

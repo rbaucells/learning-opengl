@@ -260,6 +260,13 @@ std::unique_ptr<Scene> Scene::deserialize(const std::string& filePath) {
 
         const std::string type = component.getStringField("type");
         const std::string id = component.getStringField("id");
+
+        if (type == "Transform") {
+            Transform::deserialize(owner, component);
+            add_to_id_registry(id);
+            return;
+        }
+
         const std::shared_ptr<Component> comp = ComponentRegistry::create(type, owner, component);
         owner->addComponent(comp);
         add_to_id_registry(id);
@@ -267,7 +274,7 @@ std::unique_ptr<Scene> Scene::deserialize(const std::string& filePath) {
 
     for (JsonArray objects = jsonScene.getArrayField("objects"); JsonObject object : objects) {
         const std::string name = object.getStringField("name");
-        const int tag = object.getNumberField("tag");
+        const int tag = static_cast<int>(object.getNumberField("tag"));
         const std::string objectId = object.getStringField("id");
 
         auto weakObject = scene->addObject(name, tag, objectId);
