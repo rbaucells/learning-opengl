@@ -71,6 +71,17 @@ std::weak_ptr<Object> Scene::getObjectBy(const std::function<bool(const std::sha
     return {};
 }
 
+std::vector<std::weak_ptr<Object>> Scene::getObjectsBy(const std::function<bool(const std::shared_ptr<Object>&)>& predicate) const {
+    std::vector<std::weak_ptr<Object>> foundObjects;
+
+    for (const auto& objectPtr : objects_) {
+        if (predicate(objectPtr))
+            foundObjects.push_back(objectPtr);
+    }
+
+    return foundObjects;
+}
+
 std::weak_ptr<Object> Scene::getObjectByName(const std::string& objectName) const {
     return getObjectBy([objectName](const std::shared_ptr<Object>& object) {
         return object->name == objectName;
@@ -83,8 +94,8 @@ std::weak_ptr<Object> Scene::getObjectById(const std::string& objectId) const {
     });
 }
 
-std::weak_ptr<Object> Scene::getObjectByTag(int objectTag) const {
-    return getObjectBy([objectTag](const std::shared_ptr<Object>& object) {
+std::vector<std::weak_ptr<Object>> Scene::getObjectsByTag(int objectTag) const {
+    return getObjectsBy([objectTag](const std::shared_ptr<Object>& object) {
         return object->tag == objectTag;
     });
 }
@@ -199,7 +210,7 @@ std::unique_ptr<Scene> Scene::deserialize(const std::string& filePath) {
     JsonParser parser(lexer);
     JsonObject jsonScene = parser.parseValue();
 
-    std::string sceneId = jsonScene.getStringField("id");
+    const std::string sceneId = jsonScene.getStringField("id");
     std::unique_ptr<Scene> scene = std::make_unique<Scene>(sceneId);
 
     std::vector<std::string> ids;
@@ -261,14 +272,15 @@ std::unique_ptr<Scene> Scene::deserialize(const std::string& filePath) {
         const std::string type = component.getStringField("type");
         const std::string id = component.getStringField("id");
 
+        const std::shared_ptr<Component> comp = ComponentRegistry::create(type, owner, component);
+
         if (type == "Transform") {
-            Transform::deserialize(owner, component);
-            add_to_id_registry(id);
-            return;
+            owner->replaceTrasnform(std::dynamic_pointer_cast<Transform>(comp));
+        }
+        else {
+            owner->addComponent(comp);
         }
 
-        const std::shared_ptr<Component> comp = ComponentRegistry::create(type, owner, component);
-        owner->addComponent(comp);
         add_to_id_registry(id);
     };
 
@@ -276,6 +288,7 @@ std::unique_ptr<Scene> Scene::deserialize(const std::string& filePath) {
         const std::string name = object.getStringField("name");
         const int tag = static_cast<int>(object.getNumberField("tag"));
         const std::string objectId = object.getStringField("id");
+        const bool enabled = object.getBoolField("enabled");
 
         auto weakObject = scene->addObject(name, tag, objectId);
 
@@ -284,9 +297,13 @@ std::unique_ptr<Scene> Scene::deserialize(const std::string& filePath) {
         JsonArray components = object.getArrayField("components");
 
         if (auto sharedObject = weakObject.lock()) {
+            sharedObject->setActive(enabled);
+
             for (JsonObject component : components) {
                 componentFrom(sharedObject.get(), component);
             }
+
+            sharedObject->manageDestructions();
         }
     }
 

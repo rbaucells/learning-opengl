@@ -15,7 +15,7 @@ public:
     const std::string id;
     const int tag;
 
-    const std::shared_ptr<Transform> transform;
+    std::shared_ptr<Transform> transform;
 
     void queueDestruction();
 
@@ -49,6 +49,8 @@ public:
 
         return component;
     }
+
+    void replaceTrasnform(const std::shared_ptr<Transform>& newTransform);
 
     std::weak_ptr<Component> getComponentBy(const std::function<bool(const std::shared_ptr<Component>&)>& predicate) const;
 
@@ -129,8 +131,8 @@ private:
     void manageDestructions();
 
     void update(float deltaTime);
-    void fixedUpdate(float fixedDeltaTime) const;
-    void lateUpdate(float deltaTime) const;
+    void fixedUpdate(float fixedDeltaTime);
+    void lateUpdate(float deltaTime);
 
     bool enabled_ = true;
 

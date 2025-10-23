@@ -8,6 +8,111 @@
 #include "scene.h"
 #include "json++/json.h"
 
+void Object::queueDestruction() {
+    scene->removeObject(shared_from_this());
+}
+
+JsonObject Object::serialize() const {
+    JsonObject jsonObject;
+
+    jsonObject.putStringField("id", id);
+    jsonObject.putStringField("name", name);
+    jsonObject.putNumberField("tag", tag);
+
+    JsonArray jsonComponents;
+
+    for (const auto& component : components_) {
+        jsonComponents.putObject(component->serialize());
+    }
+
+    jsonObject.putArrayField("components", jsonComponents);
+
+    return jsonObject;
+}
+
+void Object::setActive(const bool state) {
+    // if activated but not anymore
+    if (enabled_ && !state) {
+        for (const auto& component : components_) {
+            component->onDisable();
+        }
+    }
+    // if not activated but are now
+    else if (!enabled_ && state) {
+        for (const auto& component : components_) {
+            component->onEnable();
+        }
+    }
+
+    enabled_ = state;
+}
+
+bool Object::getActive() const {
+    return enabled_;
+}
+
+void Object::replaceTrasnform(const std::shared_ptr<Transform>& newTransform) {
+    // remove the old one
+    std::erase(components_, transform);
+    std::erase(componentsToStart_, transform);
+    std::erase(componentsToDestroy_, transform);
+
+    // set the new one
+    transform = newTransform;
+
+    // setup the new one
+    components_.push_back(newTransform);
+    componentsToStart_.push_back(newTransform);
+}
+
+std::weak_ptr<Component> Object::getComponentBy(const std::function<bool(const std::shared_ptr<Component>&)>& predicate) const {
+    for (const auto& component : components_) {
+        if (predicate(component)) {
+            return component;
+        }
+    }
+
+    return {};
+}
+
+std::vector<std::weak_ptr<Component>> Object::getAllComponentsBy(const std::function<bool(const std::shared_ptr<Component>&)>& predicate) const {
+    std::vector<std::weak_ptr<Component>> foundComponents;
+
+    for (const auto& component : components_) {
+        if (predicate(component))
+            foundComponents.push_back(component);
+    }
+
+    return foundComponents;
+}
+
+void Object::removeComponentBy(const std::function<bool(const std::shared_ptr<Component>&)>& predicate) {
+    for (const auto& component : components_) {
+        if (predicate(component)) {
+            componentsToDestroy_.push_back(component);
+            return;
+        }
+    }
+}
+
+void Object::removeAllComponentsBy(const std::function<bool(const std::shared_ptr<Component>&)>& predicate) {
+    for (const auto& component : components_) {
+        if (predicate(component)) {
+            componentsToDestroy_.push_back(component);
+        }
+    }
+}
+
+void Object::removeComponent(const std::shared_ptr<Component>& component) {
+    componentsToDestroy_.push_back(component);
+}
+
+void Object::removeComponentById(const std::string& componentId) {
+    removeComponentBy([componentId](const std::shared_ptr<Component>& component) {
+        return component->id == componentId;
+    });
+}
+
 void Object::manageStarts() {
     for (const auto& componentPtr : componentsToStart_) {
         componentPtr->awake();
@@ -61,7 +166,7 @@ void Object::update(const float deltaTime) {
     }
 }
 
-void Object::fixedUpdate(const float fixedDeltaTime) const {
+void Object::fixedUpdate(const float fixedDeltaTime) {
     if (!enabled_)
         return;
 
@@ -70,7 +175,7 @@ void Object::fixedUpdate(const float fixedDeltaTime) const {
     }
 }
 
-void Object::lateUpdate(const float deltaTime) const {
+void Object::lateUpdate(const float deltaTime) {
     if (!enabled_)
         return;
 
@@ -79,98 +184,7 @@ void Object::lateUpdate(const float deltaTime) const {
     }
 }
 
-void Object::queueDestruction() {
-    scene->removeObject(shared_from_this());
-}
-
-JsonObject Object::serialize() const {
-    JsonObject jsonObject;
-
-    jsonObject.putStringField("id", id);
-    jsonObject.putStringField("name", name);
-    jsonObject.putNumberField("tag", tag);
-
-    JsonArray jsonComponents;
-
-    for (const auto& component : components_) {
-        jsonComponents.putObject(component->serialize());
-    }
-
-    jsonObject.putArrayField("components", jsonComponents);
-
-    return jsonObject;
-}
-
-void Object::setActive(const bool state) {
-    // if activated but not anymore
-    if (enabled_ && !state) {
-        for (const auto& component : components_) {
-            component->onDisable();
-        }
-    }
-    // if not activated but are now
-    else if (!enabled_ && state) {
-        for (const auto& component : components_) {
-            component->onEnable();
-        }
-    }
-
-    enabled_ = state;
-}
-
-bool Object::getActive() const {
-    return enabled_;
-}
-
-std::weak_ptr<Component> Object::getComponentBy(const std::function<bool(const std::shared_ptr<Component>&)>& predicate) const {
-    for (const auto& component : components_) {
-        if (predicate(component)) {
-            return component;
-        }
-    }
-
-    return {};
-}
-
-std::vector<std::weak_ptr<Component>> Object::getAllComponentsBy(const std::function<bool(const std::shared_ptr<Component>&)>& predicate) const {
-    std::vector<std::weak_ptr<Component>> foundComponents;
-
-    for (const auto& component : components_) {
-        if (predicate(component))
-            foundComponents.push_back(component);
-    }
-
-    return foundComponents;
-}
-
-void Object::removeComponentBy(const std::function<bool(const std::shared_ptr<Component>&)>& predicate) {
-    for (const auto& component : components_) {
-        if (predicate(component)) {
-            componentsToDestroy_.push_back(component);
-            return;
-        }
-    }
-}
-
-void Object::removeAllComponentsBy(const std::function<bool(const std::shared_ptr<Component>&)>& predicate) {
-    for (const auto& component : components_) {
-        if (predicate(component)) {
-            componentsToDestroy_.push_back(component);
-        }
-    }
-}
-
-void Object::removeComponent(const std::shared_ptr<Component>& component) {
-    componentsToDestroy_.push_back(component);
-}
-
-void Object::removeComponentById(const std::string& componentId) {
-    removeComponentBy([componentId](const std::shared_ptr<Component>& component) {
-        return component->id == componentId;
-    });
-}
-
-Object::Object(Scene* scene, std::string objectName, const int objectTag, const std::string& id) : name(std::move(objectName)), id(id.empty() ? NanoId::nanoIdGen() : id), tag(objectTag), scene(scene), transform(std::make_shared<Transform>(ComponentParams(this, NanoId::nanoIdGen()))) {
+Object::Object(Scene* scene, std::string objectName, const int objectTag, const std::string& id) : name(std::move(objectName)), id(id.empty() ? NanoId::nanoIdGen() : id), tag(objectTag), transform(std::make_shared<Transform>(ComponentParams(this, NanoId::nanoIdGen()))), scene(scene) {
     components_.push_back(transform);
     componentsToStart_.push_back(transform);
 }

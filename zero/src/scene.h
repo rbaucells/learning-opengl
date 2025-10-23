@@ -20,13 +20,14 @@ public:
     void manageStarts() const;
     void manageDestructions();
 
-    [[nodiscard]] std::weak_ptr<Object> addObject(const std::string& objectName, int objectTag, const std::string& id = "");
+    [[nodiscard]] std::weak_ptr<Object> addObject(const std::string& objectName, int objectTag = 0, const std::string& id = "");
 
     [[nodiscard]] std::weak_ptr<Object> getObjectBy(const std::function<bool(const std::shared_ptr<Object>&)>& predicate) const;
+    [[nodiscard]] std::vector<std::weak_ptr<Object>> getObjectsBy(const std::function<bool(const std::shared_ptr<Object>&)>& predicate) const;
 
     [[nodiscard]] std::weak_ptr<Object> getObjectByName(const std::string& objectName) const;
     [[nodiscard]] std::weak_ptr<Object> getObjectById(const std::string& objectId) const;
-    [[nodiscard]] std::weak_ptr<Object> getObjectByTag(int objectTag) const;
+    [[nodiscard]] std::vector<std::weak_ptr<Object>> getObjectsByTag(int objectTag) const;
 
     void removeObjectBy(const std::function<bool(const std::shared_ptr<Object>&)>& predicate);
 
@@ -111,7 +112,7 @@ public:
 
     [[nodiscard]] JsonObject serialize() const;
 
-    static std::unique_ptr<Scene> deserialize(const std::string& jsonScene);
+    static std::unique_ptr<Scene> deserialize(const std::string& filePath);
 
 private:
     std::vector<std::shared_ptr<Object>> objects_;

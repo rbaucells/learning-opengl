@@ -5,6 +5,7 @@
       "name": "MyObject1",
       "tag": 0,
       "id": "aaDI8WnRIJspGIX6L9vaX",
+      "enabled": true,
       "components": [
         {
           "type": "Transform",
@@ -35,6 +36,7 @@
       "name": "MyObject2",
       "tag": 5,
       "id": "iq-ettOnIw0_BMIB4kgu1",
+      "enabled": true,
       "components": [
         {
           "type": "Transform",
