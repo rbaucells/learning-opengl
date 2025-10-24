@@ -62,6 +62,10 @@ std::weak_ptr<Object> Scene::addObject(const std::string& objectName, const int 
     return objects_.emplace_back(new Object(this, objectName, objectTag, id));
 }
 
+void Scene::addObject(const std::shared_ptr<Object>& object) {
+    return objects_.push_back(object);
+}
+
 std::weak_ptr<Object> Scene::getObjectBy(const std::function<bool(const std::shared_ptr<Object>&)>& predicate) const {
     for (const auto& objectPtr : objects_) {
         if (predicate(objectPtr))
@@ -198,113 +202,16 @@ JsonObject Scene::serialize() const {
 }
 
 std::unique_ptr<Scene> Scene::deserialize(const std::string& filePath) {
-    struct DoLaterComponent {
-        Object* owner;
-        JsonObject object;
-
-        std::vector<std::string> dependenciesToWaitFor;
-    };
-
-    std::ifstream ifstream(filePath);
-    JsonLexer lexer(ifstream);
+    std::ifstream ifStream(filePath);
+    JsonLexer lexer(ifStream);
     JsonParser parser(lexer);
     JsonObject jsonScene = parser.parseValue();
 
     const std::string sceneId = jsonScene.getStringField("id");
     std::unique_ptr<Scene> scene = std::make_unique<Scene>(sceneId);
 
-    std::vector<std::string> ids;
-    std::vector<DoLaterComponent> doLaterComponents;
-
-    auto is_in_ids = [&](const std::string& id) {
-        for (const auto& i : ids) {
-            if (i == id)
-                return true;
-        }
-
-        return false;
-    };
-
-    std::function<void(Object* owner, const JsonObject& component)> componentFrom;
-
-    auto add_to_id_registry = [&](const std::string& id) {
-        ids.push_back(id);
-
-        for (auto it = doLaterComponents.begin(); it != doLaterComponents.end();) {
-            auto dependenciesToWaitFor = it->dependenciesToWaitFor;
-            for (auto dependencyIt = it->dependenciesToWaitFor.begin(); dependencyIt != it->dependenciesToWaitFor.end();) {
-                if (*dependencyIt == id)
-                    dependencyIt = it->dependenciesToWaitFor.erase(dependencyIt);
-                else
-                    ++dependencyIt;
-            }
-
-            if (it->dependenciesToWaitFor.empty()) {
-                Object* owner = it->owner;
-                JsonObject object = it->object;
-
-                it = doLaterComponents.erase(it);
-
-                componentFrom(owner, object);
-            }
-            else {
-                ++it;
-            }
-        }
-    };
-
-    componentFrom = [&](Object* owner, const JsonObject& component) {
-        if (JsonArray dependencies = component.getArrayField("dependencies"); !dependencies.empty()) {
-            std::vector<std::string> dependenciesToWaitFor;
-
-            for (std::string dependency : dependencies) {
-                if (!is_in_ids(dependency)) {
-                    dependenciesToWaitFor.push_back(dependency);
-                }
-            }
-
-            if (!dependenciesToWaitFor.empty()) {
-                doLaterComponents.emplace_back(owner, component, dependenciesToWaitFor);
-                return;
-            }
-        }
-
-        const std::string type = component.getStringField("type");
-        const std::string id = component.getStringField("id");
-
-        const std::shared_ptr<Component> comp = ComponentRegistry::create(type, owner, component);
-
-        if (type == "Transform") {
-            owner->replaceTrasnform(std::dynamic_pointer_cast<Transform>(comp));
-        }
-        else {
-            owner->addComponent(comp);
-        }
-
-        add_to_id_registry(id);
-    };
-
-    for (JsonArray objects = jsonScene.getArrayField("objects"); JsonObject object : objects) {
-        const std::string name = object.getStringField("name");
-        const int tag = static_cast<int>(object.getNumberField("tag"));
-        const std::string objectId = object.getStringField("id");
-        const bool enabled = object.getBoolField("enabled");
-
-        auto weakObject = scene->addObject(name, tag, objectId);
-
-        add_to_id_registry(objectId);
-
-        JsonArray components = object.getArrayField("components");
-
-        if (auto sharedObject = weakObject.lock()) {
-            sharedObject->setActive(enabled);
-
-            for (JsonObject component : components) {
-                componentFrom(sharedObject.get(), component);
-            }
-
-            sharedObject->manageDestructions();
-        }
+    for (JsonObject object : jsonScene.getArrayField("objects")) {
+        Object::deserialize(scene.get(), object);
     }
 
     return scene;

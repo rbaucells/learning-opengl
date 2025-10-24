@@ -3,7 +3,6 @@
 
 #include "object.h"
 #include "json++/json.h"
-#include "math++/math.h"
 
 class Object;
 
@@ -20,6 +19,7 @@ public:
     void manageStarts() const;
     void manageDestructions();
 
+    void addObject(const std::shared_ptr<Object>& object);
     [[nodiscard]] std::weak_ptr<Object> addObject(const std::string& objectName, int objectTag = 0, const std::string& id = "");
 
     [[nodiscard]] std::weak_ptr<Object> getObjectBy(const std::function<bool(const std::shared_ptr<Object>&)>& predicate) const;

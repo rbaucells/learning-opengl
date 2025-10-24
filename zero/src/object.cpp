@@ -7,6 +7,7 @@
 #include "nanoId.h"
 #include "scene.h"
 #include "json++/json.h"
+#include "serialization/componentRegistry.h"
 
 void Object::queueDestruction() {
     scene->removeObject(shared_from_this());
@@ -181,6 +182,117 @@ void Object::lateUpdate(const float deltaTime) {
 
     for (const auto& component : components_) {
         component->lateUpdate(deltaTime);
+    }
+}
+
+void Object::deserialize(Scene* owner, const JsonObject& jsonObject) {
+    struct DoLaterComponent {
+        Object* owner;
+        JsonObject object;
+
+        std::vector<std::string> dependenciesToWaitFor;
+    };
+
+    static std::string sceneId;
+    static std::vector<DoLaterComponent> doLaterComponents;
+    static std::vector<std::string> ids;
+
+    static auto check_is_in_id_registry = [&](const std::string& id) -> bool {
+        for (const auto& i : ids) {
+            if (i == id)
+                return true;
+        }
+
+        return false;
+    };
+
+    // ReSharper disable once CppInconsistentNaming
+    static std::function<void(Object* owner, const JsonObject& component)> make_component_from_json;
+
+    static auto add_to_id_registry = [&](const std::string& id) -> void {
+        ids.push_back(id);
+
+        for (auto it = doLaterComponents.begin(); it != doLaterComponents.end();) {
+            auto dependenciesToWaitFor = it->dependenciesToWaitFor;
+            for (auto dependencyIt = it->dependenciesToWaitFor.begin(); dependencyIt != it->dependenciesToWaitFor.end();) {
+                if (*dependencyIt == id)
+                    dependencyIt = it->dependenciesToWaitFor.erase(dependencyIt);
+                else
+                    ++dependencyIt;
+            }
+
+            if (it->dependenciesToWaitFor.empty()) {
+                Object* componentOwner = it->owner;
+                JsonObject object = it->object;
+
+                it = doLaterComponents.erase(it);
+
+                make_component_from_json(componentOwner, object);
+            }
+            else {
+                ++it;
+            }
+        }
+    };
+
+    make_component_from_json = [&](Object* componentOwner, const JsonObject& component) -> void {
+        if (JsonArray dependencies = component.getArrayField("dependencies"); !dependencies.empty()) {
+            std::vector<std::string> dependenciesToWaitFor;
+
+            for (std::string dependency : dependencies) {
+                if (!check_is_in_id_registry(dependency)) {
+                    dependenciesToWaitFor.push_back(dependency);
+                }
+            }
+
+            if (!dependenciesToWaitFor.empty()) {
+                doLaterComponents.emplace_back(componentOwner, component, dependenciesToWaitFor);
+                return;
+            }
+        }
+
+        const std::string type = component.getStringField("type");
+        const std::string id = component.getStringField("id");
+
+        const std::shared_ptr<Component> comp = ComponentRegistry::create(type, componentOwner, component);
+
+        if (type == "Transform") {
+            componentOwner->replaceTrasnform(std::dynamic_pointer_cast<Transform>(comp));
+        }
+        else {
+            componentOwner->addComponent(comp);
+        }
+
+        add_to_id_registry(id);
+    };
+
+    // reset the sceneId and doLaterComponents when we are deserializing a new scene
+    if (sceneId != owner->id) {
+        sceneId = owner->id;
+        doLaterComponents.clear();
+        ids.clear();
+        ids.push_back(owner->id);
+    }
+
+    const std::string name = jsonObject.getStringField("name");
+    const int tag = static_cast<int>(jsonObject.getNumberField("tag"));
+    const std::string objectId = jsonObject.getStringField("id");
+    const bool enabled = jsonObject.getBoolField("enabled");
+
+    std::weak_ptr<Object> weakObject = owner->addObject(name, tag, objectId);
+
+    add_to_id_registry(objectId);
+
+    JsonArray components = jsonObject.getArrayField("components");
+
+    if (auto sharedObject = weakObject.lock()) {
+        sharedObject->setActive(enabled);
+
+        for (JsonObject component : components) {
+            make_component_from_json(sharedObject.get(), component);
+        }
+
+        sharedObject->manageDestructions();
     }
 }
 
