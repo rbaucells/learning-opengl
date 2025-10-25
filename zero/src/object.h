@@ -15,7 +15,7 @@ public:
     const std::string id;
     const int tag;
 
-    std::shared_ptr<Transform> transform;
+    const std::shared_ptr<Transform> transform;
 
     void queueDestruction();
 
@@ -47,8 +47,6 @@ public:
 
         return component;
     }
-
-    void replaceTrasnform(const std::shared_ptr<Transform>& newTransform);
 
     std::weak_ptr<Component> getComponentBy(const std::function<bool(const std::shared_ptr<Component>&)>& predicate) const;
 

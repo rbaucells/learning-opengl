@@ -114,6 +114,13 @@ public:
 
     static std::unique_ptr<Scene> deserialize(const std::string& filePath);
 
+    struct DoLaterComponent {
+        Object* owner;
+        JsonObject object;
+
+        std::vector<std::string> dependenciesToWaitFor;
+    };
+
 private:
     std::vector<std::shared_ptr<Object>> objects_;
     std::vector<std::shared_ptr<Object>> objectsToDestroy_;

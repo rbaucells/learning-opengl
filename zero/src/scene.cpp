@@ -63,7 +63,7 @@ std::weak_ptr<Object> Scene::addObject(const std::string& objectName, const int 
 }
 
 void Scene::addObject(const std::shared_ptr<Object>& object) {
-    return objects_.push_back(object);
+    objects_.push_back(object);
 }
 
 std::weak_ptr<Object> Scene::getObjectBy(const std::function<bool(const std::shared_ptr<Object>&)>& predicate) const {

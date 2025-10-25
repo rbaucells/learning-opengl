@@ -52,20 +52,6 @@ bool Object::getActive() const {
     return enabled_;
 }
 
-void Object::replaceTrasnform(const std::shared_ptr<Transform>& newTransform) {
-    // remove the old one
-    std::erase(components_, transform);
-    std::erase(componentsToStart_, transform);
-    std::erase(componentsToDestroy_, transform);
-
-    // set the new one
-    transform = newTransform;
-
-    // setup the new one
-    components_.push_back(newTransform);
-    componentsToStart_.push_back(newTransform);
-}
-
 std::weak_ptr<Component> Object::getComponentBy(const std::function<bool(const std::shared_ptr<Component>&)>& predicate) const {
     for (const auto& component : components_) {
         if (predicate(component)) {
@@ -254,12 +240,12 @@ void Object::deserialize(Scene* owner, const JsonObject& jsonObject) {
         const std::string type = component.getStringField("type");
         const std::string id = component.getStringField("id");
 
-        const std::shared_ptr<Component> comp = ComponentRegistry::create(type, componentOwner, component);
-
         if (type == "Transform") {
-            componentOwner->replaceTrasnform(std::dynamic_pointer_cast<Transform>(comp));
+            Transform::deserialize(componentOwner, component);
         }
         else {
+            const std::shared_ptr<Component> comp = ComponentRegistry::create(type, componentOwner, component);
+
             componentOwner->addComponent(comp);
         }
 
