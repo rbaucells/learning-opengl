@@ -5,8 +5,6 @@ project(learningOpenGl)
 set(CMAKE_CXX_STANDARD 20)
 
 # Add subdirectories for libraries
-add_subdirectory(math++)
-add_subdirectory(json++)
 add_subdirectory(zero)
 
 # Add executable

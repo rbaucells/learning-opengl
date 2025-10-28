@@ -4,11 +4,38 @@ project(zero)
 # using cpp 20
 set(CMAKE_CXX_STANDARD 20)
 
-# find glfw through cmake
-find_package(glfw3 3.3 REQUIRED)
+# get the package finder
+include(FetchContent)
 
-# find OpenAL-soft through cmake
-find_package(OpenAL REQUIRED PATHS "/usr/local/Cellar/openal-soft/1.24.3/lib/cmake" NO_DEFAULT_PATH)
+# fetch glfw
+FetchContent_Declare(
+        glfw3
+        GIT_REPOSITORY https://github.com/glfw/glfw.git
+        GIT_TAG 3.3-stable
+)
+
+# fetch openal
+FetchContent_Declare(
+        openal-soft
+        GIT_REPOSITORY https://github.com/kcat/openal-soft.git
+        GIT_TAG master
+)
+
+# fetch math++
+FetchContent_Declare(
+        math++
+        GIT_REPOSITORY https://github.com/rbaucells/math-plus-plus.git
+        GIT_TAG main
+)
+
+# fetch json++
+FetchContent_Declare(
+        json++
+        GIT_REPOSITORY https://github.com/rbaucells/json-plus-plus.git
+        GIT_TAG main
+)
+
+FetchContent_MakeAvailable(glfw3 openal-soft math++ json++)
 
 add_library(zero STATIC
         src/application.cpp
@@ -55,7 +82,7 @@ add_library(zero STATIC
 )
 
 # include dependencies
-target_include_directories(zero PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/dependencies/include)
+target_include_directories(zero PUBLIC dependencies/include)
 
 # add include directory publicly
 target_include_directories(zero PUBLIC include)
@@ -64,9 +91,9 @@ target_include_directories(zero PUBLIC include)
 target_link_libraries(zero PUBLIC
         math++
         json++
+        openal-soft
+        glfw3
 )
 
 # glad
-target_link_libraries(zero PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/dependencies/lib/glad/libglad.a)
-
-target_link_libraries(zero PUBLIC OpenAL::OpenAL glfw)
+target_link_libraries(zero PRIVATE dependencies/lib/glad/libglad.a)
