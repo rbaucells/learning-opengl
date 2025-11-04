@@ -6,7 +6,7 @@ bool Transform::hasParent() const {
     return !parent_.expired();
 }
 
-void Transform::setGlobalPosition(const Vector2& position) {
+void Transform::setGlobalPosition(const Vector<2>& position) {
     if (auto parent = parent_.lock()) {
         localPosition = parent->worldToLocalMatrix() * position;
     }
@@ -45,16 +45,16 @@ void Transform::setGlobalRotation(const float rotation) {
     }
 }
 
-void Transform::setGlobalScale(const Vector2& scale) {
+void Transform::setGlobalScale(const Vector<2>& scale) {
     if (!hasParent()) {
         localScale = scale;
     }
 }
 
-Vector2 Transform::getGlobalPosition() const {
+Vector<2> Transform::getGlobalPosition() const {
     if (auto parent = parent_.lock()) {
         auto localToWorld = localToWorldMatrix();
-        const Vector2 pos = {localToWorld[0][3], localToWorld[1][3]};
+        const Vector<2> pos = {localToWorld[0][3], localToWorld[1][3]};
         return pos;
     }
     else {
@@ -77,7 +77,7 @@ float Transform::getGlobalRotation(const RotationType type) const {
     }
 }
 
-Vector2 Transform::getGlobalScale() const {
+Vector<2> Transform::getGlobalScale() const {
     if (auto parent = parent_.lock()) {
         auto localToWorld = localToWorldMatrix();
         // get the magnitude of x
@@ -94,9 +94,9 @@ Vector2 Transform::getGlobalScale() const {
 Matrix<4, 4> Transform::localToWorldMatrix() const {
     Matrix<4, 4> transformationMatrix = Matrix<4, 4>::identity();
 
-    transformationMatrix = transformationMatrix.translate(localPosition.x, localPosition.y, 0);
+    transformationMatrix = transformationMatrix.translate(localPosition[0], localPosition[1], 0);
     transformationMatrix = transformationMatrix.rotateZ(localRotation);
-    transformationMatrix = transformationMatrix.scaleAnisotropic(localScale.x, localScale.y, 1);
+    transformationMatrix = transformationMatrix.scaleAnisotropic(localScale[0], localScale[1], 1);
 
     if (const auto parent = parent_.lock()) {
         return parent->localToWorldMatrix() * transformationMatrix;

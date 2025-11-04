@@ -6,13 +6,13 @@
 #include "../../systems/opengl-wrappers/texture.h"
 #include "glad/gl.h"
 
-SpriteRenderer::SpriteRenderer(const ComponentParams& params, const Vector2 size, const std::shared_ptr<Texture>& texture, const std::shared_ptr<ShaderProgram>& shader, int renderingLayer, const Usage usage, const DrawMode drawMode) : RendererBase(params) {
+SpriteRenderer::SpriteRenderer(const ComponentParams& params, const Vector<2> size, const std::shared_ptr<Texture>& texture, const std::shared_ptr<ShaderProgram>& shader, int renderingLayer, const Usage usage, const DrawMode drawMode) : RendererBase(params) {
     this->size_ = size;
     this->vertices_ = {
-        {{-size_.x / 2, -size_.y / 2}, {0, 0}}, // bottom left
-        {{-size_.x / 2, size_.y / 2}, {0, 1}}, // top left
-        {{size_.x / 2, -size_.y / 2}, {1, 0}}, // bottom right
-        {{size_.x / 2, size_.y / 2}, {1, 1}}, // top right
+        {{-size_[0] / 2, -size_[1] / 2}, {0, 0}}, // bottom left
+        {{-size_[0] / 2, size_[1] / 2}, {0, 1}}, // top left
+        {{size_[0] / 2, -size_[1] / 2}, {1, 0}}, // bottom right
+        {{size_[0] / 2, size_[1] / 2}, {1, 1}}, // top right
     };
 
     this->indices_ = {
@@ -57,7 +57,7 @@ SpriteRenderer::SpriteRenderer(const ComponentParams& params, const Vector2 size
 }
 
 SpriteRenderer::SpriteRenderer(const ComponentParams& params, const float pixelsPerUnit, const std::shared_ptr<Texture>& texture, const std::shared_ptr<ShaderProgram>& shader, const int renderingLayer, const Usage usage, const DrawMode drawMode)
-    : SpriteRenderer(params, Vector2(static_cast<float>(texture->getWidth()) / pixelsPerUnit, static_cast<float>(texture->getHeight()) / pixelsPerUnit), texture, shader, renderingLayer, usage, drawMode) {
+    : SpriteRenderer(params, Vector<2>(static_cast<float>(texture->getWidth()) / pixelsPerUnit, static_cast<float>(texture->getHeight()) / pixelsPerUnit), texture, shader, renderingLayer, usage, drawMode) {
 }
 
 void SpriteRenderer::draw(const Matrix<4, 4>& view, const Matrix<4, 4>& projection) const {
@@ -102,15 +102,15 @@ void SpriteRenderer::setRenderLayer(const int layer) {
     addToAllRenderers(renderingLayer_);
 }
 
-void SpriteRenderer::changeSize(const Vector2 size, const Usage usage) {
+void SpriteRenderer::changeSize(const Vector<2> size, const Usage usage) {
     this->size_ = size;
     this->usage_ = usage;
 
     this->vertices_ = {
-        {{-size_.x / 2, -size_.y / 2}, {0, 0}}, // bottom left
-        {{-size_.x / 2, size_.y / 2}, {0, 1}}, // top left
-        {{size_.x / 2, -size_.y / 2}, {1, 0}}, // bottom right
-        {{size_.x / 2, size_.y / 2}, {1, 1}}, // top right
+        {{-size_[0] / 2, -size_[1] / 2}, {0, 0}}, // bottom left
+        {{-size_[0] / 2, size_[1] / 2}, {0, 1}}, // top left
+        {{size_[0] / 2, -size_[1] / 2}, {1, 0}}, // bottom right
+        {{size_[0] / 2, size_[1] / 2}, {1, 1}}, // top right
     };
 
     glBindVertexArray(vertexArrayObject_);
@@ -121,7 +121,7 @@ void SpriteRenderer::changeSize(const Vector2 size, const Usage usage) {
 }
 
 void SpriteRenderer::changeSize(const float pixelsPerUnit, const Usage usage) {
-    changeSize(Vector2(static_cast<float>(texture_->getWidth()) / pixelsPerUnit, static_cast<float>(texture_->getHeight()) / pixelsPerUnit), usage);
+    changeSize(Vector<2>(static_cast<float>(texture_->getWidth()) / pixelsPerUnit, static_cast<float>(texture_->getHeight()) / pixelsPerUnit), usage);
 }
 
 void SpriteRenderer::changeTexture(const std::shared_ptr<Texture>& texture, const Usage usage) {

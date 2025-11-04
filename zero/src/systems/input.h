@@ -15,7 +15,7 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
 
 void processGamepadEvents(const GLFWgamepadstate& current, const GLFWgamepadstate& last);
 
-Vector2 mousePosToScreenPos(const Vector2& mousePos);
+Vector<2> mousePosToScreenPos(const Vector<2>& mousePos);
 
 inline std::shared_ptr<Publisher<bool>> escEvent = Publisher<bool>::create();
 inline std::shared_ptr<Publisher<bool>> f1Event = Publisher<bool>::create();
@@ -109,9 +109,9 @@ inline std::shared_ptr<Publisher<bool>> gamepadViewEvent = Publisher<bool>::crea
 inline std::shared_ptr<Publisher<bool>> gamepadMenuEvent = Publisher<bool>::create();
 inline std::shared_ptr<Publisher<bool>> gamepadGuideEvent = Publisher<bool>::create();
 
-inline std::shared_ptr<Publisher<Vector2>> mouseMovedEvent = Publisher<Vector2>::create();
-inline std::shared_ptr<Publisher<Vector2>> leftStickMovedEvent = Publisher<Vector2>::create();
-inline std::shared_ptr<Publisher<Vector2>> rightStickMovedEvent = Publisher<Vector2>::create();
+inline std::shared_ptr<Publisher<Vector<2>>> mouseMovedEvent = Publisher<Vector<2>>::create();
+inline std::shared_ptr<Publisher<Vector<2>>> leftStickMovedEvent = Publisher<Vector<2>>::create();
+inline std::shared_ptr<Publisher<Vector<2>>> rightStickMovedEvent = Publisher<Vector<2>>::create();
 
 inline std::shared_ptr<Publisher<float>> leftTriggerEvent = Publisher<float>::create();
 inline std::shared_ptr<Publisher<float>> rightTriggerEvent = Publisher<float>::create();

@@ -6,7 +6,7 @@
 #include "../../systems/opengl-wrappers/texture.h"
 #include "glad/gl.h"
 
-SpriteSheetRenderer::SpriteSheetRenderer(const ComponentParams& params, Vector2 size, const int gridWidth, const int gridHeight, const int padding, const std::shared_ptr<Texture>& texture, const std::shared_ptr<ShaderProgram>& shader, const int renderingLayer, const Usage usage, const DrawMode drawMode) : RendererBase(params) {
+SpriteSheetRenderer::SpriteSheetRenderer(const ComponentParams& params, Vector<2> size, const int gridWidth, const int gridHeight, const int padding, const std::shared_ptr<Texture>& texture, const std::shared_ptr<ShaderProgram>& shader, const int renderingLayer, const Usage usage, const DrawMode drawMode) : RendererBase(params) {
     this->texture_ = texture;
     this->gridWidth_ = gridWidth;
     this->gridHeight_ = gridHeight;
@@ -34,10 +34,10 @@ SpriteSheetRenderer::SpriteSheetRenderer(const ComponentParams& params, Vector2 
     const float rightX = static_cast<float>(gridWidth_) / static_cast<float>(imageWidth_);
 
     this->vertices_ = {
-        {{-size_.x / 2, -size_.y / 2}, {leftX, bottomY}}, // bottom left
-        {{-size_.x / 2, size_.y / 2}, {leftX, topY}}, // top left
-        {{size_.x / 2, -size_.y / 2}, {rightX, bottomY}}, // bottom right
-        {{size_.x / 2, size_.y / 2}, {rightX, topY}}, // top right
+        {{-size_[0] / 2, -size_[1] / 2}, {leftX, bottomY}}, // bottom left
+        {{-size_[0] / 2, size_[1] / 2}, {leftX, topY}}, // top left
+        {{size_[0] / 2, -size_[1] / 2}, {rightX, bottomY}}, // bottom right
+        {{size_[0] / 2, size_[1] / 2}, {rightX, topY}}, // top right
     };
 
     this->indices_ = {
@@ -79,7 +79,7 @@ SpriteSheetRenderer::SpriteSheetRenderer(const ComponentParams& params, Vector2 
 }
 
 SpriteSheetRenderer::SpriteSheetRenderer(const ComponentParams& params, const float pixelsPerUnit, const int gridWidth, const int gridHeight, const int padding, const std::shared_ptr<Texture>& texture, const std::shared_ptr<ShaderProgram>& shader, const int renderingLayer, const Usage usage, const DrawMode drawMode)
-    : SpriteSheetRenderer(params, Vector2(static_cast<float>(gridWidth) / pixelsPerUnit, static_cast<float>(gridHeight) / pixelsPerUnit), gridWidth, gridHeight, padding, texture, shader, renderingLayer, usage, drawMode) {
+    : SpriteSheetRenderer(params, Vector<2>(static_cast<float>(gridWidth) / pixelsPerUnit, static_cast<float>(gridHeight) / pixelsPerUnit), gridWidth, gridHeight, padding, texture, shader, renderingLayer, usage, drawMode) {
 }
 
 void SpriteSheetRenderer::draw(const Matrix<4, 4>& view, const Matrix<4, 4>& projection) const {
@@ -123,15 +123,15 @@ void SpriteSheetRenderer::setRenderLayer(const int layer) {
     addToAllRenderers(renderingLayer_);
 }
 
-void SpriteSheetRenderer::changeSize(const Vector2 size, Usage usage) {
+void SpriteSheetRenderer::changeSize(const Vector<2> size, Usage usage) {
     this->size_ = size;
     this->usage_ = usage;
 
     this->vertices_ = {
-        {{-size_.x / 2, -size_.y / 2}, {0, 0}}, // bottom left
-        {{-size_.x / 2, size_.y / 2}, {0, 1}}, // top left
-        {{size_.x / 2, -size_.y / 2}, {1, 0}}, // bottom right
-        {{size_.x / 2, size_.y / 2}, {1, 1}}, // top right
+        {{-size_[0] / 2, -size_[1] / 2}, {0, 0}}, // bottom left
+        {{-size_[0] / 2, size_[1] / 2}, {0, 1}}, // top left
+        {{size_[0] / 2, -size_[1] / 2}, {1, 0}}, // bottom right
+        {{size_[0] / 2, size_[1] / 2}, {1, 1}}, // top right
     };
 
     glBindVertexArray(vertexArrayObject_);
@@ -142,7 +142,7 @@ void SpriteSheetRenderer::changeSize(const Vector2 size, Usage usage) {
 }
 
 void SpriteSheetRenderer::changeSize(const float pixelsPerUnit, const Usage usage) {
-    changeSize(Vector2(static_cast<float>(texture_->getWidth()) / pixelsPerUnit, static_cast<float>(texture_->getHeight()) / pixelsPerUnit), usage);
+    changeSize(Vector<2>(static_cast<float>(texture_->getWidth()) / pixelsPerUnit, static_cast<float>(texture_->getHeight()) / pixelsPerUnit), usage);
 }
 
 void SpriteSheetRenderer::changeTexture(const std::shared_ptr<Texture>& texture, const int gridWidth, const int gridHeight, const int padding, const Usage usage) {
@@ -165,10 +165,10 @@ void SpriteSheetRenderer::changeTexture(const std::shared_ptr<Texture>& texture,
     const float rightX = static_cast<float>(gridWidth_) / static_cast<float>(imageWidth_);
 
     this->vertices_ = {
-        {{-size_.x / 2, -size_.y / 2}, {leftX, bottomY}}, // bottom left
-        {{-size_.x / 2, size_.y / 2}, {leftX, topY}}, // top left
-        {{size_.x / 2, -size_.y / 2}, {rightX, bottomY}}, // bottom right
-        {{size_.x / 2, size_.y / 2}, {rightX, topY}}, // top right
+        {{-size_[0] / 2, -size_[1] / 2}, {leftX, bottomY}}, // bottom left
+        {{-size_[0] / 2, size_[1] / 2}, {leftX, topY}}, // top left
+        {{size_[0] / 2, -size_[1] / 2}, {rightX, bottomY}}, // bottom right
+        {{size_[0] / 2, size_[1] / 2}, {rightX, topY}}, // top right
     };
 
     glBindVertexArray(vertexArrayObject_);
@@ -214,10 +214,10 @@ void SpriteSheetRenderer::moveTo(const int i) {
     const float topY = static_cast<float>((row * (gridHeight_ + padding_)) + gridHeight_) / static_cast<float>(imageHeight_);
 
     vertices_ = {
-        {Vector2(-size_.x / 2, -size_.y / 2), Vector2(leftX, bottomY)}, // bottom left
-        {Vector2(-size_.x / 2, size_.y / 2), Vector2(leftX, topY)}, // top left
-        {Vector2(size_.x / 2, -size_.y / 2), Vector2(rightX, bottomY)}, // bottom right
-        {Vector2(size_.x / 2, size_.y / 2), Vector2(rightX, topY)}, // top right
+        {Vector<2>(-size_[0] / 2, -size_[1] / 2), Vector<2>(leftX, bottomY)}, // bottom left
+        {Vector<2>(-size_[0] / 2, size_[1] / 2), Vector<2>(leftX, topY)}, // top left
+        {Vector<2>(size_[0] / 2, -size_[1] / 2), Vector<2>(rightX, bottomY)}, // bottom right
+        {Vector<2>(size_[0] / 2, size_[1] / 2), Vector<2>(rightX, topY)}, // top right
     };
 
     // we are working on the vao

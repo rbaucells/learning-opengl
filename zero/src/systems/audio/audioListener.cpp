@@ -54,10 +54,10 @@ void AudioListener::setVolume(const float volume) {
     alListenerf(AL_GAIN, volume);
 }
 
-void AudioListener::setListenerOrientation(const Vector3& forward, const Vector3& up) {
+void AudioListener::setListenerOrientation(const Vector<3>& forward, const Vector<3>& up) {
     const float vectorTuple[6] = {
-        forward.x, forward.y, forward.z,
-        up.x, up.y, up.z
+        forward[0], forward[1], forward[2],
+        up[0], up[1], up[2]
     };
 
     // this copies the data so vectorTuple is safe to delete
@@ -131,15 +131,15 @@ void AudioListener::queryErrors() const {
 }
 
 void AudioListener::setListenerPos() const {
-    Vector2 globalPos = object->transform->getGlobalPosition();
-    alListener3f(AL_POSITION, globalPos.x, globalPos.y, 0);
+    Vector<2> globalPos = object->transform->getGlobalPosition();
+    alListener3f(AL_POSITION, globalPos[0], globalPos[1], 0);
 }
 
 void AudioListener::setListenerVelocity(const float deltaTime) {
-    const Vector2 globalPos = object->transform->getGlobalPosition();
-    const Vector2 velocity = (globalPos - lastPos_) / deltaTime;
+    const Vector<2> globalPos = object->transform->getGlobalPosition();
+    const Vector<2> velocity = (globalPos - lastPos_) / deltaTime;
     lastPos_ = globalPos;
 
-    alListener3f(AL_VELOCITY, velocity.x, velocity.y, 0);
+    alListener3f(AL_VELOCITY, velocity[0], velocity[1], 0);
 }
 

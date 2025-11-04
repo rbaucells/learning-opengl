@@ -40,14 +40,14 @@ struct EaxReverb final : public AudioEffect {
     float reflectionsGain = 0.05;
     // [0.0, 0.3]
     float reflectionsDelay = 0.007;
-    // [[-1.0, -1.0, -1.0], [1.0, 1.0, 1.0]] (Vector3)
-    Vector3 reflectionsPan = {0, 0, 0};
+    // [[-1.0, -1.0, -1.0], [1.0, 1.0, 1.0]] (Vector<3>)
+    Vector<3> reflectionsPan = {0, 0, 0};
     // [0.0, 10.0]
     float lateReverbGain = 1.26;
     // [0.0, 0.1] (seconds)
     float lateReverbDelay = 0.011;
-    // [[-1.0, -1.0, -1.0], [1.0, 1.0, 1.0]] (Vector3)
-    Vector3 lateReverbPan = {0, 0, 0};
+    // [[-1.0, -1.0, -1.0], [1.0, 1.0, 1.0]] (Vector<3>)
+    Vector<3> lateReverbPan = {0, 0, 0};
     // [0.075, 0.25]
     float echoTime = 0.25;
     // [0.0, 1.0]

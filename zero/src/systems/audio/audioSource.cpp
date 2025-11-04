@@ -113,11 +113,11 @@ void AudioSource::setSourcePos() const {
 }
 
 void AudioSource::setSourceVelocity(const float deltaTime) {
-    const Vector2 globalPos = object->transform->getGlobalPosition();
-    const Vector2 velocity = (globalPos - lastPos_) / deltaTime;
+    const Vector<2> globalPos = object->transform->getGlobalPosition();
+    const Vector<2> velocity = (globalPos - lastPos_) / deltaTime;
     lastPos_ = globalPos;
 
-    alSource3f(source_, AL_VELOCITY, velocity.x, velocity.y, 0);
+    alSource3f(source_, AL_VELOCITY, velocity[0], velocity[1], 0);
 }
 
 void AudioSource::addEffectAndFilter(const AudioEffect* audioEffect, const AudioFilter* audioFilter) {

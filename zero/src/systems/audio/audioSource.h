@@ -71,7 +71,7 @@ private:
     void setSourcePos() const;
     void setSourceVelocity(float deltaTime);
 
-    Vector2 lastPos_;
+    Vector<2> lastPos_;
 
     ALuint source_ = 0;
     ALuint buffer_ = 0;

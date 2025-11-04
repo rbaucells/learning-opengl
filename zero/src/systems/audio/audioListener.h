@@ -15,12 +15,12 @@ public:
 
     void setDistanceModel(ALenum model);
     void setVolume(float volume);
-    void setListenerOrientation(const Vector3& forward, const Vector3& up);
+    void setListenerOrientation(const Vector<3>& forward, const Vector<3>& up);
 
     ~AudioListener() override;
 
 private:
-    Vector2 lastPos_;
+    Vector<2> lastPos_;
     ALCdevice* device_;
     ALCcontext* context_;
 

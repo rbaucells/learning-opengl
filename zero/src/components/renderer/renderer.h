@@ -57,7 +57,7 @@ protected:
 
 class SpriteSheetRenderer final : public RendererBase {
 public:
-    SpriteSheetRenderer(const ComponentParams& params, Vector2 size, int gridWidth, int gridHeight, int padding, const std::shared_ptr<Texture>& texture, const std::shared_ptr<ShaderProgram>& shader, int renderingLayer, Usage usage = dynamic_draw, DrawMode drawMode = triangles);
+    SpriteSheetRenderer(const ComponentParams& params, Vector<2> size, int gridWidth, int gridHeight, int padding, const std::shared_ptr<Texture>& texture, const std::shared_ptr<ShaderProgram>& shader, int renderingLayer, Usage usage = dynamic_draw, DrawMode drawMode = triangles);
     SpriteSheetRenderer(const ComponentParams& params, float pixelsPerUnit, int gridWidth, int gridHeight, int padding, const std::shared_ptr<Texture>& texture, const std::shared_ptr<ShaderProgram>& shader, int renderingLayer, Usage usage = dynamic_draw, DrawMode drawMode = triangles);
 
     void draw(const Matrix<4, 4>& view, const Matrix<4, 4>& projection) const override;
@@ -65,7 +65,7 @@ public:
     [[nodiscard]] int getRenderLayer() const;
     void setRenderLayer(int layer);
 
-    void changeSize(Vector2 size, Usage usage = dynamic_draw);
+    void changeSize(Vector<2> size, Usage usage = dynamic_draw);
     void changeSize(float pixelsPerUnit, Usage usage = dynamic_draw);
 
     void changeTexture(const std::shared_ptr<Texture>& texture, int gridWidth, int gridHeight, int padding, Usage usage = dynamic_draw);
@@ -118,12 +118,12 @@ private:
     std::vector<Vertex> vertices_ = {};
     std::vector<unsigned int> indices_ = {};
 
-    Vector2 size_ = {};
+    Vector<2> size_ = {};
 };
 
 class SpriteRenderer final : public RendererBase {
 public:
-    SpriteRenderer(const ComponentParams& params, Vector2 size, const std::shared_ptr<Texture>& texture, const std::shared_ptr<ShaderProgram>& shader, int renderingLayer, Usage usage = static_draw, DrawMode drawMode = triangles);
+    SpriteRenderer(const ComponentParams& params, Vector<2> size, const std::shared_ptr<Texture>& texture, const std::shared_ptr<ShaderProgram>& shader, int renderingLayer, Usage usage = static_draw, DrawMode drawMode = triangles);
     SpriteRenderer(const ComponentParams& params, float pixelsPerUnit, const std::shared_ptr<Texture>& texture, const std::shared_ptr<ShaderProgram>& shader, int renderingLayer, Usage usage = static_draw, DrawMode drawMode = triangles);
 
     void draw(const Matrix<4, 4>& view, const Matrix<4, 4>& projection) const override;
@@ -131,7 +131,7 @@ public:
     [[nodiscard]] int getRenderLayer() const;
     void setRenderLayer(int layer);
 
-    void changeSize(Vector2 size, Usage usage = static_draw);
+    void changeSize(Vector<2> size, Usage usage = static_draw);
     void changeSize(float pixelsPerUnit, Usage usage = static_draw);
 
     void changeTexture(const std::shared_ptr<Texture>& texture, Usage usage = static_draw);
@@ -167,7 +167,7 @@ private:
     std::vector<Vertex> vertices_ = {};
     std::vector<unsigned int> indices_ = {};
 
-    Vector2 size_ = {};
+    Vector<2> size_ = {};
 };
 
 class CustomRenderer final : public RendererBase {

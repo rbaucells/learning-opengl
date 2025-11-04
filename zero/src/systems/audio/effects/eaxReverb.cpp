@@ -14,13 +14,13 @@ void EaxReverb::applyEffect(const ALuint effectId) const {
     alEffectf(effectId, AL_EAXREVERB_REFLECTIONS_GAIN, reflectionsGain);
     alEffectf(effectId, AL_EAXREVERB_REFLECTIONS_DELAY, reflectionsDelay);
 
-    const float reflectionsPanArray[3] = {reflectionsPan.x, reflectionsPan.y, reflectionsPan.z};
+    const float reflectionsPanArray[3] = {reflectionsPan[0], reflectionsPan[1], reflectionsPan[2]};
     alEffectfv(effectId, AL_EAXREVERB_REFLECTIONS_PAN, reflectionsPanArray);
 
     alEffectf(effectId, AL_EAXREVERB_LATE_REVERB_GAIN, lateReverbGain);
     alEffectf(effectId, AL_EAXREVERB_LATE_REVERB_DELAY, lateReverbDelay);
 
-    const float lateReflectionsPanArray[3] = {lateReverbPan.x, lateReverbPan.y, lateReverbPan.z};
+    const float lateReflectionsPanArray[3] = {lateReverbPan[0], lateReverbPan[1], lateReverbPan[2]};
     alEffectfv(effectId, AL_EAXREVERB_LATE_REVERB_PAN, lateReflectionsPanArray);
 
     alEffectf(effectId, AL_EAXREVERB_ECHO_TIME, echoTime);
