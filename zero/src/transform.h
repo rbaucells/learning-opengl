@@ -25,8 +25,9 @@ public:
 
     Vector<2> localPosition = {0, 0};
 
-    // in radians
+    // in degrees
     float localRotation = 0;
+
     Vector<2> localScale = {0, 0};
 
 private:

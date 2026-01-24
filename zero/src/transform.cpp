@@ -37,7 +37,7 @@ void Transform::setGlobalRotation(const float rotation) {
             localRotation = atan2(m[1][0], m[0][0]);
         }
         else {
-
+            localRotation
         }
     }
     else {
@@ -46,7 +46,10 @@ void Transform::setGlobalRotation(const float rotation) {
 }
 
 void Transform::setGlobalScale(const Vector<2>& scale) {
-    if (!hasParent()) {
+    if (auto parent = parent_.lock()) {
+
+    }
+    else {
         localScale = scale;
     }
 }
@@ -84,6 +87,7 @@ Vector<2> Transform::getGlobalScale() const {
         const float scaleX = sqrt(std::pow(localToWorld[0][0], 2) + std::pow(localToWorld[1][0], 2));
         // get the magnitude of y
         const float scaleY = sqrt(std::pow(localToWorld[0][1], 2) + std::pow(localToWorld[1][1], 2));
+        // return it as Vector<2>
         return {scaleX, scaleY};
     }
     else {
